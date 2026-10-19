@@ -1,4 +1,6 @@
 from contextlib import asynccontextmanager
+from pathlib import Path
+import secrets
 from fastapi import Depends, FastAPI, File, Header, HTTPException, UploadFile, Query
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
@@ -18,6 +20,13 @@ from .utility_estimate import UtilityScenario, estimate as estimate_utilities, c
 
 def create_app(settings=None, pool=None, extractor=None):
     settings = settings or Settings()
+    team_key = ""
+    if settings.shared_mode:
+        if not settings.team_key_file or '*' in settings.cors_origins:
+            raise ValueError('공유 서버에는 접속키 파일과 명시적인 프론트 주소가 필요합니다.')
+        team_key = Path(settings.team_key_file).read_text(encoding='utf-8').strip()
+        if len(team_key) < 40 or not team_key.isascii():
+            raise ValueError('공유 서버 접속키는 ASCII 40자 이상이어야 합니다.')
 
     @asynccontextmanager
     async def lifespan(app):
@@ -33,7 +42,6 @@ def create_app(settings=None, pool=None, extractor=None):
         yield
 
     app = FastAPI(title="월세 비교 API",version="1.1.0",lifespan=lifespan)
-    app.add_middleware(CORSMiddleware,allow_origins=settings.cors_origins,allow_methods=["GET","POST","DELETE"],allow_headers=["Authorization","Content-Type"])
 
     @app.exception_handler(RequestValidationError)
     async def validation_error(request, exc):
@@ -42,6 +50,12 @@ def create_app(settings=None, pool=None, extractor=None):
 
     @app.middleware("http")
     async def limit_body(request, call_next):
+        if settings.shared_mode and not secrets.compare_digest(
+                request.headers.get('X-Team-Key', '').encode('utf-8'), team_key.encode('ascii')):
+            return JSONResponse(status_code=401, content={'detail':'팀 접속키가 필요합니다.'}, headers={'Cache-Control':'no-store'})
+        if not settings.maintenance_enabled and any(part in request.url.path.split('/') for part in
+                ('maintenance', 'maintenance-evidence', 'utilities', 'utility-estimates')):
+            return JSONResponse(status_code=503, content={'detail':'관리비·공과금 기능은 자료 검증 중으로 보류합니다.'})
         # chunked 업로드도 제한한다. 내부 상세 예외나 API 키를 응답으로 보내지 않는다.
         size=0
         chunks=[]
@@ -83,6 +97,8 @@ def create_app(settings=None, pool=None, extractor=None):
             "same_building_first": False,
             "comparable_transactions_available": False,
             "search_scope": "DONG_THEN_RELAXED_THEN_DISTRICT",
+            "maintenance_enabled": settings.maintenance_enabled,
+            "team_access_required": settings.shared_mode,
             "note": "로드된 계약 범위이며 개별 매물의 비교 가능성이나 정확도를 보장하지 않습니다.",
         }
 
@@ -143,6 +159,11 @@ def create_app(settings=None, pool=None, extractor=None):
         estimates=app.state.store.children(listing_id,sid,'utility_estimate',limit=1)['items']
         report=build_report(obj,analyses[0] if analyses else None,evidence,app.state.data_status)
         report['utility_estimate']=estimates[0] if estimates else None
+        if not settings.maintenance_enabled:
+            for field in ('maintenance', 'utility_costs', 'monthly_cost', 'utility_estimate'):
+                report[field]={'state':'ON_HOLD'}
+            report['workflow']['next_actions']=[action for action in report['workflow']['next_actions'] if 'MAINTENANCE' not in action]
+            report['workflow']['notice']='관리비·공과금 비교는 자료 검증 중으로 보류합니다. 월세 분석만 사용하세요.'
         return report
 
     @app.delete('/listings/{listing_id}',status_code=204)
@@ -240,6 +261,8 @@ def create_app(settings=None, pool=None, extractor=None):
         app.state.store.delete(evidence_id,sid,'maintenance_evidence')
         return Response(status_code=204)
 
+    # CORS가 가장 바깥에서 preflight와 접속 거절 응답에도 적용되게 한다.
+    app.add_middleware(CORSMiddleware,allow_origins=settings.cors_origins,allow_methods=["GET","POST","DELETE"],allow_headers=["Authorization","Content-Type","X-Team-Key"])
     return app
 
 app=create_app()

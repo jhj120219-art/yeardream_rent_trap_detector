@@ -12,3 +12,6 @@ class Settings:
     openai_key: str = field(default_factory=lambda: os.getenv("OPENAI_API_KEY", ""))
     vision_model: str = field(default_factory=lambda: os.getenv("OPENAI_VISION_MODEL", ""))
     kakao_key: str = field(default_factory=lambda: os.getenv("KAKAO_REST_API_KEY", ""))
+    team_key_file: str = field(default_factory=lambda: os.getenv("TEAM_ACCESS_KEY_FILE", ""))
+    shared_mode: bool = field(default_factory=lambda: os.getenv("TEAM_SHARED_MODE", "false").lower() == "true")
+    maintenance_enabled: bool = field(default_factory=lambda: os.getenv("MAINTENANCE_ENABLED", "true").lower() == "true")
