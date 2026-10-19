@@ -1,5 +1,16 @@
 # 월세 비교 백엔드 — 기존 분석 코드 연동
 
+> 2026-10-19 실제 자료 연결: 서울시 공식 FILE 다운로드의 `서울특별시_전월세가_2025.zip`을 받아 기존 정책의 6개 구 자료를 정리했습니다. 로컬 `backend/data/clean_rent_data.csv`에 신규 비교 대상 162,689건을 연결했습니다. 데이터는 Git에 포함하지 않으므로 다른 PC에서는 별도 준비가 필요합니다. 파일의 계약일은 정제 전체 기준 2023-09-18~2026-01-21이며, '2025' 파일명은 계약일 전체가 2025년이라는 뜻이 아닙니다. 최신 시세로 표시하지 마세요. 오늘 기준 요청에서 DATA_STALE을 확인했습니다. 아래 ZIP에 데이터가 없다는 설명은 전달받은 팀 코드 ZIP에 관한 설명입니다.
+
+공식 다운로드: [서울시 부동산 전월세가 정보](https://data.seoul.go.kr/dataList/OA-21276/A/1/datasetView.do)의 FILE 항목. 서울시 공공누리 제1유형 출처표시 조건을 유지합니다.
+
+공식 FILE ZIP을 별도로 받을 때에는 아래처럼 한글 열만 기존 수집기 형식으로 연결한 뒤 원래 정제 코드를 사용합니다. 첫 명령은 기존 출력 파일을 덮어쓰지 않습니다. 기존 정상 데이터는 별도 보존하고 새 경로에서 검증하세요.
+
+```bash
+python -m backend.scripts.prepare_seoul_file --zip backend/data/incoming/seoul_rent_2025.zip --out backend/data/incoming/seoul_2025_six_raw.csv
+python -m backend.scripts.import_data --raw backend/data/incoming/seoul_2025_six_raw.csv --out backend/data/seoul_2025_six_clean.csv
+```
+
 회의 내용과 `contract/analysis_contract_v1.1.json`, `api_spec.md`, `integration_kit_v1.1/`에 맞춘 웹 API입니다. 변경 파일은 `backend/` 안에만 있습니다. 가격·신뢰도 계산을 다시 만들지 않고 루트의 `normalize_listing.analyze_raw()` → `analyze.analyze_listing()`을 호출합니다.
 
 ## 1. 실행 (Python 3.10 이상, 저장소 루트)
