@@ -239,3 +239,34 @@ python -m backend.tests.smoke_server
 현재 Windows 실행 검증의 주요 버전은 Python 3.12.10, FastAPI 0.146.0, Starlette 1.9.0, Pydantic 2.14.1, pandas 2.3.3, NumPy 2.5.4, httpx 0.28.1입니다. requirements는 기존 허용 범위를 유지했습니다. Docker는 이 PC에서 도구 부재로 빌드하지 못했고 외부 배포는 하지 않았습니다.
 
 컨테이너의 /ready를 배포 대상의 readiness 경로로 연결하고 DB·정제 CSV는 영속 볼륨으로 보관합니다. 실거래 파일이 없으면 /health는 서버 생존 상태 200, /ready는 503입니다. CORS_ORIGINS에 실제 프론트 주소를 설정하고 HTTPS·자료 접근·백업/복원·운영 키를 배포 환경에서 검증해야 합니다. 현재 계정 인증·세션 만료·호출 비용 제한은 미구현이므로 팀 내부 MVP 범위로 구분합니다.
+# 관리비 자료 대조 (2026-10-19)
+
+월세 분석과 별도 기능이다. 지역 평균·바가지 판정이 아니라 입력한 관리비와 출처에 적힌 금액을 대조한다. 광고는 실제 청구서가 아니다. 원본 사진·연락처를 저장하지 않는다. URL은 기록만 하며 서버가 임의 URL에 접속하지 않는다.
+
+- `GET /maintenance/reference-cases`: 이 PC에 확보한 공개 사례. `backend/data/maintenance_public_cases.json`이 없거나 잘못되면 503. 공개 사례 파일은 Git 제외이므로 다른 PC/배포에는 별도 전달·검토가 필요하다.
+- `POST /listings/{listing_id}/maintenance-evidence`: 기존 세션으로 자신의 매물에 자료와 대조 결과를 저장한다.
+- `GET /maintenance-evidence?limit=20&offset=0`: 자신의 자료 목록.
+- `GET /maintenance-evidence/{id}`, `DELETE /maintenance-evidence/{id}`: 조회·삭제. 매물/세션 삭제 시 함께 삭제된다.
+
+등록 예시 (통제 표본, 실제 청구서 아님):
+
+```json
+{
+  "source_type": "ADVERTISEMENT",
+  "source_title": "매물 광고",
+  "source_url": "https://example.org/listing/1",
+  "observed_on": "2026-10-19",
+  "amount_10k_krw": 5,
+  "period": "MONTH",
+  "basis": "UNKNOWN",
+  "applies_to": "SAME_UNIT",
+  "user_confirmed": true,
+  "items": {"WATER": "INCLUDED", "INTERNET": "INCLUDED"}
+}
+```
+
+`source_type`: ADVERTISEMENT/PUBLIC_NOTICE/MANAGER_STATEMENT/BILL. 출처 종류는 제출자가 선택하며 진위 인증을 의미하지 않는다. `period`: MONTH/YEAR/UNKNOWN, `basis`: FIXED/ACTUAL/ESTIMATE/UNKNOWN. `applies_to`: SAME_UNIT/SAME_BUILDING/OTHER/UNKNOWN. 건물만 같고 호실이 다르면 직접 차액 계산을 보류한다. 주소/호실 자동 동일성 검증은 미구현이며 `SAME_UNIT`도 사용자의 확인 내용이다.
+
+`items`는 COMMON/WATER/ELECTRICITY/GAS/INTERNET/TV/PARKING별 INCLUDED/EXCLUDED/UNKNOWN. 생략은 UNKNOWN이며 무료·별도로 추정하지 않는다. `billing_month`는 선택적인 YYYY-MM이다. 확인하지 않은 이미지 결과는 `user_confirmed:false`로 저장하고 검토 후 새 자료로 등록한다. 이미지 추출 결과를 관리비 자료에 자동 변환하는 프론트 연결은 미구현이다.
+
+응답 `comparison.status`는 AMOUNT_MATCH(숫자 일치), AMOUNT_DIFFERENCE(차액 있음), NEEDS_REVIEW(확인 필요). 입력 매물과 근거 자료가 모두 확인되고 같은 호실·월 금액·양쪽 금액이 있을 때만 `difference_10k_krw = 입력 - 근거`를 제공한다. 0은 미기재와 다르다. 포함 항목의 동일성·고지서 진위·해당 월의 적정성을 인증하지 않으며 `unknown_items`, 출처/확인 날짜/부과 기준을 함께 표시해야 한다. 여러 근거 간 자동 합산·시세 모델·정기 광고 수집은 구현 범위 밖이다.

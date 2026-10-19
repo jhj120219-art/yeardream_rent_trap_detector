@@ -9,6 +9,8 @@ from .schemas import ListingInput
 from . import analysis_service as service
 from .vision import extract_image
 from .address import search_address
+from .maintenance import Evidence, compare as compare_maintenance
+from .maintenance import load_public_cases
 
 
 def create_app(settings=None, pool=None, extractor=None):
@@ -168,6 +170,34 @@ def create_app(settings=None, pool=None, extractor=None):
     def delete_extraction(extraction_id: str,sid=Depends(owner)):
         find(extraction_id,sid,'extraction')
         app.state.store.delete(extraction_id,sid,'extraction')
+        return Response(status_code=204)
+
+    @app.get('/maintenance/reference-cases')
+    def maintenance_cases():
+        return load_public_cases()
+
+    @app.post('/listings/{listing_id}/maintenance-evidence',status_code=201)
+    def maintenance_evidence(listing_id: str, body: Evidence, sid=Depends(owner)):
+        obj=find(listing_id,sid,'listing')
+        evidence=body.model_dump(mode='json')
+        return app.state.store.create(sid,'maintenance_evidence',{
+            'listing_id':listing_id,'evidence':evidence,
+            'comparison':compare_maintenance(obj,evidence),
+        },parent=listing_id)
+
+    @app.get('/maintenance-evidence')
+    def maintenance_history(limit: int=Query(default=20,ge=1,le=50),
+                            offset: int=Query(default=0,ge=0),sid=Depends(owner)):
+        return app.state.store.page(sid,'maintenance_evidence',limit,offset)
+
+    @app.get('/maintenance-evidence/{evidence_id}')
+    def get_maintenance(evidence_id: str,sid=Depends(owner)):
+        return find(evidence_id,sid,'maintenance_evidence')
+
+    @app.delete('/maintenance-evidence/{evidence_id}',status_code=204)
+    def delete_maintenance(evidence_id: str,sid=Depends(owner)):
+        find(evidence_id,sid,'maintenance_evidence')
+        app.state.store.delete(evidence_id,sid,'maintenance_evidence')
         return Response(status_code=204)
 
     return app
