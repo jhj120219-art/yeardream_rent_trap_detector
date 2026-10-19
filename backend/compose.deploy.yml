@@ -1,0 +1,42 @@
+# Existing external MySQL only. No DB container or public ingress is provisioned.
+services:
+  backend:
+    image: ${BACKEND_IMAGE:-rent-backend:local}
+    build:
+      context: ..
+      dockerfile: backend/Dockerfile
+    env_file:
+      - ${BACKEND_ENV_FILE:?Set absolute path to a private backend environment file}
+    environment:
+      DB_AUTO_INIT: 'false'
+      TEAM_SHARED_MODE: 'true'
+      TEAM_ACCESS_KEY_FILE: /run/secrets/team-access.key
+      MAINTENANCE_ENABLED: 'false'
+      RENT_CLEAN_CSV: /app/backend/data/clean_rent_data.csv
+    ports:
+      - '127.0.0.1:8000:8000'
+    volumes:
+      - type: bind
+        source: ${RENT_DATA_FILE:?Set absolute path to validated clean transaction CSV}
+        target: /app/backend/data/clean_rent_data.csv
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${RUNTIME_SECRETS_DIR:?Set absolute path to private directory containing team-access.key and optional MySQL CA}
+        target: /run/secrets
+        read_only: true
+        bind:
+          create_host_path: false
+    read_only: true
+    tmpfs:
+      - /tmp:mode=1777,size=64m
+    cap_drop: [ALL]
+    security_opt: ['no-new-privileges:true']
+    pids_limit: 128
+    restart: unless-stopped
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'

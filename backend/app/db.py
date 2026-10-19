@@ -62,10 +62,12 @@ class InvalidReference(ValueError):
 
 
 class Store:
-    def __init__(self, path=None, database_url=""):
+    def __init__(self, path=None, database_url="", initialize=True):
         self.mysql = bool(database_url)
         if self.mysql:
             self.options = mysql_options(database_url)
+            if not initialize:
+                return
             with self.connect() as db:
                 for statement in MYSQL_SCHEMA:
                     db.execute(statement + " ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin")
@@ -74,6 +76,8 @@ class Store:
             raise ValueError("DATABASE_URL is required; BACKEND_DB_PATH is only for explicit legacy SQLite use")
         path = Path(path)
         self.path = str(path)
+        if not initialize:
+            return
         path.parent.mkdir(parents=True, exist_ok=True)
         with self.connect() as db:
             db.executescript("""

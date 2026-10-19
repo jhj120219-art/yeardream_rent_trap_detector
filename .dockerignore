@@ -1,0 +1,22 @@
+# Only runtime source is sent to the Docker builder.
+**
+!backend/
+!backend/app/
+!backend/app/**
+!backend/scripts/
+!backend/scripts/*.py
+!backend/requirements.txt
+!backend/Dockerfile
+!analyze.py
+!compare_rent.py
+!normalize_listing.py
+!integration_kit_v1.1/
+!integration_kit_v1.1/image_extraction_example.json
+!integration_kit_v1.1/image_prompt_ko.md
+# Exclude local secrets even within source directories.
+**/.env*
+**/*.key
+**/*.pem
+**/*.sqlite*
+**/__pycache__
+**/*.pyc

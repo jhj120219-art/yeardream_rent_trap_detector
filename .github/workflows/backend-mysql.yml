@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'backend/**'
+      - '.dockerignore'
       - 'analyze.py'
       - 'compare_rent.py'
       - 'normalize_listing.py'
@@ -15,6 +16,7 @@ on:
   pull_request:
     paths:
       - 'backend/**'
+      - '.dockerignore'
       - 'analyze.py'
       - 'compare_rent.py'
       - 'normalize_listing.py'
@@ -71,3 +73,14 @@ jobs:
       - name: Reject skipped integration checks
         run: >-
           python -c "import xml.etree.ElementTree as ET; suites = ET.parse('backend/data/ci-results.xml').getroot().iter('testsuite'); assert sum(int(s.get('skipped', '0')) for s in suites) == 0, 'CI must run every integration check'"
+
+      - name: Build deployment image
+        if: matrix.mysql == '8.4'
+        run: |
+          mkdir -p backend/data
+          echo CI_PRIVATE_SENTINEL > backend/app/.env.context-probe
+          echo CI_PRIVATE_SENTINEL > backend/data/image-private.csv
+          docker build -f backend/Dockerfile -t rent-backend:ci .
+      - name: Smoke deployment Compose, access protection and restart persistence
+        if: matrix.mysql == '8.4'
+        run: python -m backend.tests.smoke_deployment

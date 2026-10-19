@@ -30,7 +30,7 @@ def create_app(settings=None, pool=None, extractor=None):
 
     @asynccontextmanager
     async def lifespan(app):
-        app.state.store = Store(settings.db_path, database_url=settings.database_url)
+        app.state.store = Store(settings.db_path, database_url=settings.database_url, initialize=settings.db_auto_init)
         app.state.pool = pool
         app.state.data_status = "READY" if pool is not None else "MISSING"
         if pool is None and settings.clean_csv.is_file():
