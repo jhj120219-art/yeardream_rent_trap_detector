@@ -74,3 +74,20 @@ docker compose -f backend/compose.deploy.yml exec -T backend python -m backend.s
 기존 MySQL 8.0/8.4 전체 회귀에 실제 DB 읽기 전용 preflight를 추가한다. 8.4 job에서는 Docker 이미지를 빌드한 뒤 배포 Compose를 직접 실행한다. CI 전용 localhost DB·임시 CSV·무작위 접속키를 사용하며, 예외 옵션으로 CI의 사설 Docker 네트워크를 허용한다. 컨텍스트에 심은 가짜 비밀파일이 이미지에 없는지, 비루트/read-only 실행, 접속 보호, 관리비 보류, 컨테이너 restart 후 입력/분석 보존과 세션 삭제를 검사한다. 운영 주소나 자격증명은 사용하지 않는다. 실제 운영 TLS·운영 환경 연결·고객 배포와 구분한다.
 
 구현 참고: [Docker build context](https://docs.docker.com/build/concepts/context/), [Compose 서비스](https://docs.docker.com/reference/compose-file/services/).
+
+## 이번 실행 결과 — 2026-10-19
+
+운영 배포 대상·MySQL 서버·프론트 도메인은 아직 없다는 사용자 답변에 따라 실제 자원을 생성하거나 공개 배포하지 않았다. 이 PC에도 운영 DATABASE_URL/환경 파일/Docker가 없었다. 실제 운영 연결은 미검증이며 준비 검사에서 blocked로 표시했다.
+
+검증 코드 `38647e9`, [CI 실행 39272224153](https://github.com/jhj120219-art/yeardream_rent_trap_detector/actions/runs/39272224153): MySQL 8.0 **152 passed, 0 skipped, 13.62초**, MySQL 8.4 **152 passed, 0 skipped, 16.68초**. 기존 Starlette/httpx 경고 각 1건. 8.4 job에서 Docker image build 및 실제 배포 Compose 검사가 성공했다.
+
+- [x] Compose 구조 검증, 별도 명시적 스키마 초기화, 읽기 전용 preflight 성공.
+- [x] 소스 경로에 심은 가짜 `.env`와 private CSV가 이미지에 없는 것을 확인.
+- [x] 비루트 UID·read-only 컨테이너·접속키 healthcheck로 healthy 기동.
+- [x] 키 없는 요청401, 관리비 비활성화, 매물/분석 저장 확인.
+- [x] 앱 컨테이너 restart 후 같은 세션으로 매물·분석 원문 일치.
+- [x] 검사 세션 삭제 및 임시 앱 컨테이너 정리.
+- [ ] 실제 운영 서버·프론트 도메인·운영 MySQL·CA·정제 CSV·최소 권한 계정 연결.
+- [ ] 운영 MySQL 서버 자체 재시작, 백업 복원, 운영 HTTPS/모니터링·장애 대응 확인.
+
+첫 CI에서는 최신 PyMySQL의 자동 TLS 암호화 때문에 “CA 미설정이면 반드시 평문”이라는 테스트 가정이 틀려 실패했다. 단순 cipher 존재만으로 통과하지 않고, 실제 암호화와 명시적 인증서/호스트 검증 옵션을 모두 요구하도록 수정한 뒤 전체 CI를 통과했다. 사설망 허용 옵션은 CI 네트워크에서만 명시적으로 사용했으며 운영 CA/TLS 검증 완료로 계산하지 않는다.
