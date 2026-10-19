@@ -106,6 +106,7 @@ python -m backend.scripts.import_data --raw backend/data/rent_raw.csv
 | `DELETE /sessions/current` | 해당 세션 및 보관 자료 전체 삭제 |
 | `GET /addresses/search?q=...` | 카카오 주소 후보·법정동 코드 조회 |
 | `POST /listings` | 입력·확인 상태·정규화 결과 저장 |
+| `GET /listings?limit=20&offset=0` | 본인 매물 목록, 최대50개/요청, has_more로 다음 페이지 확인 |
 | `GET /listings/{id}` | 본인 입력 조회 |
 | `DELETE /listings/{id}` | 입력과 하위 분석 결과 삭제 |
 | `POST /listings/{id}/analyses` | 기존 분석 호출 및 결과 저장 |
@@ -203,6 +204,29 @@ const persisted = await call(`/analyses/${analysis.id}`, 'GET', undefined, token
 숫자 입력에 불리언은 허용하지 않습니다. 층·전체 층·건축연도는 정수 또는 null이며 소수부를 잘라 저장하지 않습니다. floor=0은 기존 계약대로 미확인입니다. 관리비는 0 이상 또는 null이며 가격 통계와 별개입니다.
 
 ## 8. 재현과 배포 점검
+
+### 사진 초안·사용자 수정본 연결 (2026-10-19 구현)
+
+`POST /listings` 최상위에 선택 필드 `source_extraction_id`(추출 응답 id), `previous_listing_id`(수정 전 매물 id)를 보낼 수 있습니다. 기존 `listing/options/confirmation`은 그대로 유지합니다. 연결 필드는 분석 입력에 전달하지 않습니다.
+
+1. `POST /extractions` → 추출된 fields를 수정 폼에 채움. 원본 이미지는 저장하지 않음.
+2. 초안을 보관할 때는 `source_extraction_id`와 `confirmation.user_confirmed=false`, `input_source=IMAGE_REVIEWED`로 매물 등록. 이 매물의 분석 요청은 INPUT_REVIEW_REQUIRED.
+3. 사용자 수정·확인 후 새 매물을 등록하면서 `previous_listing_id`를 지정. 이전 매물에 살아 있는 추출 참조가 있으면 자동으로 이어받음. `user_confirmed=true`, `input_source=IMAGE_REVIEWED`, 실제 확인한 confirmed_fields를 전달.
+4. 새 매물 id로 분석하고 저장 결과를 조회. 이전 입력과 분석은 덮어쓰지 않음.
+5. 목록 조회는 같은 사용자 토큰으로만 가능. `limit` 1~50, `offset` 0이상, 응답 items/limit/offset/has_more.
+
+매물 응답의 `links`에 두 참조를 반환하고 `confirmation_recorded_at`은 확인 표시를 포함해 서버에 등록한 시각입니다(미확인 초안은 null). 다른 세션/없는 참조는404, 추출 참조를 ADDRESS_MANUAL로 등록하면422. 확인 버튼은 프론트가 실제 사용자 동작으로 구현해야 하며 서버의 boolean 기록이 사람의 검토를 독립 인증하는 것은 아닙니다.
+
+원본 추출을 삭제해도 이미 확인한 매물과 결과는 보존되고 추출 참조만 null로 바뀝니다. 이전 매물을 삭제해도 별도로 등록한 새 수정본은 남습니다. 각 매물 삭제 시 그 매물의 분석 결과는 삭제되고 세션 삭제 시 보관 자료 전체가 삭제됩니다. 기존 DB에는 연결 테이블만 추가하며 기존 입력·결과를 지우지 않습니다.
+
+### 관리비 표시 원칙
+
+공식2025 FILE과2026 Sheet 원본23열을 확인했으며 관리비·전기·수도·가스·인터넷·주차 비용 열이 없습니다. 종전 임대료는 이전 월세이며 관리비가 아닙니다. 이 자료만으로 관리비 포함 여부를 추정하지 않습니다.
+
+- 사용자가 입력/확인한 관리비는 `options.maintenance_10k_krw`(만원)에 따로 보관합니다. 미기재는 null, 명확히0원일 때만0입니다.
+- 가격 비교는 기존 월세 기준으로 유지합니다. 관리비를 월세에 더해서 실거래와 비교하지 않습니다. 관리비가 저렴/비쌈이라고 판정할 비교 근거도 없습니다.
+- 화면 제안: 월세70만원 / 관리비10만원 / 확인된 합계80만원 / 전기·가스 등 추가 비용은 별도 확인. 합계 표시 UI는 프론트 연결 항목이며 현재 새 API 필드를 구현한 것은 아닙니다.
+- 전기·가스·수도 포함 여부와 인터넷 상태는 기존 options 상태값을 사용하고 모르면 UNKNOWN으로 표시합니다. '인터넷 가능'을 비용 포함으로 바꾸지 않습니다. 월세/관리비 합쳐서만 적힌 광고는 임의로 분해하지 않고 별도 금액을 확인한 뒤 시세 분석합니다.
 
 ```bash
 python -m pytest backend/tests -q -p no:cacheprovider

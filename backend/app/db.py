@@ -16,6 +16,10 @@ def digest(token):
     return hashlib.sha256(token.encode()).hexdigest()
 
 
+class InvalidReference(ValueError):
+    pass
+
+
 class Store:
     def __init__(self, path):
         self.path = str(path)
@@ -26,6 +30,13 @@ class Store:
             CREATE TABLE IF NOT EXISTS sessions (id TEXT PRIMARY KEY, token_hash TEXT UNIQUE NOT NULL, created_at TEXT NOT NULL);
             CREATE TABLE IF NOT EXISTS objects (id TEXT PRIMARY KEY, owner TEXT NOT NULL REFERENCES sessions(id), kind TEXT NOT NULL, parent TEXT REFERENCES objects(id) ON DELETE CASCADE, payload TEXT NOT NULL, created_at TEXT NOT NULL);
             CREATE INDEX IF NOT EXISTS objects_owner ON objects(owner,kind);
+            CREATE TABLE IF NOT EXISTS object_links (
+                object_id TEXT NOT NULL REFERENCES objects(id) ON DELETE CASCADE,
+                relation TEXT NOT NULL CHECK(relation IN ('source_extraction_id','previous_listing_id')),
+                target_id TEXT NOT NULL REFERENCES objects(id) ON DELETE CASCADE,
+                PRIMARY KEY(object_id,relation)
+            );
+            CREATE INDEX IF NOT EXISTS object_links_target ON object_links(target_id);
             """)
 
     @contextmanager
@@ -50,16 +61,39 @@ class Store:
             row = db.execute("SELECT id FROM sessions WHERE token_hash=?", (digest(token),)).fetchone()
         return row['id'] if row else None
 
-    def create(self, owner, kind, payload, parent=None):
+    def create(self, owner, kind, payload, parent=None, links=None):
         oid, date = str(uuid4()), now()
         with self.connect() as db:
+            for relation, target in (links or {}).items():
+                target_kind = {'source_extraction_id':'extraction','previous_listing_id':'listing'}.get(relation)
+                found = db.execute('SELECT id FROM objects WHERE id=? AND owner=? AND kind=?',
+                                   (target, owner, target_kind)).fetchone()
+                if not found or kind != 'listing':
+                    raise InvalidReference('자료를 찾을 수 없습니다.')
             db.execute("INSERT INTO objects VALUES(?,?,?,?,?,?)", (oid,owner,kind,parent,json.dumps(payload,ensure_ascii=False,allow_nan=False),date))
-        return dict(id=oid,created_at=date,**payload)
+            for relation, target in (links or {}).items():
+                db.execute('INSERT INTO object_links VALUES(?,?,?)', (oid, relation, target))
+        return self.get(oid, owner, kind)
+
+    def public_object(self, db, row):
+        obj = dict(id=row['id'],created_at=row['created_at'],**json.loads(row['payload']))
+        if row['kind'] == 'listing':
+            links = {r['relation']:r['target_id'] for r in db.execute(
+                'SELECT relation,target_id FROM object_links WHERE object_id=?', (row['id'],))}
+            obj['links'] = {name:links.get(name) for name in ('source_extraction_id','previous_listing_id')}
+        return obj
 
     def get(self, oid, owner, kind):
         with self.connect() as db:
             row = db.execute("SELECT * FROM objects WHERE id=? AND owner=? AND kind=?",(oid,owner,kind)).fetchone()
-        return dict(id=row['id'],created_at=row['created_at'],**json.loads(row['payload'])) if row else None
+            return self.public_object(db, row) if row else None
+
+    def page(self, owner, kind, limit, offset):
+        with self.connect() as db:
+            rows = db.execute('SELECT * FROM objects WHERE owner=? AND kind=? ORDER BY created_at DESC,id DESC LIMIT ? OFFSET ?',
+                              (owner,kind,limit+1,offset)).fetchall()
+            return {'items':[self.public_object(db,row) for row in rows[:limit]],
+                    'limit':limit, 'offset':offset, 'has_more':len(rows)>limit}
 
     def delete(self, oid, owner, kind):
         with self.connect() as db:

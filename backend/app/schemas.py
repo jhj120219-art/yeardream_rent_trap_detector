@@ -19,6 +19,8 @@ class ListingInput(BaseModel):
     listing: dict[str, Any]
     options: dict[str, Any] = Field(default_factory=dict)
     confirmation: Confirmation = Field(default_factory=Confirmation)
+    source_extraction_id: str | None = Field(default=None, min_length=1, max_length=64)
+    previous_listing_id: str | None = Field(default=None, min_length=1, max_length=64)
 
     @field_validator("listing", "options")
     @classmethod

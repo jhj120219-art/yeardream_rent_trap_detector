@@ -32,8 +32,8 @@
         }
       },
       "registration": {
-        "id": "4a5d1b80-5821-4d4b-81f4-3c6bdf0d9a30",
-        "created_at": "2026-10-19T01:31:55.186257+00:00",
+        "id": "b591263e-b39b-484b-989b-1434b1b24f4f",
+        "created_at": "2026-10-19T04:51:00.532740+00:00",
         "input": {
           "schema_version": "1.1",
           "listing": {
@@ -89,13 +89,18 @@
             "floor_type": "GROUND",
             "floor_trusted": true
           }
+        },
+        "confirmation_recorded_at": "2026-10-19T04:51:00.532740+00:00",
+        "links": {
+          "source_extraction_id": null,
+          "previous_listing_id": null
         }
       },
       "http_status": 201,
       "response": {
-        "id": "80b72052-499b-4686-b1ae-07a65b2c90c4",
-        "created_at": "2026-10-19T01:31:55.194341+00:00",
-        "listing_id": "4a5d1b80-5821-4d4b-81f4-3c6bdf0d9a30",
+        "id": "6e700e89-32b3-48f3-a50a-0413593ca91d",
+        "created_at": "2026-10-19T04:51:00.542878+00:00",
+        "listing_id": "b591263e-b39b-484b-989b-1434b1b24f4f",
         "result": {
           "status": "COMPARED",
           "stage": 1,
@@ -212,8 +217,8 @@
         }
       },
       "registration": {
-        "id": "b1830805-e78e-4eb0-933d-a1552c88ab39",
-        "created_at": "2026-10-19T01:31:55.201393+00:00",
+        "id": "3c18d2f5-345e-4eed-ad3f-86298a50244d",
+        "created_at": "2026-10-19T04:51:00.550644+00:00",
         "input": {
           "schema_version": "1.1",
           "listing": {
@@ -269,13 +274,18 @@
             "floor_type": "GROUND",
             "floor_trusted": true
           }
+        },
+        "confirmation_recorded_at": "2026-10-19T04:51:00.550644+00:00",
+        "links": {
+          "source_extraction_id": null,
+          "previous_listing_id": null
         }
       },
       "http_status": 201,
       "response": {
-        "id": "a3d0958d-749b-40a0-a37e-400af4f5f596",
-        "created_at": "2026-10-19T01:31:55.209903+00:00",
-        "listing_id": "b1830805-e78e-4eb0-933d-a1552c88ab39",
+        "id": "269282fb-8239-459f-8143-d98b4e26840b",
+        "created_at": "2026-10-19T04:51:00.560166+00:00",
+        "listing_id": "3c18d2f5-345e-4eed-ad3f-86298a50244d",
         "result": {
           "status": "REFERENCE_ONLY",
           "stage": 1,
@@ -400,8 +410,8 @@
         }
       },
       "registration": {
-        "id": "48619c16-19da-49b5-b3b8-8b03777618a4",
-        "created_at": "2026-10-19T01:31:55.216055+00:00",
+        "id": "e7f8d027-e29f-4aef-96a7-583f248d49d7",
+        "created_at": "2026-10-19T04:51:00.568390+00:00",
         "input": {
           "schema_version": "1.1",
           "listing": {
@@ -457,13 +467,18 @@
             "floor_type": "GROUND",
             "floor_trusted": true
           }
+        },
+        "confirmation_recorded_at": "2026-10-19T04:51:00.568390+00:00",
+        "links": {
+          "source_extraction_id": null,
+          "previous_listing_id": null
         }
       },
       "http_status": 201,
       "response": {
-        "id": "d45c711c-b4a4-4b77-a638-85783b837933",
-        "created_at": "2026-10-19T01:31:55.224065+00:00",
-        "listing_id": "48619c16-19da-49b5-b3b8-8b03777618a4",
+        "id": "58db85fb-8a73-4238-bfcd-b9086219851f",
+        "created_at": "2026-10-19T04:51:00.577715+00:00",
+        "listing_id": "e7f8d027-e29f-4aef-96a7-583f248d49d7",
         "result": {
           "status": "INSUFFICIENT_DATA",
           "stage": null,
@@ -540,8 +555,8 @@
         }
       },
       "registration": {
-        "id": "802d62cd-6a0c-46d1-a61e-050183bcc027",
-        "created_at": "2026-10-19T01:31:55.230088+00:00",
+        "id": "e94a8850-d92e-4b28-97d8-df9eb423251c",
+        "created_at": "2026-10-19T04:51:00.584710+00:00",
         "input": {
           "schema_version": "1.1",
           "listing": {
@@ -599,13 +614,18 @@
             "floor_type": "GROUND",
             "floor_trusted": true
           }
+        },
+        "confirmation_recorded_at": null,
+        "links": {
+          "source_extraction_id": null,
+          "previous_listing_id": null
         }
       },
       "http_status": 201,
       "response": {
-        "id": "dae9389d-cf07-418b-be02-7d175c4ca5dd",
-        "created_at": "2026-10-19T01:31:55.237211+00:00",
-        "listing_id": "802d62cd-6a0c-46d1-a61e-050183bcc027",
+        "id": "c40c4da7-0e78-4648-9f85-3c286864b163",
+        "created_at": "2026-10-19T04:51:00.593319+00:00",
+        "listing_id": "e94a8850-d92e-4b28-97d8-df9eb423251c",
         "result": {
           "status": "INPUT_REVIEW_REQUIRED",
           "stage": null,

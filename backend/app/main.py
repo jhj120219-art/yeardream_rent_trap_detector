@@ -4,7 +4,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 from .config import Settings
-from .db import Store
+from .db import Store, InvalidReference, now
 from .schemas import ListingInput
 from . import analysis_service as service
 from .vision import extract_image
@@ -98,10 +98,32 @@ def create_app(settings=None, pool=None, extractor=None):
 
     @app.post('/listings',status_code=201)
     def listing(body: ListingInput, sid=Depends(owner)):
-        raw=body.model_dump()
+        raw=body.model_dump(exclude={'source_extraction_id','previous_listing_id'})
+        links={}
+        source_id=body.source_extraction_id
+        if body.previous_listing_id:
+            previous=find(body.previous_listing_id,sid,'listing')
+            links['previous_listing_id']=body.previous_listing_id
+            source_id=source_id or previous.get('links',{}).get('source_extraction_id')
+        if source_id:
+            find(source_id,sid,'extraction')
+            if body.confirmation.input_source != 'IMAGE_REVIEWED':
+                raise HTTPException(422,'이미지 초안에서 등록할 때는 IMAGE_REVIEWED를 지정해 주세요.')
+            links['source_extraction_id']=source_id
         normalized=service.review(raw)
         # 확인 전 초안도 저장할 수 있지만 분석에는 사용할 수 없다.
-        return app.state.store.create(sid,'listing',{"input":raw,"validation":normalized})
+        try:
+            return app.state.store.create(sid,'listing',{
+                "input":raw,"validation":normalized,
+                "confirmation_recorded_at":now() if body.confirmation.user_confirmed else None,
+            },links=links)
+        except InvalidReference:
+            raise HTTPException(404,'자료를 찾을 수 없습니다.') from None
+
+    @app.get('/listings')
+    def list_listings(limit: int=Query(default=20,ge=1,le=50),
+                      offset: int=Query(default=0,ge=0),sid=Depends(owner)):
+        return app.state.store.page(sid,'listing',limit,offset)
 
     @app.get('/listings/{listing_id}')
     def get_listing(listing_id: str,sid=Depends(owner)):
