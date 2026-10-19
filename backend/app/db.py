@@ -6,6 +6,47 @@ import json
 import secrets
 import sqlite3
 from uuid import uuid4
+from pathlib import Path
+from urllib.parse import urlsplit, unquote, parse_qs
+
+MYSQL_SCHEMA = (
+    "CREATE TABLE IF NOT EXISTS sessions (id VARCHAR(36) PRIMARY KEY, token_hash VARCHAR(64) UNIQUE NOT NULL, created_at VARCHAR(40) NOT NULL)",
+    "CREATE TABLE IF NOT EXISTS objects (id VARCHAR(36) PRIMARY KEY, owner VARCHAR(36) NOT NULL, kind VARCHAR(64) NOT NULL, parent VARCHAR(36), payload LONGTEXT NOT NULL, created_at VARCHAR(40) NOT NULL, INDEX objects_owner(owner,kind), FOREIGN KEY(owner) REFERENCES sessions(id), FOREIGN KEY(parent) REFERENCES objects(id) ON DELETE CASCADE)",
+    "CREATE TABLE IF NOT EXISTS object_links (object_id VARCHAR(36) NOT NULL, relation VARCHAR(32) NOT NULL, target_id VARCHAR(36) NOT NULL, PRIMARY KEY(object_id,relation), INDEX object_links_target(target_id), FOREIGN KEY(object_id) REFERENCES objects(id) ON DELETE CASCADE, FOREIGN KEY(target_id) REFERENCES objects(id) ON DELETE CASCADE, CHECK(relation IN ('source_extraction_id','previous_listing_id')))",
+)
+
+
+class MySQLConnection:
+    """Adapt the existing parameterized Store queries to DB-API cursors."""
+    def __init__(self, connection):
+        self.connection = connection
+        self.cursors = []
+
+    def execute(self, sql, params=()):
+        cursor = self.connection.cursor()
+        self.cursors.append(cursor)
+        cursor.execute(sql.replace('?', '%s'), params)
+        return cursor
+
+    def close(self):
+        for cursor in self.cursors:
+            cursor.close()
+        self.connection.close()
+
+
+def mysql_options(url):
+    parsed = urlsplit(url)
+    if parsed.scheme not in ('mysql', 'mysql+pymysql') or not parsed.hostname or not parsed.username or not parsed.path.strip('/'):
+        raise ValueError('DATABASE_URL must be mysql+pymysql://user:password@host:3306/database')
+    query = parse_qs(parsed.query)
+    if set(query) - {'ssl_ca'}:
+        raise ValueError('Unsupported DATABASE_URL option (supported: ssl_ca)')
+    options = dict(host=parsed.hostname, port=parsed.port or 3306, user=unquote(parsed.username),
+                   password=unquote(parsed.password or ''), database=unquote(parsed.path[1:]),
+                   charset='utf8mb4', autocommit=False, connect_timeout=10, read_timeout=30, write_timeout=30)
+    if 'ssl_ca' in query:
+        options.update(ssl_ca=query['ssl_ca'][0], ssl_verify_cert=True, ssl_verify_identity=True)
+    return options
 
 
 def now():
@@ -21,7 +62,17 @@ class InvalidReference(ValueError):
 
 
 class Store:
-    def __init__(self, path):
+    def __init__(self, path=None, database_url=""):
+        self.mysql = bool(database_url)
+        if self.mysql:
+            self.options = mysql_options(database_url)
+            with self.connect() as db:
+                for statement in MYSQL_SCHEMA:
+                    db.execute(statement + " ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin")
+            return
+        if path is None:
+            raise ValueError("DATABASE_URL is required; BACKEND_DB_PATH is only for explicit legacy SQLite use")
+        path = Path(path)
         self.path = str(path)
         path.parent.mkdir(parents=True, exist_ok=True)
         with self.connect() as db:
@@ -41,6 +92,19 @@ class Store:
 
     @contextmanager
     def connect(self):
+        if self.mysql:
+            import pymysql
+            connection = pymysql.connect(**self.options, cursorclass=pymysql.cursors.DictCursor)
+            db = MySQLConnection(connection)
+            try:
+                yield db
+                connection.commit()
+            except BaseException:
+                connection.rollback()
+                raise
+            finally:
+                db.close()
+            return
         db = sqlite3.connect(self.path, timeout=15)
         db.execute("PRAGMA foreign_keys=ON")
         db.row_factory = sqlite3.Row
@@ -97,8 +161,8 @@ class Store:
 
     def children(self, parent, owner, kind, limit=20, offset=0):
         with self.connect() as db:
-            total=db.execute('SELECT COUNT(*) FROM objects WHERE parent=? AND owner=? AND kind=?',
-                             (parent,owner,kind)).fetchone()[0]
+            total=db.execute('SELECT COUNT(*) AS total FROM objects WHERE parent=? AND owner=? AND kind=?',
+                             (parent,owner,kind)).fetchone()['total']
             rows = db.execute('SELECT * FROM objects WHERE parent=? AND owner=? AND kind=? ORDER BY created_at DESC,id DESC LIMIT ? OFFSET ?',
                               (parent,owner,kind,limit+1,offset)).fetchall()
             return {'items':[self.public_object(db,row) for row in rows[:limit]],

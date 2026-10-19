@@ -21,3 +21,12 @@ output/dup_sensitivity_cases.csv
 output/ledger_*.csv
 run_collect_holdout.sh
 output/holdout_backtest_cases.csv
+
+# Local credentials and private database backups
+.env
+.env.*
+!.env.example
+*.sqlite
+*.sqlite3*
+*.sql
+*.dump

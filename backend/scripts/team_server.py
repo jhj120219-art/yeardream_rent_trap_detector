@@ -50,14 +50,15 @@ def run(runtime, port):
     csv = ROOT / 'backend/data/clean_rent_data.csv'
     if not csv.is_file():
         raise RuntimeError('실거래 정제 CSV 연결이 필요합니다.')
+    mysql_mode = bool(os.getenv('DATABASE_URL'))
     database = runtime / 'team.sqlite3'
-    if database.exists():
+    if not mysql_mode and database.exists():
         backup(database, runtime / 'backups')
     origins_file = runtime / 'frontend-origins.txt'
     if not origins_file.exists():
         origins_file.write_text('http://localhost:5173\nhttp://localhost:3000\n', encoding='utf-8')
     origins = ','.join(x.strip() for x in origins_file.read_text(encoding='utf-8').splitlines() if x.strip())
-    env = dict(os.environ, BACKEND_DB_PATH=str(database), RENT_CLEAN_CSV=str(csv),
+    env = dict(os.environ, BACKEND_DB_PATH='' if mysql_mode else str(database), RENT_CLEAN_CSV=str(csv),
                TEAM_ACCESS_KEY_FILE=str(keyfile), TEAM_SHARED_MODE='true',
                MAINTENANCE_ENABLED='false', CORS_ORIGINS=origins)
     flags = subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
@@ -102,16 +103,17 @@ def run(runtime, port):
                 else:
                     raise RuntimeError('외부 주소 생성 시간 초과')
                 info = dict(url=url, port=port, supervisor_pid=os.getpid(), server_pid=server.pid,
-                            tunnel_pid=tunnel.pid, database=str(database), key_file=str(keyfile),
+                            tunnel_pid=tunnel.pid, database='mysql (DATABASE_URL)' if mysql_mode else str(database), key_file=str(keyfile),
                             temporary=True, cloudflared_version=VERSION, cloudflared_sha256=SHA256)
                 (runtime / 'connection.json').write_text(json.dumps(info, ensure_ascii=False, indent=2), encoding='utf-8')
                 (runtime / '접속주소.txt').write_text(url+'\n접속키는 team-access.key 파일을 별도로 전달하세요.\n', encoding='utf-8')
-                backup(database, runtime / 'backups')
+                if not mysql_mode:
+                    backup(database, runtime / 'backups')
                 next_backup = time.monotonic() + 86400
                 while not (runtime / 'stop.request').exists():
                     if server.poll() is not None or tunnel.poll() is not None:
                         raise RuntimeError('서버 또는 터널 중단. 로그를 확인하고 다시 시작하세요.')
-                    if time.monotonic() >= next_backup:
+                    if not mysql_mode and time.monotonic() >= next_backup:
                         backup(database, runtime / 'backups')
                         next_backup = time.monotonic() + 86400
                     time.sleep(2)
@@ -123,7 +125,7 @@ def run(runtime, port):
                     process.wait(timeout=10)
                 except subprocess.TimeoutExpired:
                     process.kill()
-        if database.exists():
+        if not mysql_mode and database.exists():
             backup(database, runtime / 'backups')
         (runtime / 'stop.request').unlink(missing_ok=True)
         (runtime / 'connection.json').unlink(missing_ok=True)

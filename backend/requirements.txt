@@ -5,3 +5,5 @@ pandas>=2.2,<3
 numpy>=1.26,<3
 python-multipart>=0.0.18,<1
 Pillow>=11,<13
+PyMySQL[rsa]>=1.1.1,<2
+python-dotenv>=1,<2
