@@ -1,0 +1,49 @@
+{
+  "schema_version": "1.1",
+  "description": "AI 월세 함정 탐지기 분석 함수 연동 계약. 입력은 normalize_listing()으로 정규화한 뒤 analyze_listing()에 전달한다. 최종 status/price_label은 분석 코드가 결정하며 프론트는 그대로 표시한다.",
+  "units": {"money": "만원(10k KRW)", "area": "㎡", "codes": "문자열(앞자리 0 보존)"},
+  "input": {
+    "listing": {
+      "district_code": {"type": "string(5)", "required": true, "example": "11620", "supported": {"11620": "관악구", "11215": "광진구", "11440": "마포구", "11590": "동작구", "11500": "강서구", "11350": "노원구"}},
+      "legal_dong_code": {"type": "string(10)", "required": "legal_dong_code 또는 dong 중 하나", "note": "주소 API의 법정동 코드(b_code). 행정동(h_code)과 혼동하지 말 것"},
+      "dong": {"type": "string", "note": "법정동 이름. 동 이름만 같다고 같은 법정동이 아니므로 자치구 코드와 함께 확인"},
+      "building_type": {"type": "enum", "required": true, "values": ["APARTMENT", "MULTI_UNIT", "DETACHED_MULTI", "OFFICETEL"], "aliases": {"SINGLE_MULTI_HOUSEHOLD": "DETACHED_MULTI"}, "note": "'빌라' 같은 모호한 값은 사용자에게 확인"},
+      "area_m2": {"type": "number", "required": true, "range": "5~200"},
+      "area_basis": {"type": "enum", "values": ["EXCLUSIVE", "SUPPLY", "CONTRACT", "RENTAL_REPORTED", "UNKNOWN"],
+                     "note": "아파트·연립다세대·오피스텔의 서울시 면적은 전용면적, 단독다가구는 계약면적(국토부 CSV 건별 대조로 확인). SUPPLY(공급면적)는 가격 판정 보류. UNKNOWN은 전용면적으로 가정하고 경고"},
+      "deposit_10k_krw": {"type": "number", "required": true, "min": 0},
+      "rent_10k_krw": {"type": "number", "required": true, "range": "1~500"},
+      "built_year": {"type": "integer", "required": false},
+      "floor": {"type": "integer|null", "note": "매물(호실) 층수. 0/없음=미확인, 음수=지하. 건물 전체 층수는 total_floors로 분리"},
+      "floor_type": {"type": "enum", "values": ["GROUND", "BASEMENT", "UNKNOWN"], "note": "단독다가구 판정의 핵심 입력. 사용자 확인(USER_CONFIRMED)이 없으면 사용하지 않음"},
+      "floor_source": {"type": "enum", "values": ["USER_CONFIRMED", "IMAGE_EXTRACTED", "UNKNOWN"]},
+      "as_of": {"type": "date", "required": false, "note": "기본: 데이터 최신일+1"}
+    },
+    "options": {"note": "시세 판정에 쓰지 않는다. 매물 간 비교·미확인 비용 안내용으로 그대로 전달",
+                "fields": ["maintenance_10k_krw", "internet_status", "elevator_status", "parking_status", "electricity_in_maintenance", "gas_in_maintenance", "water_in_maintenance"],
+                "field_status": ["INCLUDED", "SEPARATE_CHARGE", "AVAILABLE", "NOT_AVAILABLE", "UNKNOWN"]},
+    "confirmation": {"user_confirmed": {"type": "boolean", "required": true, "note": "true가 아니면 분석하지 않고 INPUT_REVIEW_REQUIRED"},
+                     "confirmed_fields": {"type": "string[]", "note": "사용자가 확인·수정한 필드 목록. floor_type이 없고 floor_source도 USER_CONFIRMED가 아니면 층 유형은 미확인 처리"},
+                     "input_source": {"type": "enum", "values": ["ADDRESS_MANUAL", "IMAGE_REVIEWED"]}}
+  },
+  "output": {
+    "status": {"values": {"COMPARED": "비교 완료, 가격 라벨 제공", "REFERENCE_ONLY": "가격 범위만 제공, 판정 없음", "INSUFFICIENT_DATA": "비교 거래 10건 미만", "INPUT_REVIEW_REQUIRED": "입력 확인 필요(errors/input_issues 참조)", "OUT_OF_SCOPE": "지원 지역·유형 밖"}},
+    "price_label": {"values": {"UPPER_TAIL": "비교 분포 상위 10% 초과(신뢰도 높음일 때만, 단독다가구에서는 금지)", "UPPER_RANGE": "상위 25% 초과(단독다가구는 Q75×1.10 초과)", "TYPICAL_RANGE": "중간 50% 범위", "LOWER_RANGE": "하위 25%", "UNRATED": "판정 안 함"}},
+    "confidence_grade": ["HIGH", "MEDIUM", "LOW", "NONE"],
+    "fields": ["status", "price_label", "stage", "sample_count", "confidence_grade", "prices_10k_krw{q10,q25,median,q75,q90}", "rent_difference_10k_krw", "rent_difference_pct", "percentile",
+               "warnings", "warning_texts", "messages", "hold_reasons", "reason_codes", "errors", "input_issues", "input_notes",
+               "reference{source,contract_type,renewals_excluded,renewals_excluded_in_data_for_gu,months_used,search_stage,sample_count,conditions,relaxed_conditions,prices_10k_krw}",
+               "confidence_details{comparability_score,data_sufficiency_score,recent_share_6m,relative_iqr}", "floor{listing_floor_type,listing_floor_source,comparable_floor_known,rule}", "options", "data_source", "data_as_of"],
+    "reason_codes": ["AREA_BASIS_UNVERIFIED", "AREA_BASIS_MISMATCH", "FLOOR_UNKNOWN", "BASEMENT_LISTING", "PRICE_LABEL_NOT_APPROVED", "SEARCH_SCOPE_EXPANDED", "LOW_CONFIDENCE"],
+    "relaxed_conditions": ["AREA_RANGE_EXPANDED", "BUILT_YEAR_RANGE_EXPANDED", "DEPOSIT_RANGE_EXPANDED", "PERIOD_EXPANDED", "SEARCH_SCOPE_EXPANDED"],
+    "notes": ["renewals_excluded_in_data_for_gu는 해당 자치구 전체 데이터에서 제외한 갱신 계약 수이며, 이 매물의 검색 범위 안에서 제외한 건수가 아니다.",
+              "사용자 문구에는 '함정·사기·불법·바가지' 표현을 쓰지 않는다(테스트로 검사)."]
+  },
+  "policy": {
+    "single_multi_household": "지상층 확인(floor_type=GROUND, USER_CONFIRMED) + 신뢰도 HIGH + 1·2차 탐색 + 월세 > Q75×1.10일 때만 UPPER_RANGE. UPPER_TAIL 금지. 반지하·층 미확인은 REFERENCE_ONLY",
+    "stage3": "같은 자치구 전체로 확대한 결과는 항상 REFERENCE_ONLY",
+    "upper_tail": "신뢰도 HIGH에서만 허용",
+    "max_judgeable_share": "백테스트 8,995건 기준 최대 67.2%(단독다가구 지상층 확인 가정), 층을 모르면 44.0%. 실제 사용자 입력 완성률은 반영되지 않은 정책상 최대치"
+  },
+  "attribution": "데이터 출처: 서울특별시 열린데이터광장 '서울시 부동산 전월세가 정보'(공공누리 제1유형), 국토교통부 실거래가 공개자료. 본 서비스의 시세 비교와 신뢰도 평가는 팀에서 가공·산출한 결과이며 원자료 제공기관의 공식 가격 판정이 아닙니다."
+}

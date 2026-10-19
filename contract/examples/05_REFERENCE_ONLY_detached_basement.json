@@ -1,0 +1,136 @@
+{
+  "_note": "단독다가구 반지하/지하 -> 가격 범위만 제공",
+  "input": {
+    "schema_version": "1.1",
+    "listing": {
+      "district_code": "11620",
+      "legal_dong_code": "1162010200",
+      "building_type": "DETACHED_MULTI",
+      "area_m2": 16.5,
+      "area_basis": "CONTRACT",
+      "deposit_10k_krw": 1000,
+      "rent_10k_krw": 69,
+      "built_year": null,
+      "floor": -1,
+      "floor_type": "BASEMENT",
+      "floor_source": "USER_CONFIRMED"
+    },
+    "options": {
+      "maintenance_10k_krw": 7,
+      "internet_status": "UNKNOWN",
+      "elevator_status": "UNKNOWN",
+      "parking_status": "UNKNOWN"
+    },
+    "confirmation": {
+      "user_confirmed": true,
+      "input_source": "IMAGE_REVIEWED",
+      "confirmed_fields": [
+        "address",
+        "building_type",
+        "area_m2",
+        "area_basis",
+        "deposit_10k_krw",
+        "rent_10k_krw",
+        "floor_type"
+      ]
+    }
+  },
+  "output": {
+    "status": "REFERENCE_ONLY",
+    "stage": 1,
+    "sample_count": 423,
+    "confidence_grade": "HIGH",
+    "price_label": "UNRATED",
+    "prices_10k_krw": {
+      "q10": 38.0,
+      "q25": 44.0,
+      "median": 50.0,
+      "q75": 55.0,
+      "q90": 60.0
+    },
+    "rent_difference_10k_krw": 19.0,
+    "rent_difference_pct": 0.38,
+    "percentile": 0.963,
+    "warnings": [
+      "BUILT_YEAR_MISSING",
+      "FLOOR_UNCONFIRMED_COMPARABLES",
+      "BASEMENT_LISTING"
+    ],
+    "messages": [
+      "이 조건에서는 가격이 높은지 낮은지 판정하지 않고, 참고용 가격 범위만 보여드립니다.",
+      "비교 423건(1차) 기준 시세 중앙값 50만원, 중간 50% 범위 44~55만원"
+    ],
+    "errors": [],
+    "relaxed": [],
+    "trust": {
+      "fit": 80,
+      "sufficiency": 88
+    },
+    "data_source": "서울 열린데이터광장 부동산 전월세가 정보(tbLnOpendataRentV)",
+    "data_as_of": "2026-10-16",
+    "reason_codes": [
+      "BASEMENT_LISTING"
+    ],
+    "hold_reasons": [
+      "basement_listing"
+    ],
+    "reference": {
+      "source": "서울 열린데이터광장 부동산 전월세가 정보(tbLnOpendataRentV)",
+      "contract_type": "NEW",
+      "renewals_excluded": true,
+      "renewals_excluded_in_data_for_gu": 8697,
+      "months_used": 12,
+      "search_stage": 1,
+      "sample_count": 423,
+      "conditions": {
+        "area_tolerance": 0.1,
+        "built_year_tolerance": 5,
+        "deposit_tolerance": 0.3,
+        "scope": "같은 법정동"
+      },
+      "relaxed_conditions": [],
+      "prices_10k_krw": {
+        "q10": 38.0,
+        "q25": 44.0,
+        "median": 50.0,
+        "q75": 55.0,
+        "q90": 60.0
+      }
+    },
+    "confidence_details": {
+      "comparability_score": 80,
+      "data_sufficiency_score": 88,
+      "recent_share_6m": 0.42,
+      "relative_iqr": 0.22
+    },
+    "floor": {
+      "listing_floor_type": "BASEMENT",
+      "listing_floor_source": "USER_INPUT",
+      "comparable_floor_known": false,
+      "rule": "Q75x1.10 초과일 때만 UPPER_RANGE, UPPER_TAIL 금지"
+    },
+    "warning_texts": {
+      "BUILT_YEAR_MISSING": "건축연도를 입력하지 않아 건축연도 조건 없이 비교했습니다.",
+      "FLOOR_UNCONFIRMED_COMPARABLES": "단독·다가구 실거래에는 층 정보가 없어 지하·반지하 계약이 섞인 비교군입니다. 그 때문에 시세가 낮게 추정될 수 있어, 평소보다 더 높을 때만 \"높은 편\"으로 표시합니다.",
+      "BASEMENT_LISTING": "지하·반지하 매물은 단독·다가구 비교군에서 층을 분리할 수 없어 가격 판정을 하지 않습니다."
+    },
+    "comparison": {
+      "dong": "신림동",
+      "gu": "관악구",
+      "building_type": "단독다가구",
+      "trace": [
+        {
+          "stage": "1차",
+          "n": 423
+        }
+      ]
+    },
+    "input_notes": [],
+    "options": {
+      "maintenance_10k_krw": 7,
+      "internet_status": "UNKNOWN",
+      "elevator_status": "UNKNOWN",
+      "parking_status": "UNKNOWN"
+    }
+  }
+}

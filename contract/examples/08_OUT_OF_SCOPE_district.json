@@ -1,0 +1,72 @@
+{
+  "_note": "현재 지원하지 않는 자치구(종로구)",
+  "input": {
+    "schema_version": "1.1",
+    "listing": {
+      "district_code": "11110",
+      "legal_dong_code": "1111010100",
+      "building_type": "APARTMENT",
+      "area_m2": 59.9,
+      "area_basis": "EXCLUSIVE",
+      "deposit_10k_krw": 5000,
+      "rent_10k_krw": 150,
+      "built_year": 2005,
+      "floor": 7,
+      "floor_type": "GROUND",
+      "floor_source": "USER_CONFIRMED"
+    },
+    "options": {
+      "maintenance_10k_krw": 7,
+      "internet_status": "UNKNOWN",
+      "elevator_status": "UNKNOWN",
+      "parking_status": "UNKNOWN"
+    },
+    "confirmation": {
+      "user_confirmed": true,
+      "input_source": "IMAGE_REVIEWED",
+      "confirmed_fields": [
+        "address",
+        "building_type",
+        "area_m2",
+        "area_basis",
+        "deposit_10k_krw",
+        "rent_10k_krw",
+        "floor_type"
+      ]
+    }
+  },
+  "output": {
+    "status": "OUT_OF_SCOPE",
+    "stage": null,
+    "sample_count": 0,
+    "confidence_grade": "NONE",
+    "price_label": "UNRATED",
+    "prices_10k_krw": null,
+    "rent_difference_10k_krw": null,
+    "rent_difference_pct": null,
+    "percentile": null,
+    "warnings": [
+      "UNSUPPORTED_DISTRICT"
+    ],
+    "messages": [
+      "현재 시세 분석을 지원하는 지역은 관악구, 광진구, 마포구, 동작구, 강서구, 노원구입니다."
+    ],
+    "errors": [],
+    "relaxed": [],
+    "trust": null,
+    "data_source": "서울 열린데이터광장 부동산 전월세가 정보(tbLnOpendataRentV)",
+    "data_as_of": "2026-10-16",
+    "reason_codes": [],
+    "hold_reasons": [],
+    "reference": null,
+    "confidence_details": null,
+    "floor": null,
+    "input_notes": [],
+    "options": {
+      "maintenance_10k_krw": 7,
+      "internet_status": "UNKNOWN",
+      "elevator_status": "UNKNOWN",
+      "parking_status": "UNKNOWN"
+    }
+  }
+}

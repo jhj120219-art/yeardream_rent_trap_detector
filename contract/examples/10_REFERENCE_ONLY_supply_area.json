@@ -1,0 +1,132 @@
+{
+  "_note": "공급면적을 입력한 경우: 가격 판정 보류",
+  "input": {
+    "schema_version": "1.1",
+    "listing": {
+      "district_code": "11620",
+      "legal_dong_code": "1162010100",
+      "building_type": "APARTMENT",
+      "area_m2": 59.9,
+      "area_basis": "SUPPLY",
+      "deposit_10k_krw": 5000,
+      "rent_10k_krw": 150,
+      "built_year": 2005,
+      "floor": 7,
+      "floor_type": "GROUND",
+      "floor_source": "USER_CONFIRMED"
+    },
+    "options": {
+      "maintenance_10k_krw": 7,
+      "internet_status": "UNKNOWN",
+      "elevator_status": "UNKNOWN",
+      "parking_status": "UNKNOWN"
+    },
+    "confirmation": {
+      "user_confirmed": true,
+      "input_source": "IMAGE_REVIEWED",
+      "confirmed_fields": [
+        "address",
+        "building_type",
+        "area_m2",
+        "area_basis",
+        "deposit_10k_krw",
+        "rent_10k_krw",
+        "floor_type"
+      ]
+    }
+  },
+  "output": {
+    "status": "REFERENCE_ONLY",
+    "stage": 1,
+    "sample_count": 43,
+    "confidence_grade": "HIGH",
+    "price_label": "UNRATED",
+    "prices_10k_krw": {
+      "q10": 140.0,
+      "q25": 157.0,
+      "median": 180.0,
+      "q75": 200.0,
+      "q90": 208.0
+    },
+    "rent_difference_10k_krw": -30.0,
+    "rent_difference_pct": -0.167,
+    "percentile": 0.174,
+    "warnings": [
+      "AREA_BASIS_MISMATCH"
+    ],
+    "messages": [
+      "이 조건에서는 가격이 높은지 낮은지 판정하지 않고, 참고용 가격 범위만 보여드립니다.",
+      "비교 43건(1차) 기준 시세 중앙값 180만원, 중간 50% 범위 157~200만원"
+    ],
+    "errors": [],
+    "relaxed": [],
+    "trust": {
+      "fit": 100,
+      "sufficiency": 92
+    },
+    "data_source": "서울 열린데이터광장 부동산 전월세가 정보(tbLnOpendataRentV)",
+    "data_as_of": "2026-10-16",
+    "reason_codes": [
+      "AREA_BASIS_MISMATCH"
+    ],
+    "hold_reasons": [
+      "area_mismatch"
+    ],
+    "reference": {
+      "source": "서울 열린데이터광장 부동산 전월세가 정보(tbLnOpendataRentV)",
+      "contract_type": "NEW",
+      "renewals_excluded": true,
+      "renewals_excluded_in_data_for_gu": 8697,
+      "months_used": 12,
+      "search_stage": 1,
+      "sample_count": 43,
+      "conditions": {
+        "area_tolerance": 0.1,
+        "built_year_tolerance": 5,
+        "deposit_tolerance": 0.3,
+        "scope": "같은 법정동"
+      },
+      "relaxed_conditions": [],
+      "prices_10k_krw": {
+        "q10": 140.0,
+        "q25": 157.0,
+        "median": 180.0,
+        "q75": 200.0,
+        "q90": 208.0
+      }
+    },
+    "confidence_details": {
+      "comparability_score": 100,
+      "data_sufficiency_score": 92,
+      "recent_share_6m": 0.58,
+      "relative_iqr": 0.24
+    },
+    "floor": {
+      "listing_floor_type": "GROUND",
+      "listing_floor_source": "USER_INPUT",
+      "comparable_floor_known": true,
+      "rule": null
+    },
+    "warning_texts": {
+      "AREA_BASIS_MISMATCH": "입력한 면적이 전용면적이 아니어서(공급·계약면적 등) 실거래 비교에 그대로 쓸 수 없습니다."
+    },
+    "comparison": {
+      "dong": "봉천동",
+      "gu": "관악구",
+      "building_type": "아파트",
+      "trace": [
+        {
+          "stage": "1차",
+          "n": 43
+        }
+      ]
+    },
+    "input_notes": [],
+    "options": {
+      "maintenance_10k_krw": 7,
+      "internet_status": "UNKNOWN",
+      "elevator_status": "UNKNOWN",
+      "parking_status": "UNKNOWN"
+    }
+  }
+}

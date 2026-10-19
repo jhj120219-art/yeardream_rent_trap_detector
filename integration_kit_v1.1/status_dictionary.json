@@ -1,0 +1,63 @@
+{
+  "extraction_status": [
+    "EXTRACTED",
+    "EXTRACTED_NEEDS_REVIEW",
+    "NO_LISTING_FOUND",
+    "MULTIPLE_LISTINGS",
+    "EXTRACTION_FAILED"
+  ],
+  "field_status": [
+    "INCLUDED",
+    "SEPARATE_CHARGE",
+    "AVAILABLE",
+    "NOT_AVAILABLE",
+    "UNKNOWN"
+  ],
+  "area_basis": [
+    "EXCLUSIVE",
+    "SUPPLY",
+    "CONTRACT",
+    "RENTAL_REPORTED",
+    "UNKNOWN"
+  ],
+  "building_type": [
+    "APARTMENT",
+    "OFFICETEL",
+    "MULTI_UNIT",
+    "DETACHED_MULTI",
+    "UNKNOWN"
+  ],
+  "compare_status": [
+    "COMPARED",
+    "REFERENCE_ONLY",
+    "INSUFFICIENT_DATA",
+    "INPUT_REVIEW_REQUIRED",
+    "OUT_OF_SCOPE"
+  ],
+  "price_label": [
+    "UPPER_TAIL",
+    "UPPER_RANGE",
+    "TYPICAL_RANGE",
+    "LOWER_RANGE",
+    "UNRATED"
+  ],
+  "notes": {
+    "source_provenance": "각 추출 필드에 raw_text 및 review_required; 사용자 확인 후 비교",
+    "floor_0": "미확인으로 처리",
+    "area_mismatch": "공급면적(SUPPLY) 입력 시 해당 매물만 가격 판정 보류. 아파트·연립다세대·오피스텔은 전용면적, 단독다가구는 계약면적이 서울시 RENT_AREA 기준(검증됨)",
+    "floor_type": "AI가 읽은 floor_type은 사용자 확인 전 판정 근거가 아님"
+  },
+  "building_type_aliases": {
+    "SINGLE_MULTI_HOUSEHOLD": "DETACHED_MULTI"
+  },
+  "floor_type": [
+    "GROUND",
+    "BASEMENT",
+    "UNKNOWN"
+  ],
+  "floor_source": [
+    "USER_CONFIRMED",
+    "IMAGE_EXTRACTED",
+    "UNKNOWN"
+  ]
+}
