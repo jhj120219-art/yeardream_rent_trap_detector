@@ -1,5 +1,9 @@
 # 구현 기록
 
+## 2026-10-19 최신: MySQL 실통합 검증 완료
+
+개인 GitHub CI [39270463052](https://github.com/jhj120219-art/yeardream_rent_trap_detector/actions/runs/39270463052), 코드 commit `371ed2a`: MySQL 8.0/8.4 환경에서 각각 140 passed, 0 skipped. 합성 표본 입력·분석의 실제 MySQL 저장과 백엔드 프로세스 재시작 후 재조회, SQLite→MySQL 마이그레이션 및 오류 시 롤백이 통과했다. /ready에 DB 접근 검사도 추가했다. 운영 DB 데이터 이전·배포는 별도이며 프론트/분석 코드·보류 기능은 변경하지 않았다. 상세·한계는 MYSQL.md 후속 기록 참조.
+
 ## 2026-10-19 다른 장소 팀 테스트 연결
 
 | 항목 | 상태 | 담당·산출물 | 남은 조건 |

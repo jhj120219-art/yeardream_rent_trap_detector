@@ -1,5 +1,7 @@
 # MySQL 8.x 전환 및 영속성 검증
 
+> **최신 검증 결과:** 2026-10-19 개인 GitHub CI에서 실제 MySQL 8.0·8.4 환경 각각 **140 passed, 0 skipped**. 아래 이전 실행의 “MySQL 미검증”은 후속 CI로 해소했다. 운영 DB 이전·운영 서버 배포는 수행하지 않았다.
+
 ## 설정
 
 신규 서버는 `DATABASE_URL`이 필요하다. 설정이 없으면 임의의 빈 SQLite DB로 시작하지 않는다. `mysql://`와 `mysql+pymysql://`를 지원한다. 명시적 `BACKEND_DB_PATH`는 기존 SQLite/테스트용이며 두 값이 있으면 DATABASE_URL이 우선한다. MySQL 접속 실패 시 SQLite로 대체하지 않는다.
@@ -82,3 +84,19 @@ MYSQL_TEST_DATABASE_URL이 없으면 실제 MySQL 테스트는 skip되며 MySQL 
 `/health`는 기존 프로세스 상태 응답을 유지한다. `/ready`는 매번 새로운 연결로 sessions/objects/object_links 테이블을 읽고, DB 연결/스키마 접근 실패 시 내부 호스트·경로·자격증명 없이 503을 반환한다. MySQL 준비 상태 연결/읽기/쓰기 timeout은 각각 2초다. 저장소가 복구되면 다음 요청에서 다시 검사하므로 프로세스 재시작 없이 정상으로 돌아올 수 있다. 데이터 미연결 503과 정상 `{"status":"ready"}` 계약을 유지한다. 이 읽기 검사는 INSERT 권한이나 디스크 쓰기 여유까지 검증하는 쓰기 시험이 아니다.
 
 로컬 검증: 137 passed, 3 skipped, 기존 경고 1건(9.71초). 스키마 장애 후 복구, 연결 오류 비밀정보 미노출, MySQL probe timeout을 추가 검사했다. URL 없이 `--require-mysql` 실행 시 의도대로 exit 4로 차단했다. 로컬 실제 MySQL은 여전히 미연결이며 원격 CI 실행 결과는 별도로 기록한다.
+
+
+## 실제 MySQL 통합 검증 완료 — 2026-10-19
+
+검증 코드 commit: `371ed2adbf1ef12bc5f084da540a468f6e3a6ddf`. [GitHub Actions 실행 39270463052](https://github.com/jhj120219-art/yeardream_rent_trap_detector/actions/runs/39270463052)의 두 job 모두 최종 success를 확인했다.
+
+| CI 서비스 | 전체 백엔드 테스트 | skip | 실행 시간 |
+|---|---:|---:|---:|
+| MySQL 8.0 | 140 passed | 0 | 15.59초 |
+| MySQL 8.4 | 140 passed | 0 | 14.84초 |
+
+Ubuntu runner, Python 3.12.15, 격리된 일회성 rent_test DB와 합성 표본을 사용했다. 각 환경의 전체 백엔드 140개 중 MySQL 대상 테스트 3개가 실제 접속으로 실행됐으며 나머지는 기존 SQLite 회귀 및 어댑터/준비 상태 검사다. 기존 도구 deprecation 경고 각 1건.
+
+실제 MySQL에서 확인한 범위: DDL·인증·utf8mb4 입력, HTTP 매물 등록/조회, 분석 결과 별도 저장, 백엔드 프로세스 종료 후 새 프로세스에서 동일 세션으로 매물/분석 재조회, 타 세션 격리, 매물 삭제 시 분석 cascade, SQLite→MySQL 전체 값·세션 해시·링크 보존, 비어 있지 않은 대상 거부, 잘못된 링크에서 전체 INSERT 롤백. 정상 /ready도 두 서버 프로세스에서 확인했다. MySQL 서버 자체 재시작/장애복구·운영 DB 백업 복구·실제 고객 데이터 이전·실제 가격 정확도 검증은 별도다.
+
+따라서 이전 commit의 “MySQL 서버/자격증명 부재로 통합 검증 미완료”는 **테스트용 CI 환경에서 해소**됐다. 이 PC에 MySQL을 설치하거나 운영 설정·데이터를 바꾸지는 않았다. 프론트와 원본 분석 코드 변경 없이 수행했다.
