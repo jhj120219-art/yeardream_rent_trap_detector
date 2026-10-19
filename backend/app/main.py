@@ -13,6 +13,7 @@ from .maintenance import Evidence, compare as compare_maintenance
 from .maintenance import load_public_cases
 from .report import build_report
 from .input_review import listing_draft
+from .utility_estimate import UtilityScenario, estimate as estimate_utilities, catalog as utility_catalog
 
 
 def create_app(settings=None, pool=None, extractor=None):
@@ -139,7 +140,10 @@ def create_app(settings=None, pool=None, extractor=None):
         obj=find(listing_id,sid,'listing')
         analyses=app.state.store.children(listing_id,sid,'analysis',limit=1)['items']
         evidence=app.state.store.children(listing_id,sid,'maintenance_evidence',evidence_limit,evidence_offset)
-        return build_report(obj,analyses[0] if analyses else None,evidence,app.state.data_status)
+        estimates=app.state.store.children(listing_id,sid,'utility_estimate',limit=1)['items']
+        report=build_report(obj,analyses[0] if analyses else None,evidence,app.state.data_status)
+        report['utility_estimate']=estimates[0] if estimates else None
+        return report
 
     @app.delete('/listings/{listing_id}',status_code=204)
     def delete_listing(listing_id: str,sid=Depends(owner)):
@@ -189,6 +193,28 @@ def create_app(settings=None, pool=None, extractor=None):
     @app.get('/maintenance/reference-cases')
     def maintenance_cases():
         return load_public_cases()
+
+    @app.get('/utilities/reference-catalog')
+    def get_utility_catalog():
+        return utility_catalog()
+
+    @app.post('/listings/{listing_id}/utility-estimates',status_code=201)
+    def utility_estimate(listing_id: str, body: UtilityScenario,sid=Depends(owner)):
+        obj=find(listing_id,sid,'listing')
+        return app.state.store.create(sid,'utility_estimate',{
+            'listing_id':listing_id,'scenario':body.model_dump(mode='json'),
+            'result':estimate_utilities(obj,body),
+        },parent=listing_id)
+
+    @app.get('/utility-estimates/{estimate_id}')
+    def get_utility_estimate(estimate_id: str,sid=Depends(owner)):
+        return find(estimate_id,sid,'utility_estimate')
+
+    @app.delete('/utility-estimates/{estimate_id}',status_code=204)
+    def delete_utility_estimate(estimate_id: str,sid=Depends(owner)):
+        find(estimate_id,sid,'utility_estimate')
+        app.state.store.delete(estimate_id,sid,'utility_estimate')
+        return Response(status_code=204)
 
     @app.post('/listings/{listing_id}/maintenance-evidence',status_code=201)
     def maintenance_evidence(listing_id: str, body: Evidence, sid=Depends(owner)):

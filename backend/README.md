@@ -1,5 +1,42 @@
 # 월세 비교 백엔드 — 기존 분석 코드 연동
 
+## 공과금 참고 견적 연결 — 2026-10-19
+
+월세 분석 결과와 별도로 `POST /listings/{id}/utility-estimates`에서 참고 견적을 저장한다. 기존 Bearer 세션을 사용한다. `GET /utility-estimates/{id}` / `DELETE /utility-estimates/{id}`로 조회·삭제하며 매물/세션 삭제 시 함께 삭제된다. `GET /listings/{id}/report`의 `utility_estimate`에는 마지막 저장 견적이 포함된다(없으면 null). `utility_costs`는 광고 포함 여부, `utility_estimate`는 사용자가 조건을 선택해 생성한 견적 스냅샷이다. GET 요청만으로 계산·저장·유료 외부 호출하지 않는다.
+
+`GET /utilities/reference-catalog`에서 지원 조건·공개 통계 프로필·출처를 확인한다. 현재 버전은 2026년10~12월의 비하계 참고 시나리오만 지원한다. 기초 전기요금표는2024-07-01, 기후9원/kWh·연료5원/kWh·부가세10%·기금2.7% 가정이며 실제 청구서 인증 계산기가 아니다. 가스는 서울도시가스 서울지역2026-10-01 요금표를 사용한다. 요금 갱신을 자동 수행하지 않으므로 지원기간 밖 요청은422이며 새 적용분 검토·버전 갱신이 필요하다.
+
+등록 예시:
+
+```json
+{
+  "scenario_month": "2026-10",
+  "acknowledge_reference_limits": true,
+  "use_public_reference": true,
+  "electricity_contract": "LOW_VOLTAGE",
+  "gas_supplier": "SEOUL_CITY_GAS_SEOUL",
+  "household_size": 1,
+  "water_individual_meter": true,
+  "water_meter_mm": 15,
+  "internet_plan": "KT_SLIM_100M_3Y"
+}
+```
+
+사용자는 과거 통계/요금 가정임을 확인하고 전기 계약·가스 공급사·수도 계량기 조건을 실제에 맞게 선택해야 한다. `acknowledge_reference_limits`나 매물 사용자 확인이 없으면 숫자를 생성하지 않는다. `use_public_reference` 기본false. 직접 사용량을 아는 경우 `electricity_kwh`(월kWh,0~1000), `gas_mj`(월열량MJ), `water_m3`(월㎥)를 지정하면 통계보다 우선한다. m³ 가스 검침량을 MJ 입력칸에 넣지 않는다. 월세/관리비 입력은 기존대로 만원이며 이 견적의 금액 응답 필드는 이름대로 **원**이다.
+
+| 항목 | 사용 근거·필요 조건 |
+| --- | --- |
+| 전기 | 서울 아파트 또는 다세대/연립/기타의2023년 연간kWh÷12. 비하계 저압 확인 필요. 직접 사용량은 유형 통계가 없어도 가능 |
+| 가스 | 같은 표의 연Mcal×4.1868÷12를 월MJ로 환산. 서울도시가스 서울권역 확인 필요. 겨울 예측 아님 |
+| 수도 | 서울1인세대2021년 일264L×30일=7.92㎥. 다른 가구원 수는 현재 통계 자동적용 안 함. 직접사용량 가능. 개별15mm미확인이면 변동요금 부분만 제공하고 총액 보류 |
+| 인터넷 | KT100M슬림3년약정 표준월요금22000원 예시. 상품 명시 선택 필요. 단체계약/할인/공유기/설치비 제외 |
+
+아파트 프로필을 빌라로, 다세대/연립/기타 프로필을 오피스텔로 치환하지 않는다. 현재 프로필은 서울 시도 단위이며 동별·평당·현재 개별 평균이 아니다. 면적/동주소를 변경해도 같은 광역 프로필은 동일하다는 한계를 표시해야 한다. 원본통계ZIP 없이도 사실 요약값·출처가 코드에 있어 다른 PC에서 참고 계산을 재현할 수 있다. 실거래 데이터 준비는 기존대로 별도다.
+
+`items[].state`: ESTIMATED, INCLUDED_IN_MAINTENANCE, INPUT_REQUIRED, NO_MATCHED_REFERENCE, UNSUPPORTED_REGION, PARTIAL_ONLY, NEEDS_REVIEW. `estimated_monthly_won`은 참고 계산액, `additional_to_maintenance_won`은 별도 부담으로 확인된 추가액이다. 포함이면 추가액0(실제 사용료0원이라는 뜻이 아님), 미기재면 참고액이 있어도 추가액null. 모든 항목의 추가액과 입력 월세/관리비가 확인됐을 때만 `scenario_monthly_subtotal_won`을 제공한다. 주차·일회성 비용은 제외하므로 전체 생활비라고 표시하지 않는다.
+
+프론트용 실제 API 출력 예시: `backend/examples/utility_estimates.json`(가상 입력, 정확도 검증 아님). 빌라 참고 계산, 오피스텔 통계 없음, 수도 포함 여부 미상, 사용자 확인 필요의4종이다. 출처·통계연도·조건·계산식·보류사유를 함께 표시하고 월세 가격 막대/판정과 합치지 않는다.
+
 ## 전체 통합 담당자 전달 사항 — 2026-10-19
 
 프론트 연결 순서: `/sessions` → `/addresses/search` 또는 `/extractions` → `/extractions/{id}/listing-draft` → 확인·수정한 `draft`로 `/listings` → `/listings/{id}/analyses` → `/listings/{id}/report`. 모든 개인 자료 API에 같은 Bearer 세션을 사용한다. 주소는 검색 후보를 사용자가 선택한 뒤 코드를 폼에 복사한다. 이미지 초안의 주소 코드·호수·기준일은 임의 추정하지 않는다. 주소/이미지 키 없이도 직접 입력은 가능하다.

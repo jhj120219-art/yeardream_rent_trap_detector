@@ -1,0 +1,619 @@
+{
+  "synthetic_inputs_only": true,
+  "not_accuracy_validation": true,
+  "examples": {
+    "villa_reference": {
+      "synthetic_listing": {
+        "schema_version": "1.1",
+        "listing": {
+          "district_code": "11620",
+          "legal_dong_code": "1162010100",
+          "building_type": "MULTI_UNIT",
+          "area_m2": 59.9,
+          "area_basis": "EXCLUSIVE",
+          "deposit_10k_krw": 5000,
+          "rent_10k_krw": 80,
+          "built_year": 2005,
+          "floor": 5,
+          "floor_type": "GROUND",
+          "floor_source": "USER_CONFIRMED",
+          "as_of": "2026-10-01",
+          "address_text": "테스트 주소",
+          "unit_ho": "501"
+        },
+        "options": {
+          "maintenance_10k_krw": 7,
+          "electricity_in_maintenance": "SEPARATE_CHARGE",
+          "gas_in_maintenance": "SEPARATE_CHARGE",
+          "water_in_maintenance": "SEPARATE_CHARGE",
+          "internet_status": "SEPARATE_CHARGE"
+        },
+        "confirmation": {
+          "user_confirmed": true,
+          "input_source": "ADDRESS_MANUAL",
+          "confirmed_fields": [
+            "floor"
+          ]
+        }
+      },
+      "scenario_request": {
+        "scenario_month": "2026-10",
+        "acknowledge_reference_limits": true,
+        "use_public_reference": true,
+        "electricity_contract": "LOW_VOLTAGE",
+        "gas_supplier": "SEOUL_CITY_GAS_SEOUL",
+        "household_size": 1,
+        "water_individual_meter": true,
+        "water_meter_mm": 15,
+        "internet_plan": "KT_SLIM_100M_3Y"
+      },
+      "result": {
+        "version": "public-reference-scenario-1",
+        "scenario_month": "2026-10",
+        "state": "ESTIMATED",
+        "items": [
+          {
+            "item": "ELECTRICITY",
+            "inclusion": "SEPARATE_CHARGE",
+            "state": "ESTIMATED",
+            "reasons": [
+              "HISTORICAL_AGGREGATE_NOT_INDIVIDUAL_PREDICTION"
+            ],
+            "estimated_monthly_won": 41793,
+            "additional_to_maintenance_won": 41793,
+            "usage": {
+              "quantity": 237.983333,
+              "unit": "kWh"
+            },
+            "source": {
+              "type": "PUBLIC_STATISTICS",
+              "url": "https://kesis.keei.re.kr/board.es?mid=a10202030100&bid=0009",
+              "year": 2023,
+              "scope": "서울 다세대/연립/기타",
+              "sheet": "가. 주택종류별",
+              "cell": "F36",
+              "aggregation": "ANNUAL_DIVIDED_BY_12",
+              "area_specific": false,
+              "notice": "다세대/연립/기타는 빌라만의 표본이 아닙니다. 계절별·개별 예측값이 아닙니다."
+            },
+            "calculation": {
+              "base_won": 1600,
+              "energy_won": 32151.22,
+              "climate_won": 2141.85,
+              "fuel_won": 1189.92,
+              "vat_won": 3708.3,
+              "fund_won": 1001.24,
+              "rates": {
+                "climate_per_kwh": 9,
+                "fuel_per_kwh": 5,
+                "vat_pct": 10,
+                "fund_pct": 2.7
+              },
+              "formula": "(기본 + 구간별 전력량 + kWh×9 + kWh×5) × (1+0.10+0.027)",
+              "notice": "비하계 저압, 할인·검침 안분·원단위 절사 제외. 요금 가정을 적용한 참고값입니다.",
+              "tariff_url": "https://www.data.go.kr/data/15104442/fileData.do",
+              "tariff_table_date": "2024-07-01",
+              "fuel_url": "https://www.kepco.co.kr/home/media/newsroom/notice/boardView.do?boardMngNo=14&boardNo=2759"
+            }
+          },
+          {
+            "item": "GAS",
+            "inclusion": "SEPARATE_CHARGE",
+            "state": "ESTIMATED",
+            "reasons": [
+              "HISTORICAL_AGGREGATE_NOT_INDIVIDUAL_PREDICTION"
+            ],
+            "estimated_monthly_won": 57786,
+            "additional_to_maintenance_won": 57786,
+            "usage": {
+              "quantity": 2276.50272,
+              "unit": "MJ"
+            },
+            "source": {
+              "type": "PUBLIC_STATISTICS",
+              "url": "https://kesis.keei.re.kr/board.es?mid=a10202030100&bid=0009",
+              "year": 2023,
+              "scope": "서울 다세대/연립/기타",
+              "sheet": "가. 주택종류별",
+              "cell": "F53",
+              "aggregation": "ANNUAL_DIVIDED_BY_12",
+              "area_specific": false,
+              "notice": "다세대/연립/기타는 빌라만의 표본이 아닙니다. 계절별·개별 예측값이 아닙니다."
+            },
+            "calculation": {
+              "unit_won_per_mj": 22.5268,
+              "base_won": 1250,
+              "vat_pct": 10,
+              "formula": "(MJ×22.5268 + 1250)×1.1",
+              "tariff_url": "https://www.seoulgas.co.kr/mobile/payment/gasPayTable",
+              "tariff_date": "2026-10-01",
+              "notice": "할인·정산·교체비 제외. 입력열량 또는 통계열량 사용, 검침량을 임의로 MJ로 변환하지 않습니다."
+            }
+          },
+          {
+            "item": "WATER",
+            "inclusion": "SEPARATE_CHARGE",
+            "state": "ESTIMATED",
+            "reasons": [
+              "HISTORICAL_AGGREGATE_NOT_INDIVIDUAL_PREDICTION"
+            ],
+            "estimated_monthly_won": 10822,
+            "additional_to_maintenance_won": 10822,
+            "usage": {
+              "quantity": 7.92,
+              "unit": "m3"
+            },
+            "source": {
+              "type": "PUBLIC_STATISTICS",
+              "url": "https://arisu.seoul.go.kr/home/sub?dsn=1704067300-000-692&menukey=7205&mode=view",
+              "year": 2021,
+              "scope": "서울 1인 세대",
+              "daily_litres": 264,
+              "days_assumed": 30,
+              "housing_specific": false
+            },
+            "calculation": {
+              "variable_won": 9742,
+              "water_per_m3": 580,
+              "sewer_per_m3": 480,
+              "fund_per_m3": 170,
+              "tariff_url": "https://i121.seoul.go.kr/cs/cyber/front/cgcalc/NR_cgCalcGeneralPurpose.do",
+              "sewer_tariff_year": 2026,
+              "formula": "m3×(580+480+170) + 계량기 기본요금",
+              "meter_base_won": 1080
+            }
+          },
+          {
+            "item": "INTERNET",
+            "inclusion": "SEPARATE_CHARGE",
+            "state": "ESTIMATED",
+            "reasons": [],
+            "estimated_monthly_won": 22000,
+            "additional_to_maintenance_won": 22000,
+            "usage": null,
+            "source": {
+              "type": "PUBLIC_PLAN",
+              "url": "https://product.kt.com/wDic/index.do?CateCode=6005&FilterCode=118",
+              "plan": "KT_SLIM_100M_3Y"
+            },
+            "calculation": {
+              "monthly_won": 22000,
+              "formula": "공개 상품 월요금",
+              "notice": "3년 약정 표준요금 예시. 설치·공유기·결합/온라인 할인·건물단체계약 제외. 설치 가능 여부를 확인한 결과는 아닙니다."
+            }
+          }
+        ],
+        "quoted_rent_and_maintenance_won": 870000,
+        "additional_utilities_won": 132401,
+        "scenario_monthly_subtotal_won": 1002401,
+        "notice": "요금 가정을 적용한 참고 견적이며 실제 평균 청구액·동네 시세·평당 관리비가 아닙니다. 주차·일회성 비용 등은 제외됩니다."
+      }
+    },
+    "officetel_no_profile": {
+      "synthetic_listing": {
+        "schema_version": "1.1",
+        "listing": {
+          "district_code": "11620",
+          "legal_dong_code": "1162010100",
+          "building_type": "OFFICETEL",
+          "area_m2": 59.9,
+          "area_basis": "EXCLUSIVE",
+          "deposit_10k_krw": 5000,
+          "rent_10k_krw": 80,
+          "built_year": 2005,
+          "floor": 5,
+          "floor_type": "GROUND",
+          "floor_source": "USER_CONFIRMED",
+          "as_of": "2026-10-01",
+          "address_text": "테스트 주소",
+          "unit_ho": "501"
+        },
+        "options": {
+          "maintenance_10k_krw": 7,
+          "electricity_in_maintenance": "SEPARATE_CHARGE",
+          "gas_in_maintenance": "SEPARATE_CHARGE",
+          "water_in_maintenance": "SEPARATE_CHARGE",
+          "internet_status": "SEPARATE_CHARGE"
+        },
+        "confirmation": {
+          "user_confirmed": true,
+          "input_source": "ADDRESS_MANUAL",
+          "confirmed_fields": [
+            "floor"
+          ]
+        }
+      },
+      "scenario_request": {
+        "scenario_month": "2026-10",
+        "acknowledge_reference_limits": true,
+        "use_public_reference": true,
+        "electricity_contract": "LOW_VOLTAGE",
+        "gas_supplier": "SEOUL_CITY_GAS_SEOUL",
+        "household_size": 1,
+        "water_individual_meter": true,
+        "water_meter_mm": 15,
+        "internet_plan": "KT_SLIM_100M_3Y"
+      },
+      "result": {
+        "version": "public-reference-scenario-1",
+        "scenario_month": "2026-10",
+        "state": "PARTIAL",
+        "items": [
+          {
+            "item": "ELECTRICITY",
+            "inclusion": "SEPARATE_CHARGE",
+            "state": "NO_MATCHED_REFERENCE",
+            "reasons": [
+              "NO_SUPPORTED_CITY_AND_HOUSING_PROFILE"
+            ],
+            "estimated_monthly_won": null,
+            "additional_to_maintenance_won": null,
+            "usage": null,
+            "source": null,
+            "calculation": null
+          },
+          {
+            "item": "GAS",
+            "inclusion": "SEPARATE_CHARGE",
+            "state": "NO_MATCHED_REFERENCE",
+            "reasons": [
+              "NO_SUPPORTED_CITY_AND_HOUSING_PROFILE"
+            ],
+            "estimated_monthly_won": null,
+            "additional_to_maintenance_won": null,
+            "usage": null,
+            "source": null,
+            "calculation": null
+          },
+          {
+            "item": "WATER",
+            "inclusion": "SEPARATE_CHARGE",
+            "state": "ESTIMATED",
+            "reasons": [
+              "HISTORICAL_AGGREGATE_NOT_INDIVIDUAL_PREDICTION"
+            ],
+            "estimated_monthly_won": 10822,
+            "additional_to_maintenance_won": 10822,
+            "usage": {
+              "quantity": 7.92,
+              "unit": "m3"
+            },
+            "source": {
+              "type": "PUBLIC_STATISTICS",
+              "url": "https://arisu.seoul.go.kr/home/sub?dsn=1704067300-000-692&menukey=7205&mode=view",
+              "year": 2021,
+              "scope": "서울 1인 세대",
+              "daily_litres": 264,
+              "days_assumed": 30,
+              "housing_specific": false
+            },
+            "calculation": {
+              "variable_won": 9742,
+              "water_per_m3": 580,
+              "sewer_per_m3": 480,
+              "fund_per_m3": 170,
+              "tariff_url": "https://i121.seoul.go.kr/cs/cyber/front/cgcalc/NR_cgCalcGeneralPurpose.do",
+              "sewer_tariff_year": 2026,
+              "formula": "m3×(580+480+170) + 계량기 기본요금",
+              "meter_base_won": 1080
+            }
+          },
+          {
+            "item": "INTERNET",
+            "inclusion": "SEPARATE_CHARGE",
+            "state": "ESTIMATED",
+            "reasons": [],
+            "estimated_monthly_won": 22000,
+            "additional_to_maintenance_won": 22000,
+            "usage": null,
+            "source": {
+              "type": "PUBLIC_PLAN",
+              "url": "https://product.kt.com/wDic/index.do?CateCode=6005&FilterCode=118",
+              "plan": "KT_SLIM_100M_3Y"
+            },
+            "calculation": {
+              "monthly_won": 22000,
+              "formula": "공개 상품 월요금",
+              "notice": "3년 약정 표준요금 예시. 설치·공유기·결합/온라인 할인·건물단체계약 제외. 설치 가능 여부를 확인한 결과는 아닙니다."
+            }
+          }
+        ],
+        "quoted_rent_and_maintenance_won": 870000,
+        "additional_utilities_won": null,
+        "scenario_monthly_subtotal_won": null,
+        "notice": "요금 가정을 적용한 참고 견적이며 실제 평균 청구액·동네 시세·평당 관리비가 아닙니다. 주차·일회성 비용 등은 제외됩니다."
+      }
+    },
+    "unknown_water_inclusion": {
+      "synthetic_listing": {
+        "schema_version": "1.1",
+        "listing": {
+          "district_code": "11620",
+          "legal_dong_code": "1162010100",
+          "building_type": "MULTI_UNIT",
+          "area_m2": 59.9,
+          "area_basis": "EXCLUSIVE",
+          "deposit_10k_krw": 5000,
+          "rent_10k_krw": 80,
+          "built_year": 2005,
+          "floor": 5,
+          "floor_type": "GROUND",
+          "floor_source": "USER_CONFIRMED",
+          "as_of": "2026-10-01",
+          "address_text": "테스트 주소",
+          "unit_ho": "501"
+        },
+        "options": {
+          "maintenance_10k_krw": 7,
+          "electricity_in_maintenance": "SEPARATE_CHARGE",
+          "gas_in_maintenance": "SEPARATE_CHARGE",
+          "water_in_maintenance": "UNKNOWN",
+          "internet_status": "INCLUDED"
+        },
+        "confirmation": {
+          "user_confirmed": true,
+          "input_source": "ADDRESS_MANUAL",
+          "confirmed_fields": [
+            "floor"
+          ]
+        }
+      },
+      "scenario_request": {
+        "scenario_month": "2026-10",
+        "acknowledge_reference_limits": true,
+        "use_public_reference": true,
+        "electricity_contract": "LOW_VOLTAGE",
+        "gas_supplier": "SEOUL_CITY_GAS_SEOUL",
+        "household_size": 1,
+        "water_individual_meter": true,
+        "water_meter_mm": 15,
+        "internet_plan": "KT_SLIM_100M_3Y"
+      },
+      "result": {
+        "version": "public-reference-scenario-1",
+        "scenario_month": "2026-10",
+        "state": "PARTIAL",
+        "items": [
+          {
+            "item": "ELECTRICITY",
+            "inclusion": "SEPARATE_CHARGE",
+            "state": "ESTIMATED",
+            "reasons": [
+              "HISTORICAL_AGGREGATE_NOT_INDIVIDUAL_PREDICTION"
+            ],
+            "estimated_monthly_won": 41793,
+            "additional_to_maintenance_won": 41793,
+            "usage": {
+              "quantity": 237.983333,
+              "unit": "kWh"
+            },
+            "source": {
+              "type": "PUBLIC_STATISTICS",
+              "url": "https://kesis.keei.re.kr/board.es?mid=a10202030100&bid=0009",
+              "year": 2023,
+              "scope": "서울 다세대/연립/기타",
+              "sheet": "가. 주택종류별",
+              "cell": "F36",
+              "aggregation": "ANNUAL_DIVIDED_BY_12",
+              "area_specific": false,
+              "notice": "다세대/연립/기타는 빌라만의 표본이 아닙니다. 계절별·개별 예측값이 아닙니다."
+            },
+            "calculation": {
+              "base_won": 1600,
+              "energy_won": 32151.22,
+              "climate_won": 2141.85,
+              "fuel_won": 1189.92,
+              "vat_won": 3708.3,
+              "fund_won": 1001.24,
+              "rates": {
+                "climate_per_kwh": 9,
+                "fuel_per_kwh": 5,
+                "vat_pct": 10,
+                "fund_pct": 2.7
+              },
+              "formula": "(기본 + 구간별 전력량 + kWh×9 + kWh×5) × (1+0.10+0.027)",
+              "notice": "비하계 저압, 할인·검침 안분·원단위 절사 제외. 요금 가정을 적용한 참고값입니다.",
+              "tariff_url": "https://www.data.go.kr/data/15104442/fileData.do",
+              "tariff_table_date": "2024-07-01",
+              "fuel_url": "https://www.kepco.co.kr/home/media/newsroom/notice/boardView.do?boardMngNo=14&boardNo=2759"
+            }
+          },
+          {
+            "item": "GAS",
+            "inclusion": "SEPARATE_CHARGE",
+            "state": "ESTIMATED",
+            "reasons": [
+              "HISTORICAL_AGGREGATE_NOT_INDIVIDUAL_PREDICTION"
+            ],
+            "estimated_monthly_won": 57786,
+            "additional_to_maintenance_won": 57786,
+            "usage": {
+              "quantity": 2276.50272,
+              "unit": "MJ"
+            },
+            "source": {
+              "type": "PUBLIC_STATISTICS",
+              "url": "https://kesis.keei.re.kr/board.es?mid=a10202030100&bid=0009",
+              "year": 2023,
+              "scope": "서울 다세대/연립/기타",
+              "sheet": "가. 주택종류별",
+              "cell": "F53",
+              "aggregation": "ANNUAL_DIVIDED_BY_12",
+              "area_specific": false,
+              "notice": "다세대/연립/기타는 빌라만의 표본이 아닙니다. 계절별·개별 예측값이 아닙니다."
+            },
+            "calculation": {
+              "unit_won_per_mj": 22.5268,
+              "base_won": 1250,
+              "vat_pct": 10,
+              "formula": "(MJ×22.5268 + 1250)×1.1",
+              "tariff_url": "https://www.seoulgas.co.kr/mobile/payment/gasPayTable",
+              "tariff_date": "2026-10-01",
+              "notice": "할인·정산·교체비 제외. 입력열량 또는 통계열량 사용, 검침량을 임의로 MJ로 변환하지 않습니다."
+            }
+          },
+          {
+            "item": "WATER",
+            "inclusion": "UNKNOWN",
+            "state": "ESTIMATED",
+            "reasons": [
+              "INCLUSION_UNKNOWN_NOT_ADDED",
+              "HISTORICAL_AGGREGATE_NOT_INDIVIDUAL_PREDICTION"
+            ],
+            "estimated_monthly_won": 10822,
+            "additional_to_maintenance_won": null,
+            "usage": {
+              "quantity": 7.92,
+              "unit": "m3"
+            },
+            "source": {
+              "type": "PUBLIC_STATISTICS",
+              "url": "https://arisu.seoul.go.kr/home/sub?dsn=1704067300-000-692&menukey=7205&mode=view",
+              "year": 2021,
+              "scope": "서울 1인 세대",
+              "daily_litres": 264,
+              "days_assumed": 30,
+              "housing_specific": false
+            },
+            "calculation": {
+              "variable_won": 9742,
+              "water_per_m3": 580,
+              "sewer_per_m3": 480,
+              "fund_per_m3": 170,
+              "tariff_url": "https://i121.seoul.go.kr/cs/cyber/front/cgcalc/NR_cgCalcGeneralPurpose.do",
+              "sewer_tariff_year": 2026,
+              "formula": "m3×(580+480+170) + 계량기 기본요금",
+              "meter_base_won": 1080
+            }
+          },
+          {
+            "item": "INTERNET",
+            "inclusion": "INCLUDED",
+            "state": "INCLUDED_IN_MAINTENANCE",
+            "reasons": [
+              "INCLUDED_NOT_FREE_USAGE"
+            ],
+            "estimated_monthly_won": null,
+            "additional_to_maintenance_won": 0,
+            "usage": null,
+            "source": null,
+            "calculation": null
+          }
+        ],
+        "quoted_rent_and_maintenance_won": 870000,
+        "additional_utilities_won": null,
+        "scenario_monthly_subtotal_won": null,
+        "notice": "요금 가정을 적용한 참고 견적이며 실제 평균 청구액·동네 시세·평당 관리비가 아닙니다. 주차·일회성 비용 등은 제외됩니다."
+      }
+    },
+    "review_required": {
+      "synthetic_listing": {
+        "schema_version": "1.1",
+        "listing": {
+          "district_code": "11620",
+          "legal_dong_code": "1162010100",
+          "building_type": "MULTI_UNIT",
+          "area_m2": 59.9,
+          "area_basis": "EXCLUSIVE",
+          "deposit_10k_krw": 5000,
+          "rent_10k_krw": 80,
+          "built_year": 2005,
+          "floor": 5,
+          "floor_type": "GROUND",
+          "floor_source": "USER_CONFIRMED",
+          "as_of": "2026-10-01",
+          "address_text": "테스트 주소",
+          "unit_ho": "501"
+        },
+        "options": {
+          "maintenance_10k_krw": 7,
+          "electricity_in_maintenance": "SEPARATE_CHARGE",
+          "gas_in_maintenance": "SEPARATE_CHARGE",
+          "water_in_maintenance": "SEPARATE_CHARGE",
+          "internet_status": "SEPARATE_CHARGE"
+        },
+        "confirmation": {
+          "user_confirmed": true,
+          "input_source": "ADDRESS_MANUAL",
+          "confirmed_fields": [
+            "floor"
+          ]
+        }
+      },
+      "scenario_request": {
+        "scenario_month": "2026-10",
+        "acknowledge_reference_limits": false,
+        "use_public_reference": true,
+        "electricity_contract": "LOW_VOLTAGE",
+        "gas_supplier": "SEOUL_CITY_GAS_SEOUL",
+        "household_size": 1,
+        "water_individual_meter": true,
+        "water_meter_mm": 15,
+        "internet_plan": "KT_SLIM_100M_3Y"
+      },
+      "result": {
+        "version": "public-reference-scenario-1",
+        "scenario_month": "2026-10",
+        "state": "NEEDS_REVIEW",
+        "items": [
+          {
+            "item": "ELECTRICITY",
+            "inclusion": "SEPARATE_CHARGE",
+            "state": "NEEDS_REVIEW",
+            "reasons": [
+              "CONFIRMED_VALID_LISTING_AND_SCENARIO_ACKNOWLEDGEMENT_REQUIRED"
+            ],
+            "estimated_monthly_won": null,
+            "additional_to_maintenance_won": null,
+            "usage": null,
+            "source": null,
+            "calculation": null
+          },
+          {
+            "item": "GAS",
+            "inclusion": "SEPARATE_CHARGE",
+            "state": "NEEDS_REVIEW",
+            "reasons": [
+              "CONFIRMED_VALID_LISTING_AND_SCENARIO_ACKNOWLEDGEMENT_REQUIRED"
+            ],
+            "estimated_monthly_won": null,
+            "additional_to_maintenance_won": null,
+            "usage": null,
+            "source": null,
+            "calculation": null
+          },
+          {
+            "item": "WATER",
+            "inclusion": "SEPARATE_CHARGE",
+            "state": "NEEDS_REVIEW",
+            "reasons": [
+              "CONFIRMED_VALID_LISTING_AND_SCENARIO_ACKNOWLEDGEMENT_REQUIRED"
+            ],
+            "estimated_monthly_won": null,
+            "additional_to_maintenance_won": null,
+            "usage": null,
+            "source": null,
+            "calculation": null
+          },
+          {
+            "item": "INTERNET",
+            "inclusion": "SEPARATE_CHARGE",
+            "state": "NEEDS_REVIEW",
+            "reasons": [
+              "CONFIRMED_VALID_LISTING_AND_SCENARIO_ACKNOWLEDGEMENT_REQUIRED"
+            ],
+            "estimated_monthly_won": null,
+            "additional_to_maintenance_won": null,
+            "usage": null,
+            "source": null,
+            "calculation": null
+          }
+        ],
+        "quoted_rent_and_maintenance_won": null,
+        "additional_utilities_won": null,
+        "scenario_monthly_subtotal_won": null,
+        "notice": "요금 가정을 적용한 참고 견적이며 실제 평균 청구액·동네 시세·평당 관리비가 아닙니다. 주차·일회성 비용 등은 제외됩니다."
+      }
+    }
+  }
+}
