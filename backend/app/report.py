@@ -1,5 +1,6 @@
 """매물 전체 결과의 읽기 전용 조합. 분석 정책과 기존 API 응답은 변경하지 않는다."""
 import math
+from .cost_items import cost_items
 
 
 def money(value):
@@ -52,6 +53,7 @@ def build_report(listing, analysis, evidence, data_status):
         'maintenance':{'quoted_monthly_10k_krw':fee,'evidence':evidence,
                        'state':'EVIDENCE_RECORDED' if evidence['total'] else 'NO_EVIDENCE'},
         'options':{k:v for k,v in options.items() if k!='maintenance_10k_krw'},
+        'utility_costs':cost_items(options,confirmed),
         'monthly_cost':{'rent_10k_krw':rent,'maintenance_10k_krw':fee,
                         'quoted_subtotal_10k_krw':round(rent+fee,6) if not reasons else None,
                         'state':'QUOTED_SUBTOTAL' if not reasons else 'NEEDS_REVIEW',

@@ -12,6 +12,7 @@ from .address import search_address
 from .maintenance import Evidence, compare as compare_maintenance
 from .maintenance import load_public_cases
 from .report import build_report
+from .input_review import listing_draft
 
 
 def create_app(settings=None, pool=None, extractor=None):
@@ -174,6 +175,10 @@ def create_app(settings=None, pool=None, extractor=None):
     @app.get('/extractions/{extraction_id}')
     def get_extraction(extraction_id: str,sid=Depends(owner)):
         return find(extraction_id,sid,'extraction')
+
+    @app.get('/extractions/{extraction_id}/listing-draft')
+    def get_listing_draft(extraction_id: str,sid=Depends(owner)):
+        return listing_draft(find(extraction_id,sid,'extraction'))
 
     @app.delete('/extractions/{extraction_id}',status_code=204)
     def delete_extraction(extraction_id: str,sid=Depends(owner)):
