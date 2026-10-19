@@ -239,6 +239,25 @@ python -m backend.tests.smoke_server
 현재 Windows 실행 검증의 주요 버전은 Python 3.12.10, FastAPI 0.146.0, Starlette 1.9.0, Pydantic 2.14.1, pandas 2.3.3, NumPy 2.5.4, httpx 0.28.1입니다. requirements는 기존 허용 범위를 유지했습니다. Docker는 이 PC에서 도구 부재로 빌드하지 못했고 외부 배포는 하지 않았습니다.
 
 컨테이너의 /ready를 배포 대상의 readiness 경로로 연결하고 DB·정제 CSV는 영속 볼륨으로 보관합니다. 실거래 파일이 없으면 /health는 서버 생존 상태 200, /ready는 503입니다. CORS_ORIGINS에 실제 프론트 주소를 설정하고 HTTPS·자료 접근·백업/복원·운영 키를 배포 환경에서 검증해야 합니다. 현재 계정 인증·세션 만료·호출 비용 제한은 미구현이므로 팀 내부 MVP 범위로 구분합니다.
+# 매물 전체 결과 연결 (2026-10-19)
+
+전체 사용 순서: 세션 발급 → 주소 검색/직접 입력 또는 이미지 초안 추출 → 사용자 검토 → 매물 등록 → 기존 월세 분석 요청 → 관리비 근거 등록(선택) → 전체 결과 조회. 근거 자료가 없어도 월세 분석은 진행하며, 관리비 미입력을 0원으로 표시하지 않는다.
+
+`GET /listings/{listing_id}/report`는 자신의 매물 전체를 한 응답으로 반환한다. 읽기 전용으로 새 분석이나 외부 AI 호출을 발생시키지 않는다. 수정 매물은 기존 방식으로 새 등록 후 새 ID로 분석한다.
+
+| 결과 항목 | 내용 |
+| --- | --- |
+| property | 주소·동/호수·유형·면적·층 등 원입력, 확인 상태, 검증 결과, 이미지/이전 매물 연결 |
+| rent | 마지막으로 저장한 분석 결과 원문, 분석 ID/시간. 가격 범위·차액·차이율·표본 수·신뢰도·상태는 기존 계약 유지 |
+| maintenance | 입력 관리비와 해당 매물에 연결한 출처별 대조 자료. 지역 평균 아님 |
+| options | 관리비 총액을 제외한 기존 옵션 항목. 누락을 무료/제공으로 채우지 않음 |
+| monthly_cost | 확인된 입력 월세+관리비 소계. 공과금 등 추가 비용이 빠질 수 있어 총 생활비로 표현하지 않음 |
+| workflow | 현재 데이터 연결 상태와 필요한 다음 동작 |
+
+분석 전 `rent.state=NOT_ANALYZED`, 관리비 근거가 없으면 `maintenance.state=NO_EVIDENCE`. 사용자 미확인·잘못된 입력·금액 미상은 소계를 보류한다. 관리비 0원은 유효한 명시 입력이다. 분석 통계만 제공되는 현재 분석기의 한계를 숨기지 않도록 `comparable_transactions=null`, `comparable_transactions_state=NOT_PROVIDED_BY_ANALYSIS`를 제공한다.
+
+관리비 자료는 `evidence_limit`(기본20, 최대50), `evidence_offset`으로 페이징하며 `total/has_more`를 확인한다. `REVIEW_MAINTENANCE_EVIDENCE`는 조회한 페이지의 검토 필요 자료를 뜻하며 전체 페이지 검증 완료를 의미하지 않는다. `workflow.next_actions`는 REVIEW_LISTING/RUN_RENT_ANALYSIS/CONNECT_RENT_DATA/REVIEW_RENT_RESULT/ADD_MAINTENANCE_AMOUNT/ADD_MAINTENANCE_EVIDENCE/REVIEW_MAINTENANCE_EVIDENCE 중 필요한 동작을 반환한다. 프론트는 기존 분석 라벨·보류 사유를 함께 표시해야 한다.
+
 # 관리비 자료 대조 (2026-10-19)
 
 월세 분석과 별도 기능이다. 지역 평균·바가지 판정이 아니라 입력한 관리비와 출처에 적힌 금액을 대조한다. 광고는 실제 청구서가 아니다. 원본 사진·연락처를 저장하지 않는다. URL은 기록만 하며 서버가 임의 URL에 접속하지 않는다.

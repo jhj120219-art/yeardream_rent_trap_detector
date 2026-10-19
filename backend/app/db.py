@@ -95,6 +95,15 @@ class Store:
             return {'items':[self.public_object(db,row) for row in rows[:limit]],
                     'limit':limit, 'offset':offset, 'has_more':len(rows)>limit}
 
+    def children(self, parent, owner, kind, limit=20, offset=0):
+        with self.connect() as db:
+            total=db.execute('SELECT COUNT(*) FROM objects WHERE parent=? AND owner=? AND kind=?',
+                             (parent,owner,kind)).fetchone()[0]
+            rows = db.execute('SELECT * FROM objects WHERE parent=? AND owner=? AND kind=? ORDER BY created_at DESC,id DESC LIMIT ? OFFSET ?',
+                              (parent,owner,kind,limit+1,offset)).fetchall()
+            return {'items':[self.public_object(db,row) for row in rows[:limit]],
+                    'limit':limit,'offset':offset,'has_more':len(rows)>limit,'total':total}
+
     def delete(self, oid, owner, kind):
         with self.connect() as db:
             return db.execute("DELETE FROM objects WHERE id=? AND owner=? AND kind=?", (oid,owner,kind)).rowcount > 0

@@ -11,6 +11,7 @@ from .vision import extract_image
 from .address import search_address
 from .maintenance import Evidence, compare as compare_maintenance
 from .maintenance import load_public_cases
+from .report import build_report
 
 
 def create_app(settings=None, pool=None, extractor=None):
@@ -130,6 +131,14 @@ def create_app(settings=None, pool=None, extractor=None):
     @app.get('/listings/{listing_id}')
     def get_listing(listing_id: str,sid=Depends(owner)):
         return find(listing_id,sid,'listing')
+
+    @app.get('/listings/{listing_id}/report')
+    def listing_report(listing_id: str, evidence_limit: int=Query(default=20,ge=1,le=50),
+                       evidence_offset: int=Query(default=0,ge=0),sid=Depends(owner)):
+        obj=find(listing_id,sid,'listing')
+        analyses=app.state.store.children(listing_id,sid,'analysis',limit=1)['items']
+        evidence=app.state.store.children(listing_id,sid,'maintenance_evidence',evidence_limit,evidence_offset)
+        return build_report(obj,analyses[0] if analyses else None,evidence,app.state.data_status)
 
     @app.delete('/listings/{listing_id}',status_code=204)
     def delete_listing(listing_id: str,sid=Depends(owner)):

@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, HttpUrl, model_validator
 from fastapi import HTTPException
+from .report import money
 
 CASES_PATH = Path(__file__).resolve().parents[1] / 'data' / 'maintenance_public_cases.json'
 
@@ -44,7 +45,7 @@ class Evidence(BaseModel):
 
 
 def compare(listing, evidence):
-    quoted = listing['input'].get('options', {}).get('maintenance_10k_krw')
+    quoted = money(listing['input'].get('options', {}).get('maintenance_10k_krw'))
     reasons = []
     if not listing['input']['confirmation']['user_confirmed'] or not evidence['user_confirmed']:
         reasons.append('USER_CONFIRMATION_REQUIRED')
