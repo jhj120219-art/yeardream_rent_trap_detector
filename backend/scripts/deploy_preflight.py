@@ -69,6 +69,7 @@ def check_database(url, allow_private_network=False):
             cursor.execute("SHOW SESSION STATUS LIKE 'Ssl_cipher'")
             cipher = cursor.fetchone()
             tls = bool(cipher and cipher['Value'])
+            verified_tls = tls and options.get('ssl_verify_cert', False) and options.get('ssl_verify_identity', False)
             cursor.execute("SELECT TABLE_NAME AS name, ENGINE AS engine FROM information_schema.TABLES "
                            "WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME IN ('sessions','objects','object_links')")
             engines = {row['name']: row['engine'] for row in cursor.fetchall()}
@@ -77,8 +78,8 @@ def check_database(url, allow_private_network=False):
                 cursor.execute('SELECT ' + ','.join(columns) + ' FROM ' + table + ' LIMIT 0')
         return [result('database_connection', True, 'Connected using read-only checks.'),
                 result('mysql_version', mysql8, 'MySQL 8.x is required.'),
-                result('database_transport', tls or allow_private_network,
-                       'TLS required unless a trusted private network was explicitly selected.'),
+                result('database_transport', verified_tls or allow_private_network,
+                       'Certificate-verified TLS required unless a trusted private network was explicitly selected.'),
                 result('database_schema', schema_ok, 'All storage tables and columns must exist and use InnoDB.')]
     except (pymysql.MySQLError, OSError, ValueError, TypeError, KeyError):
         return [result('database_connection', False,
