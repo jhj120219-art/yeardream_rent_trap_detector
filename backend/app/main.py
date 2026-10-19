@@ -1,0 +1,153 @@
+from contextlib import asynccontextmanager
+from fastapi import Depends, FastAPI, File, Header, HTTPException, UploadFile, Query
+from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse, Response
+from .config import Settings
+from .db import Store
+from .schemas import ListingInput
+from . import analysis_service as service
+from .vision import extract_image
+from .address import search_address
+
+
+def create_app(settings=None, pool=None, extractor=None):
+    settings = settings or Settings()
+
+    @asynccontextmanager
+    async def lifespan(app):
+        app.state.store = Store(settings.db_path)
+        app.state.pool = pool
+        app.state.data_status = "READY" if pool is not None else "MISSING"
+        if pool is None and settings.clean_csv.is_file():
+            try:
+                app.state.pool = service.load_pool(settings.clean_csv)
+                app.state.data_status = "READY"
+            except (ValueError,KeyError,TypeError,OSError):
+                app.state.data_status = "INVALID"
+        yield
+
+    app = FastAPI(title="월세 비교 API",version="1.1.0",lifespan=lifespan)
+    app.add_middleware(CORSMiddleware,allow_origins=settings.cors_origins,allow_methods=["GET","POST","DELETE"],allow_headers=["Authorization","Content-Type"])
+
+    @app.exception_handler(RequestValidationError)
+    async def validation_error(request, exc):
+        # 입력값(주소 등)을 에러 응답에 재노출하지 않는다.
+        return JSONResponse(status_code=422, content={"detail":[{"loc":list(e['loc']),"msg":e['msg'],"type":e['type']} for e in exc.errors()]})
+
+    @app.middleware("http")
+    async def limit_body(request, call_next):
+        # chunked 업로드도 제한한다. 내부 상세 예외나 API 키를 응답으로 보내지 않는다.
+        size=0
+        chunks=[]
+        async for chunk in request.stream():
+            size+=len(chunk)
+            if size>9*1024*1024:
+                return JSONResponse(status_code=413,content={"detail":"요청은 9MB 이하로 보내 주세요."})
+            chunks.append(chunk)
+        request._body=b''.join(chunks)
+        response=await call_next(request)
+        response.headers['Cache-Control']='no-store'
+        return response
+
+    def owner(authorization: str | None = Header(default=None)):
+        if not authorization or not authorization.startswith('Bearer '):
+            raise HTTPException(401,"세션 토큰이 필요합니다.")
+        sid=app.state.store.owner(authorization[7:])
+        if not sid:
+            raise HTTPException(401,"유효하지 않은 세션입니다.")
+        return sid
+
+    def find(oid, sid, kind):
+        obj=app.state.store.get(oid,sid,kind)
+        if obj is None:
+            raise HTTPException(404,"자료를 찾을 수 없습니다.")
+        return obj
+
+    @app.get('/health')
+    def health():
+        return {"status":"ok","schema_version":"1.1","data_status":app.state.data_status,"vision_configured":bool(settings.openai_key and settings.vision_model)}
+
+    @app.get('/capabilities')
+    def capabilities():
+        return {
+            "schema_version": "1.1", "data_status": app.state.data_status,
+            "loaded_coverage": service.coverage(app.state.pool),
+            "address_configured": bool(settings.kakao_key),
+            "vision_configured": bool(settings.openai_key and settings.vision_model),
+            "same_building_first": False,
+            "comparable_transactions_available": False,
+            "search_scope": "DONG_THEN_RELAXED_THEN_DISTRICT",
+            "note": "로드된 계약 범위이며 개별 매물의 비교 가능성이나 정확도를 보장하지 않습니다.",
+        }
+
+    @app.get('/ready', include_in_schema=False)
+    def ready():
+        if app.state.pool is None:
+            raise HTTPException(503,"정제된 실거래 데이터를 연결해야 합니다.")
+        return {"status":"ready"}
+
+    @app.post('/sessions',status_code=201)
+    def session():
+        return {"token":app.state.store.session(),"token_type":"Bearer"}
+
+    @app.delete('/sessions/current',status_code=204)
+    def delete_session(sid=Depends(owner)):
+        app.state.store.delete_session(sid)
+        return Response(status_code=204)
+
+    @app.post('/listings',status_code=201)
+    def listing(body: ListingInput, sid=Depends(owner)):
+        raw=body.model_dump()
+        normalized=service.review(raw)
+        # 확인 전 초안도 저장할 수 있지만 분석에는 사용할 수 없다.
+        return app.state.store.create(sid,'listing',{"input":raw,"validation":normalized})
+
+    @app.get('/listings/{listing_id}')
+    def get_listing(listing_id: str,sid=Depends(owner)):
+        return find(listing_id,sid,'listing')
+
+    @app.delete('/listings/{listing_id}',status_code=204)
+    def delete_listing(listing_id: str,sid=Depends(owner)):
+        find(listing_id,sid,'listing')
+        app.state.store.delete(listing_id,sid,'listing')
+        return Response(status_code=204)
+
+    @app.post('/listings/{listing_id}/analyses',status_code=201)
+    def analyze(listing_id: str,sid=Depends(owner)):
+        obj=find(listing_id,sid,'listing')
+        if app.state.pool is None:
+            raise HTTPException(503,"실거래 데이터가 연결되지 않아 분석할 수 없습니다.")
+        result=service.run(obj['input'],app.state.pool)
+        return app.state.store.create(sid,'analysis',{"listing_id":listing_id,"result":result},parent=listing_id)
+
+    @app.get('/analyses/{analysis_id}')
+    def get_analysis(analysis_id: str,sid=Depends(owner)):
+        return find(analysis_id,sid,'analysis')
+
+    @app.get('/addresses/search')
+    async def addresses(q: str=Query(min_length=2,max_length=200),sid=Depends(owner)):
+        return await search_address(q,settings)
+
+    @app.post('/extractions',status_code=201)
+    async def extraction(file: UploadFile=File(...),sid=Depends(owner)):
+        data=await file.read(8*1024*1024+1)
+        if len(data)>8*1024*1024:
+            raise HTTPException(413,"이미지는 8MB 이하로 올려 주세요.")
+        result=await (extractor or extract_image)(data,settings)
+        # 원본 이미지와 파일명은 DB에 저장하지 않는다.
+        return app.state.store.create(sid,'extraction',{"result":result})
+
+    @app.get('/extractions/{extraction_id}')
+    def get_extraction(extraction_id: str,sid=Depends(owner)):
+        return find(extraction_id,sid,'extraction')
+
+    @app.delete('/extractions/{extraction_id}',status_code=204)
+    def delete_extraction(extraction_id: str,sid=Depends(owner)):
+        find(extraction_id,sid,'extraction')
+        app.state.store.delete(extraction_id,sid,'extraction')
+        return Response(status_code=204)
+
+    return app
+
+app=create_app()
