@@ -74,3 +74,11 @@ MYSQL_TEST_DATABASE_URL이 없으면 실제 MySQL 테스트는 skip되며 MySQL 
 - clone된 저장소에는 기존 개인 DB가 없었다. 기존 운영 데이터는 수정·삭제·이전하지 않았다. 별도 PC/runtime에 있는 원본 DB를 확보한 후 위 절차로 이전해야 한다.
 - 루트 test_analyze.py는 제외된 실거래 CSV가 없어 실행 불가하다. test_normalize.py의 38개 원본 회귀 사례는 backend 테스트의 임시 복사 실행으로 통과했다. 실제 실거래 정확도/커버리지 검증과 구분한다.
 - 원본 분석 코드·프론트는 변경하지 않았다. 기존 백엔드 테스트가 API·분석 계약·소유자 격리·cascade·보류 기능을 검사한다. MySQL의 같은 동작은 통합 테스트 환경에서 추가 확인해야 한다.
+
+## MySQL 자동 검증 및 준비 상태 점검 — 2026-10-19
+
+개인 origin의 `.github/workflows/backend-mysql.yml`은 main push/관련 PR/수동 실행에서 격리된 MySQL 8.0과 8.4 서비스 컨테이너를 각각 생성한다. 운영 비밀정보나 운영 DB를 사용하지 않는다. Python 3.12에서 기존 회귀 검사와 MySQL 재시작·이전·롤백 검사를 모두 실행하며, `--require-mysql`은 URL 미설정을 즉시 오류로 처리하고 JUnit skip 건수도 0인지 검사한다. 서비스 컨테이너는 [GitHub Actions 공식 지침](https://docs.github.com/en/actions/tutorials/use-containerized-services)에 따라 Linux runner를 사용한다.
+
+`/health`는 기존 프로세스 상태 응답을 유지한다. `/ready`는 매번 새로운 연결로 sessions/objects/object_links 테이블을 읽고, DB 연결/스키마 접근 실패 시 내부 호스트·경로·자격증명 없이 503을 반환한다. MySQL 준비 상태 연결/읽기/쓰기 timeout은 각각 2초다. 저장소가 복구되면 다음 요청에서 다시 검사하므로 프로세스 재시작 없이 정상으로 돌아올 수 있다. 데이터 미연결 503과 정상 `{"status":"ready"}` 계약을 유지한다. 이 읽기 검사는 INSERT 권한이나 디스크 쓰기 여유까지 검증하는 쓰기 시험이 아니다.
+
+로컬 검증: 137 passed, 3 skipped, 기존 경고 1건(9.71초). 스키마 장애 후 복구, 연결 오류 비밀정보 미노출, MySQL probe timeout을 추가 검사했다. URL 없이 `--require-mysql` 실행 시 의도대로 exit 4로 차단했다. 로컬 실제 MySQL은 여전히 미연결이며 원격 CI 실행 결과는 별도로 기록한다.

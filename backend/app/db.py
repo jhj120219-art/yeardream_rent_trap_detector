@@ -91,10 +91,13 @@ class Store:
             """)
 
     @contextmanager
-    def connect(self):
+    def connect(self, timeout=None):
         if self.mysql:
             import pymysql
-            connection = pymysql.connect(**self.options, cursorclass=pymysql.cursors.DictCursor)
+            options = dict(self.options)
+            if timeout is not None:
+                options.update(connect_timeout=timeout, read_timeout=timeout, write_timeout=timeout)
+            connection = pymysql.connect(**options, cursorclass=pymysql.cursors.DictCursor)
             db = MySQLConnection(connection)
             try:
                 yield db
@@ -105,7 +108,7 @@ class Store:
             finally:
                 db.close()
             return
-        db = sqlite3.connect(self.path, timeout=15)
+        db = sqlite3.connect(self.path, timeout=15 if timeout is None else timeout)
         db.execute("PRAGMA foreign_keys=ON")
         db.row_factory = sqlite3.Row
         try:
@@ -113,6 +116,20 @@ class Store:
                 yield db
         finally:
             db.close()
+
+    def available(self):
+        """Readiness probes storage tables using fresh, bounded connections."""
+        errors = (sqlite3.Error,)
+        if self.mysql:
+            import pymysql
+            errors += (pymysql.MySQLError,)
+        try:
+            with self.connect(timeout=2) as db:
+                for table, column in (("sessions", "id"), ("objects", "id"), ("object_links", "object_id")):
+                    db.execute(f"SELECT {column} FROM {table} LIMIT 1").fetchone()
+            return True
+        except errors:
+            return False
 
     def session(self):
         token, sid = secrets.token_urlsafe(32), str(uuid4())

@@ -68,6 +68,7 @@ def test_http_process_restart_persists_input_and_analysis(target, tmp_path):
     raw_rows().to_csv(source, index=False)
     import_raw(source, clean)
     with server(path, url, clean, tmp_path) as c:
+        assert c.get('/ready').status_code == 200
         auth = {'Authorization': 'Bearer ' + c.post('/sessions').json()['token']}
         c.headers.update(auth)
         body = payload()
@@ -91,6 +92,7 @@ def test_http_process_restart_persists_input_and_analysis(target, tmp_path):
             assert sorted(row['kind'] for row in rows) == ['analysis', 'listing']
     # A different OS process opens fresh DB connections after the first process exits.
     with server(path, url, clean, tmp_path) as c:
+        assert c.get('/ready').status_code == 200
         c.headers.update(auth)
         assert c.get('/listings/' + lid).json() == listing
         assert c.get('/analyses/' + analysis['id']).json() == analysis

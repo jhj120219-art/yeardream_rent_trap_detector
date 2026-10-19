@@ -104,6 +104,8 @@ def create_app(settings=None, pool=None, extractor=None):
 
     @app.get('/ready', include_in_schema=False)
     def ready():
+        if not app.state.store.available():
+            raise HTTPException(503,"DB에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.")
         if app.state.pool is None:
             raise HTTPException(503,"정제된 실거래 데이터를 연결해야 합니다.")
         return {"status":"ready"}
