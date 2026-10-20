@@ -70,3 +70,6 @@ node --test backend/tests/frontend_client.test.mjs
 ```
 
 MySQL 검사는 실사용 DB가 아닌 전용 `MYSQL_TEST_DATABASE_URL`을 설정한 뒤 실행합니다. 운영 준비는 [DEPLOYMENT.md](DEPLOYMENT.md), 이전 구현 설명은 [보존 기록](IMPLEMENTATION_HISTORY_20261020.md)을 참고합니다. 보존 기록의 실행법·PC 경로·검사 수보다 현재 안내가 우선합니다.
+
+
+최근 재검토: [2026-10-21 팀 ZIP 비교·후속 개발](ZIP_REVIEW_20261021.md). 프론트 연결 모듈은 요청 시간 제한과 오류 요청 ID를 지원하며 Node 검사 5개를 통과했습니다.
