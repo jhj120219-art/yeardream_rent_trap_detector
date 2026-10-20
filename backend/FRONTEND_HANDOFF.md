@@ -1,5 +1,7 @@
 # 팀 연결 안내 — 2026-10-20
 
+쉽게 읽는 공유 보고서: [화면용 HTML](reports/team_connection_20261020/team_connection_report.html) · [공유용 PDF](reports/team_connection_20261020/team_connection_report.pdf). 담당별 현재 현황과 다음 해야 할 일을 정리했습니다.
+
 ## 지금 어디까지 이어졌나요?
 
 | 담당 | 확인한 상태 | 다음 할 일 |
