@@ -4,8 +4,9 @@ ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 WORKDIR /app
 COPY backend/requirements.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir -r /tmp/requirements.txt && useradd --uid 10001 --create-home appuser
-COPY analyze.py compare_rent.py normalize_listing.py ./
-COPY integration_kit_v1.1/ ./integration_kit_v1.1/
+COPY backend/__init__.py ./backend/__init__.py
+COPY machine/analyze.py machine/compare_rent.py machine/normalize_listing.py ./machine/
+COPY machine/integration_kit_v1.1/ ./machine/integration_kit_v1.1/
 COPY machine/analysis_internal/ ./machine/analysis_internal/
 COPY backend/app/ ./backend/app/
 COPY backend/scripts/ ./backend/scripts/

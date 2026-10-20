@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; connect-src 'none'; base-uri 'none'; form-action 'none'">
-<title>월세 비교 · 백엔드 연동 화면 시안 v0.2</title>
+<title>월세 비교 · 요구사항 기반 화면 시안 v0.5</title>
 <style>
 #rent-input-flow {padding:16px 0;color-scheme:light dark;font-family:system-ui,-apple-system,"Malgun Gothic",sans-serif;}
 #rent-input-flow .preview {margin:0 12px 12px;color:light-dark(#555,#bbb);font-size:12px;line-height:1.6;}
@@ -65,93 +65,212 @@
 #rent-input-flow .listitem p{margin:5px 0}#rent-input-flow .footer{padding:16px 22px;border-top:1px solid var(--line)}
 #rent-input-flow .progressline{font-size:12px;color:var(--sub);margin:10px 0}#rent-input-flow .choices{margin:14px 0}#rent-input-flow .pending{border:1px dashed var(--line)}
 @media(max-width:440px){#rent-input-flow .metric{grid-template-columns:1fr}#rent-input-flow .actions button{flex-basis:140px}}
+#rent-input-flow #sample-capture,#rent-input-flow #sample-address,#rent-input-flow #load-sample {background:#172b4d;color:#fff;border-color:#172b4d;font-weight:700;}
+#rent-input-flow #sample-capture:hover,#rent-input-flow #sample-address:hover,#rent-input-flow #load-sample:hover {background:#243f68;border-color:#243f68;}
 </style></head><body><div id="rent-input-flow">
-<p class="preview">v0.2 · 백엔드 전달 자료 62888e2 반영 · 오프라인 화면 시안<br>실제 API·이미지 분석·DB 저장은 하지 않습니다. 아래 기능 상태는 백엔드 전달 문서 기준입니다.</p>
+<p class="preview">화면 설계 시안 v0.5 · 요구사항정의서 ‘초안’ 기준<br>실제 API 연결 전입니다. 주소 검색·이미지 추출·건물 조회·분석은 가상 예시이며 파일을 서버로 전송하지 않습니다.</p>
 <div class="app">
-<header class="top"><strong>월세 비교</strong><span class="small">관리비 제외 · 신규 월세 실거래</span><button id="open-list" type="button">내 매물 · 범위 논의</button></header>
-<ol class="steps" aria-label="진행 단계"><li data-step="start" aria-current="step">1. 입력 방식</li><li data-step="collect">2. 정보 가져오기</li><li data-step="fill">3. 입력·확인</li><li data-step="result">4. 결과</li></ol>
+<header class="top"><strong>월세 비교</strong><span class="small">관심 매물과 유사한 월세 실거래 비교</span></header>
+<ol class="steps"><li>1. 입력 방식</li><li>2. 정보 가져오기</li><li>3. 입력·확인</li><li>4. 결과</li></ol>
 <main>
-<section data-screen="start">
-<h2 tabindex="-1">어떤 방법으로 입력할까요?</h2><p class="small">현재는 직접 입력부터 연결합니다. 주소 검색과 캡처 자동 입력은 외부 API 검증 후 연결할 예정입니다.</p>
-<div class="box"><h3 style="margin-top:0">매물 조건 직접 입력</h3><p>동네·면적·보증금·월세를 입력하고 확인해 주세요.</p><button id="manual-start" class="primary" type="button">직접 입력으로 시작</button><p class="small" style="margin-top:12px">구·법정동 수준 비교를 허용하는 화면 제안입니다. 정확한 주소 필수 여부는 팀에서 결정합니다.</p></div>
-<h3>자동 입력 경로 · 연결 검증 전</h3>
-<div class="choices"><button data-mode="address" type="button" aria-pressed="true">주소로 직접 찾기<span>주소 후보 선택 · 시연용</span></button><button data-mode="capture" type="button" aria-pressed="false">캡처로 입력<span>텍스트 추출 · 시연용</span></button></div>
-<div data-route="address" class="box pending"><label for="address-query">건물명 · 도로명 · 지번주소</label><div class="row" style="margin-top:8px"><input id="address-query" placeholder="예: 봉천동 아파트"><button id="search-demo" type="button">가상 검색 결과 보기</button></div><div id="candidates" hidden><button id="select-address" class="candidate" type="button"><strong>검사용 가상 주소</strong><span>관악구 봉천동 · 실제 건물 조회 결과가 아닙니다.</span></button></div><p class="small" style="margin-top:12px">주소 검색 API는 실제 외부 호출 미검증입니다. 유형·준공연도 자동 조회는 별도 협의가 필요합니다.</p></div>
-<div data-route="capture" class="box pending" hidden><label for="capture-file">매물 이미지 한 장</label><input id="capture-file" type="file" accept="image/png,image/jpeg,image/webp" aria-describedby="file-note"><p id="file-note" class="small">이미지 8MB · 전체 요청 9MB 제한. JPG·PNG·WebP는 형식 제안입니다. 이 시안은 내용을 읽거나 전송하지 않습니다.</p><p id="file-message" class="small" role="status"></p><div class="row"><button id="file-demo" disabled type="button">첨부 후 고정 예시 보기</button><button id="capture-demo" type="button">파일 없이 예시 보기</button></div></div>
-<p class="small" style="margin-top:18px">현재 전달된 지원 지역: 강서·관악·광진·노원·동작·마포구. 실제 서비스에서는 지원 범위 API 응답을 사용합니다.</p>
+<section data-screen="start"><div class="row"><button id="sample-capture">가상 캡처 넣기</button><button id="sample-address">가상 주소 넣기</button></div><h2 tabindex="-1">어떤 매물인지 알려주세요</h2>
+<p>관심 있는 매물의 정보를 입력하면 유사한 월세 실거래와 비교해 가격 차이와 근거를 보여드립니다.</p>
+<div class="notice"><strong>비교 범위 안내</strong><br>월세 비교와 관리비를 더한 예상 비용을 구분해 보여드립니다. 가격 차이는 사기 여부를 뜻하지 않습니다.<br><span class="small">최종 지원 지역·주택 유형은 협의 중입니다. 이 시안은 가상 아파트 예시로 흐름을 확인합니다.</span></div>
+<div class="choices"><button id="choose-capture">캡처로 입력<span>매물 정보가 보이는 이미지 첨부</span></button><button id="choose-address">주소로 입력<span>주소 선택 후 건물 정보 가져오기</span></button></div>
+<button id="choose-manual">모든 정보 직접 입력</button>
+<div id="capture-panel" class="box" hidden><h3>매물 캡처 첨부</h3><p>주소·면적·보증금·월세 등이 보이는 이미지 한 장을 선택하세요.</p><div id="sample-image" class="notice" hidden role="img" aria-label="가상 매물 캡처: 관악구 봉천동 아파트, 전용 59.9제곱미터, 보증금 5000만원, 월세 80만원"><strong>가상 매물 캡처</strong><br>서울 관악구 봉천동 · 아파트<br>전용 59.9㎡ · 보증금 5,000 / 월세 80만 원</div><label for="capture-file">캡처 파일</label><input id="capture-file" type="file" accept="image/png,image/jpeg,image/webp"><p id="file-note" class="small">시안에서는 PNG·JPEG·WebP, 8MB 이하를 받습니다. 운영 제한은 추후 확정합니다.</p><button id="extract" disabled>가상 추출 결과 확인</button><p class="small">선택한 이미지의 실제 내용은 분석하지 않습니다. 고정된 예시 정보를 보여줍니다.</p></div>
+<div id="sample-address-panel" class="box" hidden><strong>선택한 가상 주소</strong><p id="sample-address-value"></p><button id="sample-address-next" class="primary">건물 정보 가져오기</button></div>
 </section>
-<section data-screen="collect" hidden>
-<h2 id="collect-title" tabindex="-1">가져온 정보를 확인해 주세요</h2><p class="small">자동 입력 경로의 고정 예시입니다. 실제 조회·추출 결과가 아닙니다.</p>
-<blockquote id="capture-quote" hidden>가상 캡처: “관악구 봉천동 / 아파트 / 면적 59.9㎡ / 보증금 5,000만 / 월세 80만”</blockquote>
-<div id="collected"></div><div class="notice"><strong>건물 정보 자동 조회는 아직 확인되지 않았어요.</strong><p class="small">주소만으로 현재 보증금·월세·호실 면적을 알 수 없습니다. 준공연도·유형은 확인 가능한 값만 입력해 주세요.</p></div>
-<div class="actions"><button id="collect-back" type="button">다시 선택</button><button id="to-form" class="primary" type="button">부족한 정보 입력</button></div>
+<section data-screen="collect" hidden><h2 tabindex="-1">가져온 정보를 확인하세요</h2><p>지금은 조회 결과를 확인하는 단계입니다. 부족하거나 다른 정보는 다음 화면에서 입력·수정할 수 있습니다.</p>
+<div id="collect-note" class="notice"></div><div id="collected"></div>
+<div class="actions"><button id="collect-back">처음으로</button><button class="primary" id="collect-next">입력·확인으로</button></div></section>
+<section data-screen="fill" hidden><button id="load-sample">예시 값 채우기</button><h2 tabindex="-1">부족한 정보를 입력하고 최종 확인하세요</h2><p>자동 입력된 값도 수정할 수 있습니다. <strong>*</strong>는 분석에 필요한 항목입니다.</p>
+<div class="box"><strong>비교 지역 *</strong><div class="grid"><label class="field">시군구<select id="region-district"><option value="">선택하세요</option><option value="11620">서울특별시 관악구</option></select></label><label class="field">법정동<select id="region-dong"><option value="">시군구를 먼저 선택하세요</option></select></label></div><p class="small">시안은 관악구 봉천동·신림동 선택 예시입니다. 실제 서비스에서는 지원 지역의 법정동 목록을 제공합니다.</p></div>
+<div class="box"><strong>건물 주소 — 선택</strong><p id="address-summary"></p><button id="change-address">건물 주소 검색·변경</button><p class="small">정확한 주소를 입력하면 건축연도 등 건물 정보를 가져올 수 있어요. 비교 지역과 필수 조건이 확인되면 건물 주소 없이도 진행할 수 있습니다.<br>카카오 주소 검색 연동 예정 · 현재는 가상 검색 결과에서 선택합니다.</p></div>
+<div id="capture-address-note" class="notice" hidden></div><div id="capture-candidates"></div>
+<div id="refresh-note" class="notice" hidden></div><div id="conflicts"></div>
+<label id="review-box" class="check" hidden><input id="review" type="checkbox"><span>유지된 입력값과 캡처 정보가 변경된 지역·건물의 매물에도 해당하는지 확인했습니다.</span></label>
+<div class="grid" id="fields"></div><p class="small">관리비는 매물에 표시된 월 금액 하나만 입력하세요. 모르면 비워두세요. 미입력은 0원과 구분합니다.</p>
+<p id="year-note" class="notice" hidden>건축연도가 미입력되어 건축연도 조건 없이 비교합니다. 분석 신뢰도에 영향을 줄 수 있습니다.</p>
+<div class="notice small">주택 유형·건축연도는 건물 조회 예시입니다. 해당 호실로 확인되지 않은 면적이나 과거 거래금액은 자동 입력하지 않습니다. 건축연도와 사용승인일의 적용 기준은 협의 중입니다.</div>
+<div id="validation" class="error" role="alert" hidden></div>
+<label class="check"><input id="confirmed" type="checkbox"><span>주소와 매물 조건을 확인했으며, 이 정보로 비교하겠습니다.</span></label>
+<div class="actions"><button id="fill-back">입력 방식으로</button><button class="primary" id="analyze">월세 비교하기</button></div>
+
 </section>
-<section data-screen="fill" hidden>
-<h2 tabindex="-1">매물 조건을 확인해 주세요</h2><p id="missing-count" class="small" role="status"></p>
-<form id="listing-form">
-<div class="grid">
-<label class="field">자치구 *<select name="district" required><option value="">선택하세요</option><option value="11620">관악구</option><option value="11215">광진구</option><option value="11440">마포구</option><option value="11590">동작구</option><option value="11500">강서구</option><option value="11350">노원구</option></select></label>
-<label class="field">법정동 *<input name="dong" required placeholder="예: 봉천동" maxlength="30"></label>
-<label class="field">주택 유형 *<span class="small" data-origin="type">직접 입력</span><select name="type" required><option value="">선택하세요</option><option value="APARTMENT">아파트</option><option value="MULTI_UNIT">연립·다세대</option><option value="OFFICETEL">오피스텔</option><option value="DETACHED_MULTI">단독·다가구</option></select></label>
-<label class="field">면적 기준 *<select name="basis" required><option value="">선택하세요</option><option value="EXCLUSIVE">전용면적</option><option value="CONTRACT">계약면적</option><option value="SUPPLY">공급면적</option><option value="UNKNOWN">모르겠어요</option></select></label>
-<label class="field">면적 (㎡) *<span class="small" data-origin="area">직접 입력</span><input name="area" type="number" required min="5" max="200" step="any" placeholder="예: 59.9"></label>
-<label class="field">보증금 (만원) *<span class="small" data-origin="deposit">직접 입력</span><input name="deposit" type="number" required min="0" step="any" placeholder="예: 5000"></label>
-<label class="field">월세 (만원) *<span class="small" data-origin="rent">직접 입력</span><input name="rent" type="number" required min="1" max="500" step="any" placeholder="예: 80"></label>
-<label class="field">주소 설명 · 선택<input name="address" placeholder="현재 광고에 적힌 주소" maxlength="150"></label>
-</div>
-<div id="basis-note" class="notice" hidden></div>
-<details open><summary>추가 정보 · 아는 범위에서 입력해 주세요</summary><div class="grid"><label class="field">해당 호실 층<input name="floor" type="number" step="1" placeholder="미확인 · 지하는 음수"></label><label class="field">지상·지하<select name="floorType"><option value="UNKNOWN">미확인</option><option value="GROUND">지상</option><option value="BASEMENT">지하·반지하</option></select></label><label class="field">준공연도 · 선택<input name="year" type="number" min="1950" step="1" placeholder="미확인"></label></div><label class="check"><input name="floorConfirmed" type="checkbox"><span>해당 호실의 층 또는 지상·지하 여부를 확인했어요.</span></label><p class="small">단독·다가구의 반지하·층 미확인은 참고 처리됩니다. 건물 전체 층수와 호실 층을 구분해 주세요.</p></details>
-<div class="row" style="margin-top:18px"><button id="fill-example" type="button">백엔드 예시 값 불러오기</button><span class="small">기존 입력을 가상 예시로 바꿉니다.</span></div>
-<label class="check"><input name="confirmed" type="checkbox" required><span>입력한 지역·유형·면적·금액과 자동 입력값을 매물 정보와 대조했어요.</span></label>
-<p class="small">관리비·공과금 입력과 총 주거비 계산은 보류 중입니다.</p><div id="form-error" class="error" role="alert" hidden></div>
-<details><summary>팀 연동 메모 · 요청 예시</summary><p class="small">schema_version 1.1 · listing/options/confirmation. 실제 전송은 하지 않습니다. 캡처 연결 ID는 서버가 발급한 값을 사용해야 합니다.</p><pre id="payload-preview"></pre><label class="field">통신 오류 시안<select id="failure-mode"><option value="">정상 흐름</option><option value="save:422">저장 실패 422</option><option value="analyze:503">분석 요청 실패 503</option><option value="report:404">보고서 조회 실패 404</option></select></label></details>
-<div class="actions"><button id="form-back" type="button">입력 방식 선택</button><button id="submit" type="submit" class="primary" disabled>확인 후 저장·비교 시연</button></div>
-</form></section>
-<section data-screen="processing" hidden><h2 tabindex="-1">저장하고 비교 결과를 가져와요</h2><p class="small">API 순서를 보여주는 모의 동작입니다.</p><ol class="process"><li data-phase="save">매물 저장 대기</li><li data-phase="analyze">월세 분석 대기</li><li data-phase="report">보고서 조회 대기</li></ol><div id="process-error" class="error" role="alert" hidden></div><div class="actions" id="retry-actions" hidden><button id="process-edit" type="button">입력 확인</button><button id="retry" class="primary" type="button">실패 단계부터 재시도</button></div></section>
-<section data-screen="result" hidden><h2 tabindex="-1">월세 비교 결과</h2><p class="small">가상 입력·백엔드 예시 응답으로 검토하는 화면입니다.</p><div id="input-summary" class="notice"></div>
-<div id="example-result" hidden><span class="tag">비교 완료 · COMPARED</span><h3>비슷한 조건의 거래보다 낮은 편이에요</h3><p class="small">하위 25% 구간입니다. 층·옵션·상태 등 낮은 이유를 확인해 보세요.</p><div class="result-price">156~200만원 <span class="small">중간 50% 가격대</span></div><div class="metric"><div class="box">비교 중앙값<strong>180만원</strong></div><div class="box">입력한 월세<strong>80만원</strong></div></div><div class="info-row"><span>중앙값 대비</span><strong>-100만원 · -55.6%</strong></div><details open><summary>비교 근거</summary><p>같은 법정동(관악구 봉천동) · 최근 12개월 · 신규 계약 42건<br>아파트 · 면적 ±10% · 보증금 ±30% · 준공연도 ±5년</p><p>신뢰도 등급: 높음(HIGH)</p><p class="small">데이터 기준일: 2026-10-16<br>출처: 서울 열린데이터광장 부동산 전월세가 정보</p></details><p class="small">백엔드 제공 예시를 재현했습니다. 실제 주소를 조회한 결과가 아닙니다.</p></div>
-<div id="no-result" class="notice" hidden><strong>이 입력의 실제 분석 결과는 아직 없어요.</strong><p>이 HTML은 서버에 연결되어 있지 않습니다. 임의로 바꾼 값에 고정 예시 가격을 적용하지 않습니다.</p></div>
-<div class="notice"><p>현재 비교 범위는 동네의 유사 거래입니다. 같은 건물 우선 비교·개별 비교 거래 목록·새 신뢰도 %는 미제공입니다.</p><p class="small">관리비·옵션·내부 상태는 월세 비교에 반영되지 않습니다. 가격 위치는 사기 판정이 아닙니다.</p></div>
-<details open><summary>팀 검토 · 결과 상태별 화면 예시</summary><p class="small">아래 상태는 입력과 무관한 UI 예시입니다. 서버 판단을 변경하는 기능이 아닙니다.</p><label class="field">검토할 상태<select id="state-preview"><option value="COMPARED">비교 완료</option><option value="REFERENCE_ONLY">참고용</option><option value="INSUFFICIENT_DATA">자료 부족</option><option value="INPUT_REVIEW_REQUIRED">입력 확인 필요</option><option value="OUT_OF_SCOPE">지원 범위 밖</option></select></label><div id="state-card" class="notice" role="status"></div></details>
-<div class="actions"><button id="edit" type="button">조건 수정</button><button id="new" type="button">다른 매물 입력</button></div></section>
-<section data-screen="list" hidden><h2 tabindex="-1">내 매물 · 설계 후보</h2><p class="small">MVP 포함 여부는 논의 중입니다. 이 목록은 페이지 메모리의 시연 자료로, 실제 서버 목록이 아니며 새로고침하면 사라집니다.</p><div id="listing-items"></div><div id="delete-question" class="notice" hidden><p id="delete-text"></p><div class="row"><button id="delete-cancel" type="button">취소</button><button id="delete-confirm" type="button">예시 자료 삭제</button></div></div><div class="actions"><button id="list-back" type="button">입력으로</button><button id="clear-demo" type="button">세션 자료 전체 삭제 시안</button></div><p class="small" style="margin-top:16px">실제 DELETE /sessions/current는 저장 자료도 모두 삭제합니다. 창을 닫을 때 자동 호출하지 않습니다.</p></section>
-</main>
-<footer class="footer"><details><summary>팀 연동 기준과 남은 논의</summary><p>실제 연동: 팀 접속키 입력 → POST /sessions → 지원 범위 확인 → POST /listings → POST /listings/{id}/analyses → GET /listings/{id}/report.</p><p class="small">모든 실제 요청에 X-Team-Key, 세션 이후 Bearer 토큰 사용. 결과는 property.input / rent.result. 키는 소스·로그·배포 파일에 넣지 않습니다. 이 시안은 키를 받지 않습니다.</p><p class="small">논의: 주택 유형 범위, 건물 자동 조회, 정확한 주소 필수 여부, v2 기능, 목록·삭제, 미확인 면적 정책, 외부 API 검증·이미지 보관, 조건 수정 저장 방식.</p><p class="small">자세한 내용: 같은 폴더의 사용흐름.md · <a href="https://docs.google.com/spreadsheets/d/1D8E9QjkNiDwWqL32SAmZechF-bOX3Pjsi92FhLItBRE/edit" target="_blank" rel="noopener noreferrer">요구사항 정의서 Google 스프레드시트</a></p></details></footer>
-</div>
+<section data-screen="result" hidden><h2 tabindex="-1">월세 비교 결과</h2>
+<p class="notice">가상 데이터로 구성한 화면 예시입니다. 비교 기준·거래 수·비용 추정값은 입력 조건과 무관한 고정 예시이며, 실제 시세 분석 결과가 아닙니다.</p>
+<span id="result-status" class="tag"></span><p id="result-reason"></p>
+<h3>비교를 요청한 매물</h3><div id="result-summary" class="box"></div>
+<div id="prices"><h3>유사 거래의 참고 가격</h3><div class="metric box"><div>월세 중앙값<strong>180만 원</strong></div><div>가운데 50% 가격 범위<strong>156~200만 원</strong></div></div><p class="small">관리비 제외 · 평균 대신 중앙값을 표시합니다.</p><div class="notice"><span id="demo-difference"></span><br><span class="small">차액 = 입력 월세 − 기준 월세, 차이율 = 차액 ÷ 기준 월세 × 100</span></div></div>
+<div id="verdict" class="box"><strong id="demo-verdict"></strong><br>가격 차이만으로 좋은 매물이거나 안전한 매물이라고 판단할 수 없습니다.</div>
+<div id="evidence"><h3>비교 근거</h3><div class="box">거래 수: 42건 · 계약일 범위: 최근 12개월<br>지역: <span id="comparison-region">관악구 봉천동</span> · 유형: <span id="comparison-type"></span><br>면적·보증금: 분석에서 적용한 조건 범위를 표시할 영역 (예시에는 세부 기준 미제공)<br><span id="expansion"></span></div><h3>분석 신뢰도</h3><p>이 예시에는 신뢰도 등급과 상세 사유가 제공되지 않았습니다. 실제 결과에서 제공된 경우 함께 표시합니다. 신뢰도는 가격 정확도나 사기 확률이 아닙니다.</p></div>
+<h3>관리비를 더한 비용 참고</h3><div id="cost-summary" class="box"></div><h3>예상 공과금·인터넷 비용 내역</h3><div id="cost-breakdown"></div><p id="cost-source" class="small"></p><p class="notice small">수도·전기·가스·인터넷 추정 합계는 관리비 전체 평균이 아닙니다. 입력 관리비의 포함 항목은 확인하지 않아 두 합계의 비용 범위가 다를 수 있습니다. 합계 차이로 비싸거나 저렴하다고 판정하지 않습니다.</p><h3>출처와 한계</h3><p class="small">시안의 고정 예시 · 자료 기준일 예시: 2026-10-16<br>실서비스에서는 분석에 사용한 출처와 기준일을 표시합니다. 월세 판정에는 관리비·옵션·내부 상태가 반영되지 않습니다. 예상 비용은 별도로 표시하며 실제 총 주거비나 사기 여부를 보장하지 않습니다.</p>
+<details id="scenario-panel"><summary>시안 검토: 결과 상태 바꾸기</summary><label for="scenario">가상 상태</label><select id="scenario"><option value="COMPARED">비교 완료</option><option value="REFERENCE_ONLY">참고용 결과</option><option value="INSUFFICIENT_DATA">비교 자료 부족</option><option value="INPUT_REVIEW_REQUIRED">입력 정보 재확인 필요</option><option value="OUT_OF_SCOPE">지원 범위 밖</option></select></details>
+<div class="actions"><button id="edit">입력 정보 수정</button><button id="new">새 매물 비교</button></div>
+</section>
+<section data-screen="search" hidden><h2 tabindex="-1">매물 주소 검색</h2><p>실서비스에서는 카카오 주소 검색 결과를 선택합니다. 아래는 동작 확인용 가상 주소입니다.</p><label for="query">주소·건물명</label><div class="row"><input id="query" placeholder="가상 건물명 또는 동을 입력"><button id="search">가상 주소 검색</button></div><div id="address-results"></div><p id="search-note" class="small"></p><button id="cancel-search">돌아가기</button></section>
+<p id="live" role="status" aria-live="polite" class="small"></p>
+</main><footer class="footer small">로컬 화면 시안 · 입력 내용은 새로고침하면 사라집니다.</footer></div></div>
 <script>
-'use strict';
-const form = document.getElementById('listing-form');
-const $ = id => document.getElementById(id);
-const fields = ['district','dong','type','basis','area','deposit','rent','address','floor','floorType','year'];
-const requiredFields = ['district','dong','type','basis','area','deposit','rent'];
-const example = {district:'11620',dong:'봉천동',type:'APARTMENT',basis:'EXCLUSIVE',area:'59.9',deposit:'5000',rent:'80',address:'검사용 가상 주소',floor:'5',floorType:'GROUND',year:'2005'};
-const state = {screen:'start', mode:'manual', exampleLoaded:false, listingId:null, nextPhase:0, saved:[], sequence:0, pendingDelete:null, busy:false};
-const names = {APARTMENT:'아파트',MULTI_UNIT:'연립·다세대',OFFICETEL:'오피스텔',DETACHED_MULTI:'단독·다가구'};
-const numOrNull = v => v.trim()==='' ? null : Number(v);
-const percentText = ratio => (ratio == null ? '미제공' : `${(ratio * 100).toFixed(1)}%`);
-function read(){return Object.fromEntries(fields.map(k=>[k,form.elements.namedItem(k).value.trim()]));}
-function setForm(values){for(const k of fields) form.elements.namedItem(k).value=values[k] ?? (k==='floorType'?'UNKNOWN':''); form.elements.confirmed.checked=false; form.elements.floorConfirmed.checked=false;}
-function show(screen){state.screen=screen;document.querySelectorAll('[data-screen]').forEach(el=>el.hidden=el.dataset.screen!==screen);document.querySelectorAll('[data-step]').forEach(el=>{if(el.dataset.step===(screen==='processing'?'fill':screen))el.setAttribute('aria-current','step');else el.removeAttribute('aria-current');});document.querySelector(`[data-screen="${screen}"] h2`)?.focus();}
-function floorIssue(v){const f=numOrNull(v.floor);if(f!==null&&f!==0&&((f>0&&v.floorType==='BASEMENT')||(f<0&&v.floorType==='GROUND')))return '층 숫자와 지상·지하 선택이 달라요. 해당 호실 기준으로 다시 확인해 주세요.';if(form.elements.floorConfirmed.checked&&(f===null||f===0)&&v.floorType==='UNKNOWN')return '확인한 층 또는 지상·지하를 입력하거나, 층 확인 체크를 해제해 주세요.';return '';}
-function payload(){const v=read(), f=numOrNull(v.floor), floor=f===0?null:f, trusted=form.elements.floorConfirmed.checked;let type=v.floorType;if(trusted&&type==='UNKNOWN'&&floor!==null)type=floor>0?'GROUND':'BASEMENT';const listing={district_code:v.district,dong:v.dong,building_type:v.type,area_m2:numOrNull(v.area),area_basis:v.basis,deposit_10k_krw:numOrNull(v.deposit),rent_10k_krw:numOrNull(v.rent),built_year:numOrNull(v.year),floor,floor_type:type,floor_source:trusted?'USER_CONFIRMED':'UNKNOWN',address_text:v.address||null,unit_ho:null};if(v.district==='11620'&&v.dong==='봉천동')listing.legal_dong_code='1162010100';if(state.exampleLoaded)listing.as_of='2026-10-19';const confirmed=form.elements.confirmed.checked;const p={schema_version:'1.1',listing,options:{},confirmation:{user_confirmed:confirmed,input_source:state.mode==='capture'?'IMAGE_REVIEWED':'ADDRESS_MANUAL',confirmed_fields:confirmed?['district_code',listing.legal_dong_code?'legal_dong_code':'dong','building_type','area_m2','area_basis','deposit_10k_krw','rent_10k_krw',...(v.year?['built_year']:[]),...(v.address?['address_text']:[]),...(trusted?['floor','floor_type']:[])]:[]}};if(state.mode==='capture')p.source_extraction_id='DEMO_ONLY_NOT_A_SERVER_ID';return p;}
-function exampleEligible(){return state.exampleLoaded&&form.elements.floorConfirmed.checked&&Object.entries(example).every(([key,value])=>read()[key]===value);}
-function update(){const v=read();const missing=requiredFields.filter(k=>v[k]==='').length;$('missing-count').textContent=missing?`필수 정보 ${missing}개를 입력해 주세요.`:'필수 정보가 채워졌어요. 값과 단위를 확인해 주세요.';const n=$('basis-note');n.hidden=!['SUPPLY','UNKNOWN','CONTRACT'].includes(v.basis);n.textContent=v.basis==='SUPPLY'?'공급면적은 가격 판정이 보류됩니다. 전용면적을 알면 수정해 주세요.':v.basis==='UNKNOWN'?'현재 규격은 미확인 면적을 전용면적으로 가정하고 경고합니다. 실제 결과는 유형·층 등 분석 정책에 따라 달라질 수 있어요.':'단독·다가구 실거래는 계약면적 기준입니다. 다른 유형은 전용면적을 확인해 주세요.';const issue=floorIssue(v);$('form-error').hidden=!issue;$('form-error').textContent=issue;$('submit').disabled=!!issue||!form.checkValidity();$('payload-preview').textContent=JSON.stringify(payload(),null,2);}
-function fresh(mode='manual'){state.mode=mode;state.exampleLoaded=false;state.listingId=null;state.nextPhase=0;setForm({});document.querySelectorAll('[data-origin]').forEach(el=>el.textContent='직접 입력');$('failure-mode').value='';update();}
-function chooseMode(mode){document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===mode)));document.querySelectorAll('[data-route]').forEach(el=>el.hidden=el.dataset.route!==mode);}
-function collect(mode){fresh(mode);const v=mode==='capture'?{district:'11620',dong:'봉천동',type:'APARTMENT',area:'59.9',deposit:'5000',rent:'80'}:{district:'11620',dong:'봉천동',address:'검사용 가상 주소'};setForm(v);if(mode==='capture')document.querySelectorAll('[data-origin]').forEach(el=>el.textContent='캡처 고정 예시 · 확인 필요');$('capture-quote').hidden=mode!=='capture';$('collect-title').textContent=mode==='capture'?'캡처에서 읽은 값을 확인해 주세요':'선택한 주소를 확인해 주세요';$('collected').replaceChildren();for(const [label,value] of [['지역','관악구 봉천동 · 가상 예시'],['주택 유형',v.type?'아파트 · 캡처 예시':'직접 입력 필요'],['준공연도','미확인 · 자동 조회 미제공'],['면적',v.area?'59.9㎡ · 기준 확인 필요':'직접 입력 필요'],['보증금·월세',v.rent?'5,000만원 / 80만원 · 캡처 예시':'현재 광고 조건 직접 입력']]){const row=document.createElement('div');row.className='info-row';const a=document.createElement('span'),b=document.createElement('strong');a.textContent=label;b.textContent=value;row.append(a,b);$('collected').append(row);}update();show('collect');}
-function renderResult(record){state.activeRecord=record;$('input-summary').textContent=`${record.values.dong} · ${names[record.values.type]||'유형 확인'} · ${record.values.area}㎡ · 보증금 ${record.values.deposit}만원 / 월세 ${record.values.rent}만원`;$('example-result').hidden=!record.example;$('no-result').hidden=record.example;$('state-preview').value='COMPARED';renderState();show('result');}
-const statusViews={COMPARED:['비교 완료','서버가 반환한 가격 위치·범위·차이·근거를 표시합니다.'],REFERENCE_ONLY:['참고용 가격 범위','보류 이유와 제공된 범위만 표시합니다. 높다·낮다 판정은 표시하지 않습니다.'],INSUFFICIENT_DATA:['비교 자료가 부족해요','가격을 임의로 만들지 않습니다. 조건을 확인하거나 나중에 다시 시도하도록 안내합니다.'],INPUT_REVIEW_REQUIRED:['입력 정보를 확인해 주세요','서버가 알려준 수정 항목과 이유를 입력칸에 연결합니다.'],OUT_OF_SCOPE:['현재 지원 범위 밖이에요','지원 범위 API가 알려주는 지역·유형을 안내합니다.']};
-function renderState(){const s=$('state-preview').value;const [title,body]=statusViews[s];$('state-card').textContent=`[UI 예시: ${s}] ${title} — ${body}`;}
-const phases=[['save','POST /listings','매물 저장'],['analyze','POST /listings/{id}/analyses','월세 분석'],['report','GET /listings/{id}/report','보고서 조회']];
-async function run(){if(state.busy)return;state.busy=true;$('open-list').disabled=true;$('retry-actions').hidden=true;$('process-error').hidden=true;show('processing');try{for(let i=0;i<phases.length;i++){const [key,,label]=phases[i];document.querySelector(`[data-phase="${key}"]`).textContent=i<state.nextPhase?`${label} · 모의 완료`:`${label} 대기`;}for(let i=state.nextPhase;i<phases.length;i++){const [key,route,label]=phases[i];const li=document.querySelector(`[data-phase="${key}"]`);li.textContent=`${label} 중 · ${route}`;await new Promise(resolve=>setTimeout(resolve,250));if($('failure-mode').value.startsWith(key+':')){const code=$('failure-mode').value.split(':')[1];$('failure-mode').value='';state.nextPhase=i;li.textContent=`${label} 실패 · HTTP ${code} 예시`;$('process-error').hidden=false;$('process-error').textContent=`HTTP ${code} 모의 오류. 입력과 ${state.listingId?'저장된 예시 ID를':'현재 단계를'} 유지합니다. 재시도하면 이 단계부터 이어집니다.`;$('retry-actions').hidden=false;return;}if(key==='save')state.listingId=`demo-${++state.sequence}`;state.nextPhase=i+1;li.textContent=`${label} · 모의 완료`;}const record={id:state.listingId,values:read(),payload:payload(),example:exampleEligible()};const index=state.saved.findIndex(r=>r.id===record.id);if(index<0)state.saved.push(record);else state.saved[index]=record;renderResult(record);}finally{state.busy=false;$('open-list').disabled=false;}}
-function list(){if(state.busy)return;$('delete-question').hidden=true;state.pendingDelete=null;$('listing-items').replaceChildren();if(!state.saved.length){const p=document.createElement('p');p.textContent='아직 시연한 매물이 없어요.';$('listing-items').append(p);}for(const r of state.saved){const div=document.createElement('div');div.className='listitem';const p=document.createElement('p');p.textContent=`${r.values.dong} · ${names[r.values.type]} · 월세 ${r.values.rent}만원`;const view=document.createElement('button');view.type='button';view.textContent='결과 보기';view.onclick=()=>{setForm(r.values);state.mode=r.payload.confirmation.input_source==='IMAGE_REVIEWED'?'capture':'manual';state.exampleLoaded=r.example;state.listingId=r.id;renderResult(r);};const del=document.createElement('button');del.type='button';del.textContent='삭제';del.onclick=()=>askDelete(r.id);const row=document.createElement('div');row.className='row';row.append(view,del);div.append(p,row);$('listing-items').append(div);}$('clear-demo').disabled=!state.saved.length;show('list');}
-function askDelete(id){state.pendingDelete=id;$('delete-text').textContent=id==='ALL'?'이 페이지의 모든 예시 매물을 삭제할까요? 실제 서비스에서는 세션의 저장 자료 전체가 삭제되는 동작입니다.':'이 예시 매물과 결과를 목록에서 삭제할까요?';$('delete-question').hidden=false;$('delete-cancel').focus();}
-$('manual-start').onclick=()=>{fresh();show('fill');};document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>chooseMode(b.dataset.mode));$('search-demo').onclick=()=>{$('candidates').hidden=false;};$('select-address').onclick=()=>collect('address');$('capture-demo').onclick=()=>collect('capture');$('file-demo').onclick=()=>collect('capture');
-$('capture-file').onchange=event=>{const f=event.target.files[0],valid=f&&['image/jpeg','image/png','image/webp'].includes(f.type)&&f.size<=8000000&&f.size>0;$('file-demo').disabled=!valid;$('file-message').textContent=!f?'':valid?'파일 선택됨. 파일과 무관한 고정 예시로 진행하며 전송하지 않습니다.':'형식 또는 크기를 확인해 주세요. JPG·PNG·WebP, 8MB 이하의 비어 있지 않은 파일을 선택해 주세요.';};
-$('collect-back').onclick=()=>show('start');$('to-form').onclick=()=>show('fill');$('form-back').onclick=()=>show('start');form.elements.year.max=String(new Date().getFullYear()+1);
-form.addEventListener('input',event=>{if(![...fields,'floorConfirmed','confirmed'].includes(event.target.name))return;if(event.target.name!=='confirmed'){form.elements.confirmed.checked=false;state.exampleLoaded=false;state.listingId=null;state.nextPhase=0;if(['floor','floorType'].includes(event.target.name))form.elements.floorConfirmed.checked=false;const origin=document.querySelector(`[data-origin="${event.target.name}"]`);if(origin)origin.textContent='직접 입력';}update();});form.addEventListener('change',update);
-$('fill-example').onclick=()=>{state.exampleLoaded=true;state.listingId=null;state.nextPhase=0;setForm(example);form.elements.floorConfirmed.checked=true;document.querySelectorAll('[data-origin]').forEach(el=>el.textContent='백엔드 가상 예시');update();};
-form.onsubmit=event=>{event.preventDefault();update();if(!form.reportValidity()||floorIssue(read()))return;state.nextPhase=0;state.listingId=null;run();};$('retry').onclick=()=>run();$('process-edit').onclick=()=>{form.elements.confirmed.checked=false;state.listingId=null;state.nextPhase=0;update();show('fill');};$('state-preview').onchange=renderState;
-$('edit').onclick=()=>{setForm(state.activeRecord.values);form.elements.floorConfirmed.checked=state.activeRecord.payload.listing.floor_source==='USER_CONFIRMED';state.exampleLoaded=state.activeRecord.example;state.listingId=null;state.nextPhase=0;update();show('fill');};$('new').onclick=()=>{fresh();show('start');};$('open-list').onclick=list;$('list-back').onclick=()=>show('start');$('clear-demo').onclick=()=>askDelete('ALL');$('delete-cancel').onclick=()=>{$('delete-question').hidden=true;state.pendingDelete=null;};$('delete-confirm').onclick=()=>{state.saved=state.pendingDelete==='ALL'?[]:state.saved.filter(r=>r.id!==state.pendingDelete);list();};
-fresh();chooseMode('address');
-</script></div></body></html>
+const ADDRESSES=[
+ {id:'a',address:'서울특별시 관악구 가상로 10 · 예시 아파트 A (가상 주소)',district:'11620',dong:'봉천동',ledger:{type:'APARTMENT',year:'2005'}},
+ {id:'b',address:'서울특별시 관악구 가상로 20 · 예시 아파트 B (가상 주소)',district:'11620',dong:'봉천동',ledger:{type:'APARTMENT',year:'2015'}},
+ {id:'c',address:'서울특별시 관악구 가상로 30 · 조회 불가 건물 C (가상 주소)',district:'11620',dong:'봉천동',ledger:{}}
+];
+const SAMPLE={address:ADDRESSES[0].address,district:'11620',dong:'봉천동',type:'APARTMENT',basis:'EXCLUSIVE',area:'59.9',deposit:'5000',rent:'80',floor:'5',floorType:'GROUND',year:'2005'};
+function initialState(){return {values:{address:'',district:'',dong:'',type:'',basis:'',area:'',deposit:'',rent:'',maintenance:'',floor:'',floorType:'UNKNOWN',year:''},origins:{},addressId:null,confirmed:false,reviewRequired:false,conflicts:{},captureAddress:'',addressResolution:'',addressCandidates:[]};}
+function mergeAddress(state,a){
+ const s=JSON.parse(JSON.stringify(state)),changed=(Boolean(s.addressId)&&s.addressId!==a.id)||(hasRegion(s)&&(s.values.district!==a.district||s.values.dong!==a.dong));
+ s.addressId=a.id;for(const k of ['address','district','dong']){s.values[k]=a[k];s.origins[k]='address';}
+ s.conflicts={};
+ for(const k of ['type','year']){
+  if(!s.values[k]||s.origins[k]==='ledger'){s.values[k]=a.ledger[k]||'';s.origins[k]=a.ledger[k]?'ledger':'';}
+  else if(a.ledger[k]&&a.ledger[k]!==s.values[k])s.conflicts[k]={current:s.values[k],lookup:a.ledger[k]};
+ }
+ if(changed)s.reviewRequired=Object.keys(s.origins).some(k=>['manual','capture'].includes(s.origins[k])&&s.values[k]!==''&&k!=='address');
+ s.addressResolution='resolved';s.addressCandidates=[];
+ s.confirmed=false;return s;
+}
+function resolveCaptureAddress(state,matches){
+ const s=JSON.parse(JSON.stringify(state));
+ s.captureAddress=s.values.address;
+ if(matches.length===1&&matches[0].exact)return mergeAddress(s,matches[0].address);
+ s.addressId=null;s.addressCandidates=matches.map(m=>m.address);
+ s.addressResolution=matches.length>1?'multiple':matches.length===1?'partial':'not-found';
+ s.confirmed=false;return s;
+}
+const REGIONS={'11620':{name:'서울특별시 관악구',dongs:['봉천동','신림동']}};
+function hasRegion(s){return Boolean(REGIONS[s.values.district]?.dongs.includes(s.values.dong));}
+function regionLabel(s){return hasRegion(s)?REGIONS[s.values.district].name+' '+s.values.dong:'지역 확인 필요';}
+function changeRegion(state,district,dong){
+ const s=JSON.parse(JSON.stringify(state));
+ if(s.values.district===district&&s.values.dong===dong)return s;
+ const hadRegion=hasRegion(s);
+ s.values.district=district;s.values.dong=dong;s.origins.district='manual';s.origins.dong='manual';
+ s.values.address='';s.addressId=null;s.addressCandidates=[];s.addressResolution='';s.conflicts={};
+ for(const k of ['type','year'])if(s.origins[k]==='ledger'){s.values[k]='';s.origins[k]='';}
+ s.reviewRequired=s.reviewRequired||(hadRegion&&Object.keys(s.origins).some(k=>!['district','dong','address'].includes(k)&&['capture','manual'].includes(s.origins[k])&&s.values[k]!==''));
+ s.confirmed=false;return s;
+}
+function validate(s){
+ const v=s.values,e=[];
+ if(v.maintenance!=null&&v.maintenance!==''&&(!Number.isFinite(Number(v.maintenance))||Number(v.maintenance)<0))e.push('관리비는 0 이상의 숫자로 입력하세요.');
+ if(!hasRegion(s))e.push('비교할 시군구와 법정동을 선택하세요.');
+ for(const [k,label] of [['type','주택 유형'],['basis','면적 기준'],['area','면적'],['deposit','보증금'],['rent','월세']])if(v[k]==='')e.push(label+'을 입력하세요.');
+ for(const [k,min,max,label] of [['area',5,200,'면적은 5~200㎡'],['deposit',0,Infinity,'보증금은 0 이상'],['rent',1,500,'월세는 1~500만 원']])if(v[k]!==''&&(!Number.isFinite(Number(v[k]))||Number(v[k])<min||Number(v[k])>max))e.push(label+'의 숫자로 입력하세요.');
+ if(v.year!==''&&(!Number.isInteger(Number(v.year))||Number(v.year)<1950||Number(v.year)>new Date().getFullYear()+1))e.push('건축연도를 올바른 네 자리 연도로 입력하세요.');
+ if(v.floor!==''&&(!Number.isInteger(Number(v.floor))||Number(v.floor)===0))e.push('층은 0을 제외한 정수로 입력하세요.');
+ if(v.floor!==''&&((v.floorType==='GROUND'&&Number(v.floor)<0)||(v.floorType==='BASEMENT'&&Number(v.floor)>0)))e.push('층과 지상·지하 구분을 확인하세요. 지하층은 음수로 입력합니다.');
+ return e;
+}
+function isSample(s){return s.addressId==='a'&&Object.keys(SAMPLE).every(k=>s.values[k]===SAMPLE[k]);}
+function resultView(status){return {prices:['COMPARED','REFERENCE_ONLY'].includes(status),verdict:status==='COMPARED',evidence:['COMPARED','REFERENCE_ONLY'].includes(status)};}
+function costSummary(rent,maintenance,items,median){
+ const valid=v=>v!==''&&v!=null&&Number.isFinite(Number(v))&&Number(v)>=0;
+ const round=v=>Math.round(v*100)/100;
+ const ownTotal=valid(rent)&&valid(maintenance)?round(Number(rent)+Number(maintenance)):null;
+ const estimateTotal=items.length===4&&items.every(valid)?round(items.reduce((a,v)=>a+Number(v),0)):null;
+ return {ownTotal,estimateTotal,referenceTotal:valid(median)&&estimateTotal!==null?round(Number(median)+estimateTotal):null};
+}
+// UI wiring
+const $=id=>document.getElementById(id),esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const names={address:'주소',type:'주택 유형',basis:'면적 기준',area:'면적 (㎡)',deposit:'보증금 (만 원)',rent:'월세 (만 원)',maintenance:'월 관리비 (만 원) · 선택',year:'건축연도 · 선택',floor:'해당 호실 층 · 선택',floorType:'지상·지하 · 선택'};
+const options={type:{APARTMENT:'아파트',OFFICETEL:'오피스텔',MULTI_UNIT:'연립·다세대',DETACHED:'단독·다가구'},basis:{EXCLUSIVE:'전용면적',SUPPLY:'공급면적',UNKNOWN:'미확인'},floorType:{UNKNOWN:'미확인',GROUND:'지상',BASEMENT:'지하'}};
+const sourceNames={ledger:'건물 조회 예시',capture:'캡처 추출 예시',manual:'직접 입력·수정',address:'주소 조회·검색'};
+const display=(k,v)=>(v===''||v==null)?'미입력':(options[k]?.[v]||v);
+let state=initialState(),screen='start',searchBack='start',mode='',resultSnapshot=null;
+function show(name){screen=name;document.querySelectorAll('[data-screen]').forEach(el=>el.hidden=el.dataset.screen!==name);document.querySelectorAll('.steps li').forEach((el,i)=>{if(i===['start','collect','fill','result'].indexOf(name))el.setAttribute('aria-current','step');else el.removeAttribute('aria-current');});document.querySelector('[data-screen="'+name+'"] h2')?.focus();$('live').textContent='';}
+function rows(values){return Object.keys(names).map(k=>'<div class="info-row"><span>'+names[k]+'</span><strong>'+esc(display(k,values[k]))+'</strong><span class="tag">'+esc(sourceNames[state.origins[k]]||'미입력')+'</span></div>').join('');}
+function addressResolutionNote(){
+ if(state.addressResolution==='resolved')return '건물까지 확인됨: 표준 주소를 반영했습니다. 건물 조회로 빈 항목을 보완하며, 사진에서 추출한 값은 임의로 덮어쓰지 않습니다.';
+ if(hasRegion(state))return '법정동까지 확인됨: '+regionLabel(state)+'. 건물 주소 없이 비교할 수 있습니다. 건물 정보를 가져오려면 다음 화면에서 후보를 선택하거나 정확한 주소를 검색하세요.';
+ return '지역 확인 필요: 다음 화면에서 시군구·법정동을 선택하세요. 건물 후보가 있으면 선택할 수도 있습니다. 나머지 사진 정보는 유지됩니다.';
+}
+function collected(){ $('collected').innerHTML='<div class="notice">비교 지역: '+esc(regionLabel(state))+'</div>'+rows(state.values);$('collect-note').textContent=mode==='capture'?'가상 추출·주소 조회 완료: '+addressResolutionNote():'건물까지 확인됨 (가상 조회): 주택 유형과 건축연도만 가져왔습니다. 호실 면적·보증금·월세는 직접 확인해야 합니다.';show('collect');}
+function invalidate(){state.confirmed=false;$('confirmed').checked=false;resultSnapshot=null;}
+function renderFill(){
+ $('address-summary').textContent=state.addressId?state.values.address:'확인된 건물 주소 없음 · 선택 사항';
+ $('region-district').value=state.values.district;
+ $('region-dong').innerHTML='<option value="">법정동을 선택하세요</option>'+(REGIONS[state.values.district]?.dongs||[]).map(d=>'<option>'+esc(d)+'</option>').join('');
+ $('region-dong').value=state.values.dong;$('region-dong').disabled=!state.values.district;
+ $('year-note').hidden=state.values.year!=='';
+ $('capture-address-note').hidden=!state.captureAddress;
+ $('capture-address-note').textContent=state.captureAddress?'사진에서 추출한 주소: '+state.captureAddress+' / '+addressResolutionNote():'';
+ $('capture-candidates').innerHTML=state.addressCandidates.map(a=>'<button class="candidate" data-capture-address="'+a.id+'">'+esc(a.address)+'<span>건물 조회 후보 · 선택하면 지역과 건물 정보를 반영</span></button>').join('');
+ document.querySelectorAll('[data-capture-address]').forEach(b=>b.onclick=()=>{state=mergeAddress(state,ADDRESSES.find(a=>a.id===b.dataset.captureAddress));invalidate();$('validation').hidden=true;renderFill();});
+ $('fields').innerHTML=Object.keys(names).filter(k=>k!=='address').map(k=>{
+ const required=['type','basis','area','deposit','rent'].includes(k);
+ const control=options[k]?'<select id="f-'+k+'"><option value="">선택하세요</option>'+Object.entries(options[k]).map(([v,label])=>'<option value="'+v+'">'+label+'</option>').join('')+'</select>':'<input id="f-'+k+'" type="number" step="'+(['floor','year'].includes(k)?'1':'any')+'" placeholder="'+(k==='floor'?'예: 5 또는 -1':'직접 입력')+'">';
+ return '<label class="field" for="f-'+k+'"><span>'+names[k]+(required?' *':'')+'</span><span class="small">'+esc(sourceNames[state.origins[k]]||'미입력')+'</span>'+control+'</label>';
+ }).join('');
+ Object.keys(names).filter(k=>k!=='address').forEach(k=>{$('f-'+k).value=state.values[k];$('f-'+k).addEventListener('change',e=>{state.values[k]=e.target.value;state.origins[k]='manual';invalidate();const a=ADDRESSES.find(a=>a.id===state.addressId);if(a?.ledger[k]&&a.ledger[k]!==state.values[k])state.conflicts[k]={current:state.values[k],lookup:a.ledger[k]};else delete state.conflicts[k];renderFill();});});
+ $('conflicts').innerHTML=Object.entries(state.conflicts).map(([k,c])=>'<div class="notice"><strong>'+names[k]+' 정보 불일치</strong><p>현재 값 ('+esc(sourceNames[state.origins[k]])+'): '+esc(display(k,c.current))+'<br>건물 조회 예시: '+esc(display(k,c.lookup))+'</p><button data-conflict="'+k+'" data-use="keep">현재 값 확인·유지</button> <button data-conflict="'+k+'" data-use="lookup">조회값 사용</button></div>').join('');
+ document.querySelectorAll('[data-conflict]').forEach(b=>b.onclick=()=>{const k=b.dataset.conflict;if(b.dataset.use==='lookup'){state.values[k]=state.conflicts[k].lookup;state.origins[k]='ledger';}delete state.conflicts[k];invalidate();renderFill();});
+ $('review-box').hidden=!state.reviewRequired;$('review').checked=false;$('confirmed').checked=state.confirmed;
+}
+function openSearch(back){searchBack=back;$('query').value=back==='fill'?(state.addressId?state.values.address:(state.captureAddress||state.values.address)):'';$('address-results').innerHTML='';$('search-note').textContent='빈 검색어로 검색하면 가상 주소 3개를 모두 볼 수 있습니다.';show('search');}
+function reset(){state=initialState();mode='';resultSnapshot=null;$('capture-file').value='';$('extract').disabled=true;$('capture-panel').hidden=true;$('sample-image').hidden=true;$('sample-address-panel').hidden=true;$('refresh-note').hidden=true;$('validation').hidden=true;show('start');}
+$('choose-capture').onclick=()=>{$('capture-panel').hidden=false;$('sample-address-panel').hidden=true;};
+$('choose-address').onclick=()=>{mode='address';openSearch('start');};
+$('choose-manual').onclick=()=>{mode='manual';renderFill();show('fill');};
+$('region-district').onchange=()=>updateRegion($('region-district').value,'');
+$('region-dong').onchange=()=>updateRegion($('region-district').value,$('region-dong').value);
+function updateRegion(district,dong){state=changeRegion(state,district,dong);invalidate();$('validation').hidden=true;$('refresh-note').hidden=false;$('refresh-note').textContent='비교 지역을 변경했습니다. 이전 건물 주소와 조회값은 해제하고, 직접 입력·캡처 값은 유지했습니다.';renderFill();}
+$('capture-file').onchange=()=>{$('sample-image').hidden=true;const f=$('capture-file').files[0],ok=f&&['image/png','image/jpeg','image/webp'].includes(f.type)&&f.size<=8*1024*1024;$('extract').disabled=!ok;$('file-note').textContent=!f?'이미지를 선택하세요.':ok?f.name+' · 첨부 완료 (실제 추출 없음)':'PNG·JPEG·WebP, 8MB 이하 파일을 선택하세요.';};
+$('extract').onclick=()=>{
+ state=initialState();mode='capture';
+ const scenario='exact';
+ const extracted={exact:'서울 관악구 가상로 10',multiple:'서울 관악구 봉천동',dong:'서울 관악구 봉천동',partial:'가상 아파트 A',none:'주소를 읽을 수 없음'};
+ Object.assign(state.values,{address:extracted[scenario],type:'APARTMENT',basis:'EXCLUSIVE',area:'59.9',deposit:'5000',rent:'80'});
+ for(const k of ['address','type','basis','area','deposit','rent'])state.origins[k]='capture';
+ if(scenario==='multiple'||scenario==='dong'){state.values.district='11620';state.values.dong='봉천동';state.origins.district='capture';state.origins.dong='capture';}
+ const matches=scenario==='exact'?[{address:ADDRESSES[0],exact:true}]:scenario==='multiple'?ADDRESSES.map(address=>({address,exact:false})):scenario==='partial'?[{address:ADDRESSES[0],exact:false}]:[];
+ state=resolveCaptureAddress(state,matches);
+ $('refresh-note').hidden=true;$('validation').hidden=true;
+ collected();
+};
+$('search').onclick=()=>{const q=$('query').value.trim(),found=ADDRESSES.filter(a=>(a.address+' '+a.dong).includes(q));$('address-results').innerHTML=found.map(a=>'<button class="candidate" data-address="'+a.id+'">'+esc(a.address)+'<span>'+a.dong+' · 가상 검색 결과</span></button>').join('');$('search-note').textContent=found.length?'원하는 결과를 선택하세요.':'일치하는 가상 주소가 없습니다. 검색어를 지워 전체 예시를 확인하세요.';document.querySelectorAll('[data-address]').forEach(b=>b.onclick=()=>{state=mergeAddress(state,ADDRESSES.find(a=>a.id===b.dataset.address));resultSnapshot=null;if(searchBack==='start'){mode='address';collected();}else{$('refresh-note').hidden=false;$('refresh-note').textContent='선택한 주소의 건물 정보를 갱신했습니다. 조회되지 않은 자동 입력값은 비웠으며, 직접 입력·수정하거나 캡처에서 가져온 값은 유지했습니다.';renderFill();show('fill');}});};
+$('cancel-search').onclick=()=>show(searchBack);
+$('change-address').onclick=()=>openSearch('fill');
+$('collect-back').onclick=reset;$('collect-next').onclick=()=>{renderFill();show('fill');};
+$('fill-back').onclick=()=>show('start');
+$('review').onchange=()=>{state.reviewRequired=!$('review').checked;invalidate();};
+$('confirmed').onchange=()=>{state.confirmed=$('confirmed').checked;};
+$('load-sample').onclick=()=>{state=initialState();state.values={...SAMPLE,maintenance:'8'};state.origins.maintenance='manual';state.addressId='a';for(const k of Object.keys(SAMPLE))state.origins[k]=['type','year'].includes(k)?'ledger':['address','district','dong'].includes(k)?'address':'manual';resultSnapshot=null;$('validation').hidden=true;$('refresh-note').hidden=true;renderFill();$('live').textContent='예시 값을 채웠습니다. 내용을 확인하고 월세 비교하기를 눌러주세요.';};
+$('sample-capture').onclick=()=>{mode='capture';$('sample-address-panel').hidden=true;$('capture-panel').hidden=false;$('capture-file').value='';$('sample-image').hidden=false;$('extract').disabled=false;$('file-note').textContent='가상 캡처 첨부 완료 · 실제 파일 업로드 없음';$('live').textContent='가상 캡처를 넣었습니다. 가상 추출 결과 확인을 눌러 다음 단계로 이동하세요.';};
+$('sample-address').onclick=()=>{mode='address';state=initialState();state.values.address=ADDRESSES[0].address;$('capture-panel').hidden=true;$('sample-address-panel').hidden=false;$('sample-address-value').textContent=ADDRESSES[0].address;resultSnapshot=null;$('live').textContent='가상 주소를 넣었습니다. 건물 정보 가져오기를 눌러 다음 단계로 이동하세요.';};
+$('sample-address-next').onclick=()=>{state=mergeAddress(initialState(),ADDRESSES[0]);mode='address';collected();};
+const statusText={COMPARED:['비교 완료','유사 거래와 입력 월세를 비교했습니다.'],REFERENCE_ONLY:['참고용 결과','비교 조건이 충분히 일치하지 않아 가격의 높고 낮음을 판정하지 않습니다.'],INSUFFICIENT_DATA:['비교 자료 부족','유사 거래가 부족해 기준 가격과 차이를 제공하지 않습니다.'],INPUT_REVIEW_REQUIRED:['입력 정보 재확인 필요','매물 조건을 다시 확인한 뒤 분석을 요청하세요.'],OUT_OF_SCOPE:['지원 범위 밖','이 지역 또는 주택 유형은 분석 지원 범위에 포함되지 않습니다.'],UNCONNECTED:['실제 분석 미연결','입력은 확인했지만 실제 분석 API가 연결되지 않아 가격을 계산하지 않았습니다. 결과 상태 예시는 입력 화면의 가상 매물로 확인할 수 있습니다.']};
+function renderResult(status){
+ const view=resultView(status);$('result-status').textContent=statusText[status][0];$('result-reason').textContent=statusText[status][1];
+ $('comparison-region').textContent=status==='REFERENCE_ONLY'?REGIONS[resultSnapshot.values.district].name+' (가상 확대 범위)':regionLabel(resultSnapshot);
+ $('comparison-type').textContent=display('type',resultSnapshot.values.type);
+ const rent=Number(resultSnapshot.values.rent),diff=Math.round((rent-180)*100)/100,pct=Math.abs(diff/180*100).toFixed(1);
+ $('demo-difference').textContent='입력 월세 '+rent+'만 원 · 가상 기준 180만 원 대비 '+(diff===0?'동일':Math.abs(diff)+'만 원 '+(diff>0?'높음':'낮음')+' ('+(diff>0?'+':'−')+pct+'%)');
+ $('demo-verdict').textContent='가상 기준과 비교한 월세가 '+(diff===0?'같습니다.':diff>0?'높습니다.':'낮습니다.');
+ $('prices').hidden=!view.prices;$('verdict').hidden=!view.verdict;$('evidence').hidden=!view.evidence;
+ $('expansion').textContent=status==='REFERENCE_ONLY'?'범위 확대 예시: 동 단위 거래 부족으로 자치구까지 확대했습니다. 이는 화면 확인용 가상 상황입니다.':'비교 범위 확대 없음 (가상 예시)';
+ $('result-summary').innerHTML='비교 지역: '+esc(regionLabel(resultSnapshot))+'<br>'+Object.keys(names).filter(k=>k!=='address'||resultSnapshot.addressId).map(k=>esc(names[k])+': '+esc(display(k,resultSnapshot.values[k]))).join('<br>')+(resultSnapshot.values.year===''?'<br>건축연도 미입력: 건축연도 조건 없이 비교':'');
+ $('scenario-panel').hidden=false;
+ renderCosts(view);
+}
+function renderCosts(view){
+ const demo=view.prices;
+ const amounts=demo?[1,3,4,3]:[null,null,null,null];
+ const v=resultSnapshot.values,totals=costSummary(v.rent,v.maintenance,amounts,demo?180:null);
+ const money=v=>v==null?'미제공':Number(v).toLocaleString('ko-KR',{maximumFractionDigits:2})+'만 원 / 월';
+ const ownFee=v.maintenance===''||v.maintenance==null?'미입력':money(v.maintenance);
+ $('cost-summary').innerHTML='<strong>내 매물: 입력 금액 기준</strong><br>월세 '+money(v.rent)+' + 관리비 '+ownFee+'<br>합계: '+(totals.ownTotal===null?'관리비 입력 후 계산':money(totals.ownTotal))+'<hr><strong>비교 기준: 참고 추정값</strong><br>기준 월세 '+(demo?money(180):'미제공')+' + 예상 공과금·인터넷 '+money(totals.estimateTotal)+'<br>합계: '+money(totals.referenceTotal);
+ $('cost-breakdown').innerHTML=['수도','전기','가스','인터넷'].map((label,i)=>'<div class="info-row"><span>'+label+'</span><strong>'+money(amounts[i])+'</strong><span class="tag">'+(demo?'가상 추정 예시':'자료 미제공')+'</span></div>').join('')+'<div class="info-row"><span>추정 합계</span><strong>'+money(totals.estimateTotal)+'</strong><span></span></div>';
+ $('cost-source').textContent=demo?'디자인용 가상 금액: 수도 1·전기 3·가스 4·인터넷 3만 원, 합계 11만 원. 실제 지역 평균 자료가 아니며 적용 지역·기준 시점·출처는 미확정입니다.':'관리비 추정 자료가 연결되지 않았습니다. 자료가 없는 항목은 0원으로 처리하지 않습니다.';
+}
+$('analyze').onclick=()=>{
+ const e=validate(state);if(Object.keys(state.conflicts).length)e.push('불일치한 정보의 값을 확인하세요.');if(state.reviewRequired)e.push('지역·건물 변경 후 유지된 정보를 재확인하세요.');if(!state.confirmed)e.push('입력 정보 최종 확인에 체크하세요.');
+ $('validation').hidden=e.length===0;$('validation').innerHTML=e.map(esc).join('<br>');if(e.length){$('validation').scrollIntoView({block:'center'});return;}
+ resultSnapshot=JSON.parse(JSON.stringify(state));$('scenario').value='COMPARED';renderResult('COMPARED');show('result');
+};
+$('scenario').onchange=()=>renderResult($('scenario').value);
+$('edit').onclick=()=>{invalidate();renderFill();show('fill');};$('new').onclick=reset;
+show('start');
+</script></body></html>

@@ -1,0 +1,31 @@
+# Only runtime source is sent to the Docker builder.
+**
+!backend/
+!backend/app/
+!backend/app/**
+!backend/scripts/
+!backend/scripts/*.py
+!backend/requirements.txt
+!backend/Dockerfile
+!backend/__init__.py
+!machine/
+!machine/analysis_internal/
+!machine/analysis_internal/engine_v2.py
+!machine/analysis_internal/common.py
+!machine/analysis_internal/configs/
+!machine/analysis_internal/configs/candidate_v2.json
+!machine/analysis_internal/configs/trust_coef_v2.json
+# Exclude local secrets even within source directories.
+**/.env*
+**/*.key
+**/*.pem
+**/*.sqlite*
+**/__pycache__
+**/*.pyc
+
+!machine/analyze.py
+!machine/compare_rent.py
+!machine/normalize_listing.py
+!machine/integration_kit_v1.1/
+!machine/integration_kit_v1.1/image_extraction_example.json
+!machine/integration_kit_v1.1/image_prompt_ko.md

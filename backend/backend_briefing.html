@@ -1,0 +1,100 @@
+<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>매물 시세 비교 서비스 백엔드 개발 브리핑</title><style>body{margin:0;background:#f5f7fa;color:#10283d;font:15px/1.8 "Malgun Gothic",sans-serif}main{max-width:960px;margin:0 auto;padding:40px 36px 70px}.meta{font-size:12px;letter-spacing:1px;color:#536c83}h1{font-size:32px;line-height:1.35;color:#071b29;margin:12px 0 16px}h2{font-size:20px;border-bottom:1px solid #243a4b;padding-bottom:9px;margin:30px 0 12px}section.page{margin:0 0 56px}section.page+section.page{border-top:2px solid #cfdae4;padding-top:28px}p{margin:12px 0}table{border-collapse:separate;border-spacing:0;width:100%;background:white;border:1px solid #ced9e3;border-radius:6px;overflow:hidden;margin:14px 0}th,td{padding:12px 14px;border-bottom:1px solid #d5dfe8;text-align:left;vertical-align:top;overflow-wrap:anywhere}th{background:#eaf0f5;font-size:13px;color:#425d75}tr:last-child td{border-bottom:0}a{color:#175d8b}footer{color:#5c7185;font-size:12px;border-top:1px solid #cdd8e2;padding-top:18px}@media(max-width:650px){main{padding:24px 16px}h1{font-size:25px}th,td{padding:8px;font-size:12px}}@media print{body{background:white}main{padding:0}.page{break-before:page}.page:first-child{break-before:auto}}</style><main>
+<section class="page"><div class="meta">백엔드 개발 브리핑 최종본 · 2026-10-19 · 1/5 · 기준 02f95e6</div><h1>백엔드 개발·팀 연결 최종 보고</h1><p>분석·프론트 공유용 | 2026-10-19 | 기준 코드 02f95e6. 관리비는 분석 담당의 자료 검증까지 보류합니다. 실제 확인한 내용과 남은 일을 나누어 정리했습니다.</p>
+<h2>한눈에 보는 현재 상태</h2>
+<table><colgroup><col style="width:18.0%"><col style="width:59.0%"><col style="width:23.0%"></colgroup><thead><tr><th>항목</th><th>우리가 만든 것·확인한 것</th><th>상태</th></tr></thead><tbody>
+<tr><td>직접 입력</td><td>주소 코드·면적·금액·층·날짜 검사, 사용자 확인, 매물 저장</td><td>검증 완료</td></tr>
+<tr><td>분석 연결</td><td>기존 v1.1 분석 호출, 실제 정제 실거래 로딩, 결과 저장·조회</td><td>검증 완료</td></tr>
+<tr><td>DB·자료 보호</td><td>별도 팀 SQLite DB, 사용자 세션별 조회·삭제, 온라인 백업</td><td>검증 완료</td></tr>
+<tr><td>다른 장소 접속</td><td>접속키로 보호한 임시 HTTPS 서버, 공개 주소 경유 요청 확인</td><td>검증 완료*</td></tr>
+<tr><td>주소·이미지 입력</td><td>검색·추출·검토용 초안 코드, 사용자 확인 후 등록 구조</td><td>모의 검증 / 실제 키 미검증</td></tr>
+<tr><td>관리비·공과금</td><td>공유 서버에서 관련 API 차단, 보고서 관련 항목 ON_HOLD</td><td>보류</td></tr>
+<tr><td>프론트 화면·상시 서버</td><td>프론트 담당 PC 최종 연결, 고정 주소 운영 배포</td><td>미완료</td></tr>
+</tbody></table>
+<h2>현재 서버의 의미</h2>
+<p>* 공개 HTTPS 검사는 현재 PC에서 외부 주소를 경유해 수행했습니다. 프론트 담당 PC에서 화면 연결까지 확인한 것은 아닙니다.</p>
+<p>현재는 팀 개발용 임시 서버입니다. 이 PC가 켜져 있어야 하며 서버를 다시 시작하면 주소가 바뀝니다. 실제 고객용 로그인·고정 주소·상시 운영 서버는 별도 준비가 필요합니다.</p>
+<h2>이번 검증과 코드 반영</h2>
+<p>전체 테스트 128개 통과, 실패 없음. 도구의 폐기 예정 안내 1건이 있습니다. 공개 HTTPS로 접속 보호, 저장→실거래 분석→조회→삭제, 사용자 간 접근 차단, 관리비 보류, 백업 무결성을 확인했습니다.</p>
+<p>검사용 가상 매물·세션은 모두 삭제했습니다. 실제 매물 가격 정확도나 관리비 자료의 신뢰성을 입증한 테스트가 아닙니다. 개인 GitHub push 완료: 02f95e6c6b70a800f16c04f4b284067ed4042f07.</p>
+</section>
+<section class="page"><div class="meta">백엔드 개발 브리핑 최종본 · 2026-10-19 · 2/5 · 기준 02f95e6</div><h1>프론트에게 전달할 접속 정보</h1><p>백엔드가 서버·DB를 준비했고, 프론트는 화면에서 아래 주소로 API 요청을 보내면 됩니다. DB에 직접 접속하지 않습니다.</p>
+<h2>서버 주소와 접속키</h2>
+<p>https://doe-stands-starsmerchant-voices.trycloudflare.com</p>
+<p>2026-10-19 19:03 한국시간 확인: 서버 정상, 실거래 데이터 READY. 이 주소는 API 주소이므로 일반 웹사이트처럼 화면이 뜨지 않을 수 있습니다. 키 없이 열면 401이 정상입니다.</p>
+<p>접속키는 문서에 포함하지 않습니다. PM이 team-access.key 파일을 개인적으로 따로 전달합니다. 키를 단체 채팅·GitHub·스크린샷·프론트 배포 파일에 넣지 마세요.</p>
+<h2>처음 연결하는 순서</h2>
+<table><colgroup><col style="width:25.0%"><col style="width:75.0%"></colgroup><thead><tr><th>순서</th><th>프론트에서 할 일</th></tr></thead><tbody>
+<tr><td>1. 키 입력</td><td>팀 테스트 시작 시 접속키를 입력받고 메모리에서만 사용합니다.</td></tr>
+<tr><td>2. 세션 발급</td><td>POST /sessions. 헤더 X-Team-Key: 별도 전달받은 키.</td></tr>
+<tr><td>3. 토큰 보관</td><td>응답의 token을 해당 사용자 세션에 사용합니다. 토큰은 다른 사용자와 공유하지 않습니다.</td></tr>
+<tr><td>4. 나머지 요청</td><td>X-Team-Key와 Authorization: Bearer &lt;token&gt;을 함께 보냅니다. JSON 요청에는 Content-Type: application/json도 추가합니다.</td></tr>
+</tbody></table>
+<h2>화면 실행 주소</h2>
+<p>현재 허용 주소: http://localhost:5173, http://localhost:3000. 프론트 담당 PC에서도 이 주소로 개발 화면을 띄우면 됩니다. 다른 포트·배포 주소를 쓰면 정확한 화면 주소를 백엔드에 알려주세요.</p>
+<p>브라우저가 먼저 보내는 OPTIONS 확인 요청에는 키를 직접 넣지 않습니다. 실제 API 요청에 넣으면 됩니다. /health·/capabilities·/openapi.json도 접속키가 필요합니다.</p>
+<h2>세션을 끝낼 때</h2>
+<p>DELETE /sessions/current는 해당 세션의 저장 자료도 삭제합니다. 창을 닫을 때 자동 호출하지 말고, 사용자에게 삭제 의미를 알려주는 명시적 종료 버튼에 연결하세요. 토큰을 잃으면 계정 로그인으로 복구하는 기능은 아직 없습니다.</p>
+</section>
+<section class="page"><div class="meta">백엔드 개발 브리핑 최종본 · 2026-10-19 · 3/5 · 기준 02f95e6</div><h1>API 사용 순서와 입력 기준</h1><p>함께 제공한 listing_input_example.json과 frontend_api_example.js를 사용하면 핵심 흐름을 바로 연결할 수 있습니다. 예시는 검사용 가상 매물이며 실제 광고가 아닙니다.</p>
+<h2>핵심 API</h2>
+<table><colgroup><col style="width:18.0%"><col style="width:48.0%"><col style="width:34.0%"></colgroup><thead><tr><th>기능</th><th>요청</th><th>응답·활용</th></tr></thead><tbody>
+<tr><td>서버 확인</td><td>GET /health</td><td>data_status가 READY인지 확인</td></tr>
+<tr><td>지원 범위</td><td>GET /capabilities</td><td>실제 데이터 지역·지원 기능 확인</td></tr>
+<tr><td>매물 저장</td><td>POST /listings</td><td>201, 응답 id를 listingId로 사용</td></tr>
+<tr><td>월세 분석</td><td>POST /listings/{listingId}/analyses</td><td>201, result의 상태를 확인</td></tr>
+<tr><td>전체 결과</td><td>GET /listings/{listingId}/report</td><td>property·rent 중심으로 화면 구성</td></tr>
+<tr><td>내 매물 목록</td><td>GET /listings?limit=20&amp;offset=0</td><td>items·has_more로 다음 페이지 처리</td></tr>
+<tr><td>매물 삭제</td><td>DELETE /listings/{listingId}</td><td>204, 해당 매물과 연결 분석 삭제</td></tr>
+<tr><td>세션·자료 삭제</td><td>DELETE /sessions/current</td><td>204, 해당 세션 자료 전체 삭제</td></tr>
+</tbody></table>
+<h2>입력 규칙</h2>
+<p>schema_version는 &quot;1.1&quot;. listing / options / confirmation 구조를 유지합니다. 돈은 만원, 면적은 ㎡입니다. 예: 월세 80만원은 80으로 보냅니다. 모르는 값은 계약이 허용하는 null·UNKNOWN으로 두며 임의로 0을 넣지 않습니다.</p>
+<p>유형: APARTMENT=아파트, MULTI_UNIT=연립·다세대(빌라), OFFICETEL=오피스텔, DETACHED_MULTI=단독·다가구. 원룸은 별도 건물 유형이 아닙니다. 실제 법적 건물 유형을 선택합니다.</p>
+<p>주소는 구 코드·법정동 코드와 건물 동·호수를 구분합니다. 아파트·빌라·오피스텔은 전용면적 기준입니다. 사용자 확인 전 입력은 저장할 수 있지만 가격 판단에 사용하면 안 됩니다.</p>
+<h2>결과 화면에서 주의할 점</h2>
+<p>HTTP 201은 요청 처리가 됐다는 뜻입니다. 분석 가능 여부는 result.status를 따로 확인합니다. 통합 보고서에서는 rent.result가 분석 결과입니다. 관리비 관련 네 항목은 ON_HOLD이므로 합계·추천 비용을 표시하지 않습니다.</p>
+<p>가격 범위·차액·차이율·표본 수 등은 실제 응답에 있는 값만 표시하고, 없는 값은 미제공으로 표시합니다. 비교 거래 개별 목록·같은 건물 우선 비교·새 신뢰도 %는 현재 연결 코드에서 제공하지 않습니다.</p>
+</section>
+<section class="page"><div class="meta">백엔드 개발 브리핑 최종본 · 2026-10-19 · 4/5 · 기준 02f95e6</div><h1>프론트 화면·오류·캡처 처리</h1><p>사용자가 다음에 무엇을 해야 하는지 쉽게 보이게 만드는 것이 프론트 통합의 핵심입니다. 가격이 높다는 이유만으로 사기·불법이라고 표시하지 않습니다.</p>
+<h2>분석 상태에 따른 화면</h2>
+<table><colgroup><col style="width:44.0%"><col style="width:56.00000000000001%"></colgroup><thead><tr><th>result.status</th><th>화면 안내</th></tr></thead><tbody>
+<tr><td>COMPARED</td><td>비교 결과를 표시합니다. 가격 위치일 뿐 사기 판정이 아닙니다.</td></tr>
+<tr><td>INPUT_REVIEW_REQUIRED</td><td>입력 내용을 확인·수정하도록 안내합니다.</td></tr>
+<tr><td>REFERENCE_ONLY</td><td>참고용임을 표시하고 확정 판단처럼 보여주지 않습니다.</td></tr>
+<tr><td>INSUFFICIENT_DATA</td><td>비교 자료가 부족하다고 안내합니다. 임의 가격을 만들지 않습니다.</td></tr>
+<tr><td>OUT_OF_SCOPE</td><td>현재 지원 데이터 범위 밖이라고 안내합니다.</td></tr>
+</tbody></table>
+<h2>HTTP 오류 처리</h2>
+<table><colgroup><col style="width:18.0%"><col style="width:82.0%"></colgroup><thead><tr><th>코드</th><th>화면·개발 처리</th></tr></thead><tbody>
+<tr><td>401</td><td>팀 접속키 또는 세션 토큰을 확인합니다.</td></tr>
+<tr><td>404</td><td>현재 세션에서 조회할 수 없는 자료입니다.</td></tr>
+<tr><td>413</td><td>이미지 8MB·전체 요청 9MB 제한을 안내합니다.</td></tr>
+<tr><td>422</td><td>잘못된 입력 항목을 수정하도록 안내합니다.</td></tr>
+<tr><td>503</td><td>실거래 데이터·외부 API 키 미연결 또는 관리비 보류를 안내합니다.</td></tr>
+</tbody></table>
+<h2>주소·캡처는 이렇게 연결합니다</h2>
+<p>주소: GET /addresses/search?q=검색어 → 후보 선택 → 법정동 코드 확인. 캡처: POST /extractions에 multipart 필드 file 업로드 → GET /extractions/{id}/listing-draft → 사용자가 확인·수정 → source_extraction_id와 IMAGE_REVIEWED 확인 정보로 POST /listings.</p>
+<p>현재 주소·캡처 API의 실제 외부 키 호출은 미검증입니다. 직접 입력을 기본으로 먼저 연결하세요. 캡처에 없는 값, 여러 매물이 나온 경우, 불명확한 층은 확인 요청으로 처리하고 사용자 확인 없이 분석에 쓰지 않습니다.</p>
+<h2>이번 화면 완료 기준</h2>
+<p>직접 입력 → 확인 → 저장 → 분석 → 결과 → 내 목록 → 삭제까지 프론트 담당 PC에서 연결합니다. 정상·확인 필요·자료 부족·범위 밖·통신 오류 화면을 확인합니다. 키와 토큰이 화면·로그·저장소에 노출되지 않는지도 함께 확인합니다.</p>
+</section>
+<section class="page"><div class="meta">백엔드 개발 브리핑 최종본 · 2026-10-19 · 5/5 · 기준 02f95e6</div><h1>개발 근거·남은 일·담당자 요청</h1><p>분석 담당의 ZIP 원본 기능과 백엔드에서 추가한 기능을 구분했습니다. 담당자의 전체 진행률을 임의로 추정하지 않았습니다.</p>
+<h2>어떤 자료를 어떻게 연결했나</h2>
+<table><colgroup><col style="width:23.0%"><col style="width:77.0%"></colgroup><thead><tr><th>구분</th><th>내용</th></tr></thead><tbody>
+<tr><td>전달 ZIP</td><td>ai-wolse-trap-detector-main (1).zip 기준. 이전 전달본과 동일한 원본으로 확인한 기록을 유지합니다.</td></tr>
+<tr><td>원본 분석 유지</td><td>백엔드 → normalize_listing.analyze_raw() → analyze.analyze_listing(). 기존 v1.1 계약·분석 정책을 임의 변경하지 않았습니다.</td></tr>
+<tr><td>로컬 추가 개발</td><td>FastAPI·SQLite, 입력 검증, 사용자 세션·저장·조회·삭제, 추출 검토 구조, 보고서, 공유 서버·키 보호·백업을 연결했습니다.</td></tr>
+<tr><td>실거래 범위</td><td>서울 강서·관악·광진·노원·동작·마포 정제 데이터 연결. 현재 지원 범위는 /capabilities 응답을 기준으로 확인합니다. 서울 전체 지원으로 표시하지 않습니다.</td></tr>
+<tr><td>기획과 차이</td><td>기획·최신 시연은 같은 건물 우선. 현재 연결 코드는 동 → 조건 완화 → 구 비교. 개별 비교 거래 목록도 미제공입니다.</td></tr>
+</tbody></table>
+<h2>담당자별 다음 행동</h2>
+<table><colgroup><col style="width:23.0%"><col style="width:77.0%"></colgroup><thead><tr><th>담당</th><th>요청·완료 기준</th></tr></thead><tbody>
+<tr><td>프론트</td><td>접속 주소·별도 키로 핵심 화면 연결. 실행 주소와 오류가 난 단계·HTTP 코드 공유. 키·실제 개인 주소는 오류 자료에서 제거.</td></tr>
+<tr><td>분석 담당</td><td>같은 건물 우선 비교·거래 목록·신뢰도 등 최신 실행 코드와 입력·출력 계약 전달. 데이터 갱신 방식·필수 컬럼 확정. 관리비 자료는 검증 후 재논의.</td></tr>
+<tr><td>백엔드인 우리</td><td>프론트 연동 오류 수정, 최신 분석 계약 수령 후 차이 검토·연결. 실제 키가 준비되면 주소·캡처 호출 검증.</td></tr>
+<tr><td>PM인 사용자</td><td>접속 주소와 키 파일을 따로 전달. 학교 제공 공용 서버·클라우드 계정 유무 확인. 비용·계정이 필요한 상시 배포는 환경 확정 후 진행.</td></tr>
+</tbody></table>
+<h2>팀 공유 요약</h2>
+<p>월세 핵심 백엔드와 임시 원격 테스트 서버·별도 DB를 준비했습니다. 프론트는 직접 입력부터 결과·삭제까지 연결해 주세요. 관리비는 계속 보류합니다. 분석 최신 시연과 현재 코드의 차이는 최신 실행 코드·계약을 받은 뒤 연결합니다. 고정 주소의 상시 운영 배포는 아직 완료되지 않았습니다.</p>
+</section>
+<footer>분석 담당과 프론트 담당 공유용 · 확인된 구현과 미검증 항목을 구분한 자료입니다.</footer></main></html>

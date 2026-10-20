@@ -1,3 +1,4 @@
+from pathlib import Path
 """Team v0.2 direct-input flow: real loaded region choices and existing v1.1 contract."""
 import pandas as pd
 from fastapi.testclient import TestClient
@@ -56,4 +57,5 @@ def test_missing_data_does_not_invent_region_choices(tmp_path):
 def test_team_v11_source_matches_current_runtime_bridge():
     # Fail visibly if a later ZIP changes analysis policy before explicit adapter review.
     for name in ('analyze.py','normalize_listing.py','compare_rent.py'):
-        assert (ROOT/name).read_bytes()==(ROOT/'machine'/name).read_bytes()
+        import importlib
+        assert Path(importlib.import_module(name[:-3]).__file__).resolve()==(ROOT/'machine'/name).resolve()

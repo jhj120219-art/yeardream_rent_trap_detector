@@ -1,3 +1,21 @@
+# 팀 백엔드 실행·연결 안내
+
+최신 공유 자료: [쉬운 보고서](reports/team_connection_20261020/team_connection_report.html) · [프론트 연결 방법](FRONTEND_HANDOFF.md).
+
+팀 저장소 루트에서 실행합니다. 분석 코드는 `machine/` 원본을 직접 불러옵니다. `backend/backend/` 같은 중첩 폴더를 만들거나 분석 파일을 루트로 복사하지 않습니다.
+
+```shell
+python -m pip install -r backend/requirements.txt
+python -m uvicorn backend.app.main:app --host 127.0.0.1 --port 8000
+```
+
+실행 전 [MySQL 설정](MYSQL.md)과 `.env.example`을 참고해 비공개 환경변수를 설정해주세요. 정제 CSV는 `RENT_CLEAN_CSV`로 지정합니다. 원본·DB·키는 이 저장소에 없습니다. 데이터가 없으면 준비/분석 API는 503으로 표시합니다. 기본 설치 엔진은 v1이며, 현재 팀 서버처럼 개선판을 쓰려면 `ANALYSIS_ENGINE=v2`, `V2_ENABLED=true`, `SAME_BUILDING_ENABLED=false`, 관리비 보류는 `MAINTENANCE_ENABLED=false`를 사용합니다. 외부 공개 시 접속키와 허용 프론트 주소를 설정하는 [팀 서버 안내](TEAM_SERVER.md)를 따릅니다.
+
+기존 `backend_briefing.*`와 루트 JSON 예시는 이전 전달 기록입니다. 최신 예시는 `examples/api_responses.json`, 연결 모듈은 `frontend_api_example.mjs`를 사용해주세요.
+
+
+---
+
 > **관리비 입력 후속 반영:** 광고 총액·포함 항목·명시 금액·설명의 입력·저장·표시는 지원합니다. 적정성 비교·예상 계산은 계속 보류합니다. [프론트 입력 규격](ADVERTISED_COSTS.md). 팀 폴더에서 MySQL 포함 전체 181개 검사를 통과했으며 같은 동네 월세 계산은 유지됩니다.
 
 ## 현재 진행 범위 — 2026-10-20 확정

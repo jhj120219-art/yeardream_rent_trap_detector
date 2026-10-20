@@ -8,7 +8,7 @@ import pytest
 from fastapi.testclient import TestClient
 from PIL import Image
 import compare_rent
-from backend.app.config import Settings, ROOT
+from backend.app.config import Settings, ROOT, ANALYSIS_ROOT
 from backend.app.main import create_app
 from backend.app.vision import image_url, validate_output, TEMPLATE, extract_image
 from backend.scripts.import_data import import_raw
@@ -262,7 +262,7 @@ def test_team_normalize_regressions_in_isolation(tmp_path):
     import subprocess
     import sys
     for name in ('test_normalize.py','normalize_listing.py','analyze.py','compare_rent.py'):
-        shutil.copy2(ROOT/name,tmp_path/name)
+        shutil.copy2(ANALYSIS_ROOT/name,tmp_path/name)
     (tmp_path/'output').mkdir()
     proc=subprocess.run([sys.executable,'test_normalize.py'],cwd=tmp_path,capture_output=True,text=True)
     assert proc.returncode==0,proc.stderr

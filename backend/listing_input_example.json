@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.1",
+  "listing": {
+    "district_code": "11620",
+    "legal_dong_code": "1162010100",
+    "building_type": "APARTMENT",
+    "area_m2": 59.9,
+    "area_basis": "EXCLUSIVE",
+    "deposit_10k_krw": 5000,
+    "rent_10k_krw": 80,
+    "built_year": 2005,
+    "floor": 5,
+    "floor_type": "GROUND",
+    "floor_source": "USER_CONFIRMED",
+    "as_of": "2026-10-19",
+    "address_text": "검사용 가상 주소",
+    "unit_ho": null
+  },
+  "options": {},
+  "confirmation": {
+    "user_confirmed": true,
+    "input_source": "ADDRESS_MANUAL",
+    "confirmed_fields": [
+      "floor"
+    ]
+  }
+}

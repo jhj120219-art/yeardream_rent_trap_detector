@@ -1,0 +1,7 @@
+최신 프론트 연결 안내 — 2026-10-20
+
+FRONTEND_HANDOFF.md와 reports/team_connection_20261020/team_connection_report.pdf를 먼저 확인해주세요.
+frontend_api_example.mjs를 화면 버튼에 연결해주세요. 기존 .js 파일은 최신 모듈을 다시 내보냅니다.
+동네 월세 비교로 진행하며 같은 건물 우선 비교와 관리비는 보류합니다.
+서버 주소와 팀 접속키는 별도로 전달합니다. 키는 GitHub에 올리지 않습니다.
+backend_briefing.html/pdf와 기존 JSON 예시는 이전 전달 기록입니다. 최신 API 규격·상태는 FRONTEND_HANDOFF.md와 examples/api_responses.json을 참고해주세요.

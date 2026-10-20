@@ -8,7 +8,7 @@
 - `DB_AUTO_INIT=false`: 서버 시작 시 테이블 생성 금지. 기본값 true는 기존 개발/테스트 호환용이며 배포 Compose는 false로 고정한다. 기존 스키마가 없거나 DB 접근에 실패하면 `/ready`는 503이다.
 - `backend/scripts/init_mysql.py`: 관리자/마이그레이션 계정으로 명시적으로 실행하는 별도 테이블 초기화. CREATE IF NOT EXISTS만 수행한다. 운영 애플리케이션 계정에는 SELECT/INSERT/DELETE만 부여할 수 있다. 기존 테이블의 구조를 자동 업그레이드하지 않는다.
 - `backend/compose.deploy.yml`: 앱만 실행, 외부 MySQL 사용, UID 10001, 읽기 전용 루트·CSV·키 파일, tmpfs, 권한 제거, 로그 회전, 로컬 8000 바인딩, 키를 읽는 /ready healthcheck. 자동 스키마 초기화·관리비 기능은 비활성화한다.
-- `.dockerignore`: 실행에 필요한 소스·프롬프트만 builder에 전달한다. `.env`, 키, 인증서, 개인 DB, 원본 CSV, Git 이력, 테스트/가상환경을 이미지 컨텍스트에서 제외한다.
+- `backend/Dockerfile.dockerignore`: 실행에 필요한 소스·프롬프트만 builder에 전달한다. `.env`, 키, 인증서, 개인 DB, 원본 CSV, Git 이력, 테스트/가상환경을 이미지 컨텍스트에서 제외한다.
 
 ## 서버에서 준비할 private 파일
 
