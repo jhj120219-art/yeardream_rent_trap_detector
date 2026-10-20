@@ -122,6 +122,7 @@ def create_app(settings=None, pool=None, extractor=None):
             "comparable_transactions_available": False,
             "search_scope": "DONG_THEN_RELAXED_THEN_DISTRICT",
             "maintenance_enabled": settings.maintenance_enabled,
+            "advertised_costs_input_supported": True,
             "team_access_required": settings.shared_mode,
             "location_catalog_available": hasattr(app.state.pool,'backend_locations'),
             "retry_key_supported": True,
@@ -213,7 +214,7 @@ def create_app(settings=None, pool=None, extractor=None):
             for field in ('maintenance', 'utility_costs', 'monthly_cost', 'utility_estimate'):
                 report[field]={'state':'ON_HOLD'}
             report['workflow']['next_actions']=[action for action in report['workflow']['next_actions'] if 'MAINTENANCE' not in action]
-            report['workflow']['notice']='관리비·공과금 비교는 자료 검증 중으로 보류합니다. 월세 분석만 사용하세요.'
+            report['workflow']['notice']='광고 관리비·포함 항목은 advertised_costs에서 확인할 수 있습니다. 관리비·공과금 비교와 예상 비용 계산은 자료 검증 중으로 보류합니다.'
         return report
 
     @app.delete('/listings/{listing_id}',status_code=204)

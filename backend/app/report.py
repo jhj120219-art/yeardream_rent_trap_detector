@@ -1,16 +1,7 @@
 """매물 전체 결과의 읽기 전용 조합. 분석 정책과 기존 API 응답은 변경하지 않는다."""
-import math
 from .cost_items import cost_items
-
-
-def money(value):
-    if value is None or isinstance(value,bool):
-        return None
-    try:
-        number=float(str(value).replace(',','').replace('만원','').strip())
-    except (ValueError,TypeError):
-        return None
-    return number if math.isfinite(number) and number >= 0 else None
+from .report_money import advertised_money as money
+from .advertised_costs import advertised_costs
 
 
 def build_report(listing, analysis, evidence, data_status):
@@ -43,6 +34,7 @@ def build_report(listing, analysis, evidence, data_status):
         next_actions.append('REVIEW_MAINTENANCE_EVIDENCE')
     return {
         'report_version':'1.0','listing_id':listing['id'],
+        'advertised_costs':advertised_costs(options,confirmed),
         'property':{'input':raw['listing'],'validation':listing['validation'],
                     'confirmation':raw['confirmation'],'links':listing['links']},
         'rent':{'state':result['status'] if result else 'NOT_ANALYZED',

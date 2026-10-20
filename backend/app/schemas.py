@@ -14,6 +14,13 @@ class Confirmation(BaseModel):
 
 
 class ListingInput(BaseModel):
+    @field_validator('options')
+    @classmethod
+    def validate_advertised_costs(cls, value):
+        from .advertised_costs import validate_advertised_options
+        validate_advertised_options(value)
+        return value
+
     model_config = ConfigDict(extra="forbid")
     schema_version: Literal["1.1"] = "1.1"
     listing: dict[str, Any]
