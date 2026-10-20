@@ -1,5 +1,7 @@
 # 다른 장소에서 함께 쓰는 팀 테스트 서버
 
+> 주소 준비: 임시 호스트가 생성됐다는 로그만으로 접속 준비 완료를 판단하지 않는다. 시작 도구가 외부 HTTPS /ready를 접속키로 확인한 뒤에만 새 주소를 기록한다. 준비 중에는 접속주소.txt에 준비 중으로 표시한다. 백엔드 /ready가 실패하면 주소를 공유하지 않고 종료한다. 저장·분석 재시도는 RETRY_REQUESTS.md의 선택 Idempotency-Key 사용법을 따른다.
+
 > 2026-10-20: 현재 PC는 MySQL 팀 DB로 전환했다. 아래 SQLite 설명은 이전 실행 기록이며 현재 설정은 [MYSQL.md](MYSQL.md) 최신 절을 따른다. 시작 시 `--env-file`로 비공개 MySQL 환경 파일을 읽는다. 공유 검사도 `python -m backend.tests.smoke_shared --runtime <팀 runtime> --env-file <team.env>`를 사용한다. 임시 주소는 서버 재시작 때 바뀌므로 이전 보고서 링크 대신 runtime의 `접속주소.txt`를 확인한다.
 
 > MySQL을 사용할 때는 실행 전에 `DATABASE_URL`을 설정합니다. 이 경우 SQLite 파일·자동 백업은 사용하지 않으며 MySQL 백업을 별도로 운영해야 합니다. [전환 안내](MYSQL.md)를 먼저 확인하세요. `DATABASE_URL`이 없을 때만 기존 팀 SQLite 모드가 유지됩니다.

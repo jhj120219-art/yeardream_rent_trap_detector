@@ -5,7 +5,7 @@ import hashlib
 import json
 import secrets
 import sqlite3
-from uuid import uuid4
+from uuid import uuid4, uuid5, NAMESPACE_URL
 from pathlib import Path
 from urllib.parse import urlsplit, unquote, parse_qs
 
@@ -58,6 +58,11 @@ def digest(token):
 
 
 class InvalidReference(ValueError):
+    pass
+
+
+class RequestConflict(ValueError):
+    """A retry key cannot be reused for changed input or a deleted result."""
     pass
 
 
@@ -146,18 +151,52 @@ class Store:
             row = db.execute("SELECT id FROM sessions WHERE token_hash=?", (digest(token),)).fetchone()
         return row['id'] if row else None
 
-    def create(self, owner, kind, payload, parent=None, links=None):
+    def request_id(self, owner, request):
+        operation, key, fingerprint = request
+        return str(uuid5(NAMESPACE_URL, owner+'\0'+operation+'\0'+key))
+
+    def replay(self, owner, kind, request):
+        if request is None:
+            return None
+        record=self.get(self.request_id(owner,request),owner,'request_receipt')
+        if record is None:
+            return None
+        if record['fingerprint'] != request[2]:
+            raise RequestConflict()
+        result=self.get(record['object_id'],owner,kind)
+        if result is None:
+            raise RequestConflict()
+        return result
+
+    def create(self, owner, kind, payload, parent=None, links=None, request=None):
         oid, date = str(uuid4()), now()
-        with self.connect() as db:
-            for relation, target in (links or {}).items():
-                target_kind = {'source_extraction_id':'extraction','previous_listing_id':'listing'}.get(relation)
-                found = db.execute('SELECT id FROM objects WHERE id=? AND owner=? AND kind=?',
-                                   (target, owner, target_kind)).fetchone()
-                if not found or kind != 'listing':
-                    raise InvalidReference('자료를 찾을 수 없습니다.')
-            db.execute("INSERT INTO objects VALUES(?,?,?,?,?,?)", (oid,owner,kind,parent,json.dumps(payload,ensure_ascii=False,allow_nan=False),date))
-            for relation, target in (links or {}).items():
-                db.execute('INSERT INTO object_links VALUES(?,?,?)', (oid, relation, target))
+        integrity_errors=(sqlite3.IntegrityError,)
+        if self.mysql:
+            import pymysql
+            integrity_errors+=(pymysql.IntegrityError,)
+        try:
+            with self.connect() as db:
+                if request is not None:
+                    # The existing primary key serializes competing retries in the same transaction.
+                    # Keep the receipt after result deletion so a retry cannot resurrect deleted data.
+                    receipt=json.dumps({'fingerprint':request[2],'object_id':oid},allow_nan=False)
+                    db.execute('INSERT INTO objects VALUES(?,?,?,?,?,?)',
+                               (self.request_id(owner,request),owner,'request_receipt',None,receipt,date))
+                for relation, target in (links or {}).items():
+                    target_kind = {'source_extraction_id':'extraction','previous_listing_id':'listing'}.get(relation)
+                    found = db.execute('SELECT id FROM objects WHERE id=? AND owner=? AND kind=?',
+                                       (target, owner, target_kind)).fetchone()
+                    if not found or kind != 'listing':
+                        raise InvalidReference('자료를 찾을 수 없습니다.')
+                db.execute("INSERT INTO objects VALUES(?,?,?,?,?,?)", (oid,owner,kind,parent,json.dumps(payload,ensure_ascii=False,allow_nan=False),date))
+                for relation, target in (links or {}).items():
+                    db.execute('INSERT INTO object_links VALUES(?,?,?)', (oid, relation, target))
+        except integrity_errors:
+            # The failed transaction is fully rolled back before reading the winner.
+            replayed=self.replay(owner,kind,request)
+            if replayed is None:
+                raise
+            return replayed
         return self.get(oid, owner, kind)
 
     def public_object(self, db, row):

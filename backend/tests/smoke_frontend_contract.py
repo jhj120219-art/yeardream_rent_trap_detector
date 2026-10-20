@@ -13,7 +13,7 @@ def smoke(runtime):
     key=Path(info['key_file']).read_text(encoding='utf-8').strip()
     with httpx.Client(base_url=info['url'],timeout=45) as client:
         preflight=client.options('/locations',headers={'Origin':ORIGIN,
-            'Access-Control-Request-Method':'GET','Access-Control-Request-Headers':'x-team-key,authorization'})
+            'Access-Control-Request-Method':'GET','Access-Control-Request-Headers':'x-team-key,authorization,idempotency-key'})
         assert preflight.status_code==200
         assert preflight.headers['access-control-allow-origin']==ORIGIN
         denied=client.get('/locations',headers={'Origin':ORIGIN})
@@ -34,12 +34,17 @@ def smoke(runtime):
             body=payload(as_of='2026-10-20')
             body['listing'].pop('legal_dong_code')
             body['listing'].update(dong='봉천동',address_text=None,unit_ho=None)
-            saved=client.post('/listings',json=body)
+            listing_headers={'Idempotency-Key':'live-listing-retry-001'}
+            saved=client.post('/listings',json=body,headers=listing_headers)
             assert saved.status_code==201,saved.text
+            assert client.post('/listings',json=body,headers=listing_headers).json()==saved.json()
             lid=saved.json()['id']
-            result=client.post('/listings/'+lid+'/analyses')
+            analysis_headers={'Idempotency-Key':'live-analysis-retry-001'}
+            route='/listings/'+lid+'/analyses'
+            result=client.post(route,headers=analysis_headers)
             assert result.status_code==201
             assert result.json()['result']['status']=='COMPARED'
+            assert client.post(route,headers=analysis_headers).json()==result.json()
             report=client.get('/listings/'+lid+'/report').json()
             assert report['rent']['result']==result.json()['result']
             assert report['maintenance']['state']=='ON_HOLD'
@@ -47,7 +52,7 @@ def smoke(runtime):
                 'unapproved_origin':'REJECTED','missing_key':401,'districts':len(catalog['districts']),
                 'legal_dongs':sum(len(x['dongs']) for x in catalog['districts']),
                 'data_as_of':catalog['data_as_of'],'dong_name_input':'COMPARED','report':'PASS',
-                'maintenance':'ON_HOLD'},ensure_ascii=False))
+                'maintenance':'ON_HOLD','retry_same_listing_and_analysis':'PASS'},ensure_ascii=False))
         finally:
             assert client.delete('/sessions/current').status_code==204
 

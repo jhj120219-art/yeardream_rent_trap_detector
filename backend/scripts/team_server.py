@@ -102,6 +102,20 @@ def run(runtime, port):
                     time.sleep(1)
                 else:
                     raise RuntimeError('외부 주소 생성 시간 초과')
+                # A generated hostname can precede DNS/tunnel registration. Publish it only
+                # after authenticated HTTPS readiness succeeds, not merely after a log line.
+                for attempt in range(60):
+                    if server.poll() is not None or tunnel.poll() is not None:
+                        raise RuntimeError('외부 연결 준비 중 서버가 중단됐습니다.')
+                    try:
+                        if request(url,key).get('status')=='ready':
+                            break
+                    except Exception:
+                        pass
+                    if attempt<59:
+                        time.sleep(1)
+                else:
+                    raise RuntimeError('외부 HTTPS 연결 준비 시간 초과. 주소를 공유하지 않았습니다.')
                 info = dict(url=url, port=port, supervisor_pid=os.getpid(), server_pid=server.pid,
                             tunnel_pid=tunnel.pid, database='mysql (DATABASE_URL)' if mysql_mode else str(database), key_file=str(keyfile),
                             temporary=True, cloudflared_version=VERSION, cloudflared_sha256=SHA256)
@@ -155,4 +169,6 @@ if __name__ == '__main__':
             msvcrt.locking(lock.fileno(), msvcrt.LK_NBLCK, 1)
         # A stop request left while no supervisor was running must not stop the next launch.
         (args.runtime / 'stop.request').unlink(missing_ok=True)
+        (args.runtime / 'connection.json').unlink(missing_ok=True)
+        (args.runtime / '접속주소.txt').write_text('서버 연결 준비 중입니다. HTTPS 확인 후 새 주소가 표시됩니다.\n',encoding='utf-8')
         run(args.runtime, args.port)

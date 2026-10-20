@@ -1,12 +1,13 @@
 from contextlib import asynccontextmanager
 from pathlib import Path
 import secrets
+import json
 from fastapi import Depends, FastAPI, File, Header, HTTPException, UploadFile, Query
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 from .config import Settings
-from .db import Store, InvalidReference, now
+from .db import Store, InvalidReference, RequestConflict, digest, now
 from .schemas import ListingInput
 from . import analysis_service as service
 from .vision import extract_image
@@ -47,6 +48,17 @@ def create_app(settings=None, pool=None, extractor=None):
     async def validation_error(request, exc):
         # 입력값(주소 등)을 에러 응답에 재노출하지 않는다.
         return JSONResponse(status_code=422, content={"detail":[{"loc":list(e['loc']),"msg":e['msg'],"type":e['type']} for e in exc.errors()]})
+
+    @app.exception_handler(RequestConflict)
+    async def request_conflict(request, exc):
+        return JSONResponse(status_code=409,content={'detail':'같은 재시도 키로 다른 입력을 보냈거나 이전 결과가 삭제되었습니다. 새 작업에는 새 키를 사용해 주세요.'})
+
+    def retry_key(value: str | None=Header(default=None,alias='Idempotency-Key',
+            min_length=8,max_length=128,pattern=r'^[A-Za-z0-9._:-]+$')):
+        return value
+
+    def request_identity(operation,key,body):
+        return (operation,key,digest(json.dumps(body,sort_keys=True,separators=(',',':'),ensure_ascii=True,allow_nan=False))) if key is not None else None
 
     @app.middleware("http")
     async def limit_body(request, call_next):
@@ -100,6 +112,7 @@ def create_app(settings=None, pool=None, extractor=None):
             "maintenance_enabled": settings.maintenance_enabled,
             "team_access_required": settings.shared_mode,
             "location_catalog_available": hasattr(app.state.pool,'backend_locations'),
+            "retry_key_supported": True,
             "note": "로드된 계약 범위이며 개별 매물의 비교 가능성이나 정확도를 보장하지 않습니다.",
         }
 
@@ -133,7 +146,11 @@ def create_app(settings=None, pool=None, extractor=None):
         return Response(status_code=204)
 
     @app.post('/listings',status_code=201)
-    def listing(body: ListingInput, sid=Depends(owner)):
+    def listing(body: ListingInput, sid=Depends(owner),key=Depends(retry_key)):
+        request=request_identity('POST /listings',key,body.model_dump(mode='json'))
+        replayed=app.state.store.replay(sid,'listing',request)
+        if replayed is not None:
+            return replayed
         raw=body.model_dump(exclude={'source_extraction_id','previous_listing_id'})
         links={}
         source_id=body.source_extraction_id
@@ -152,7 +169,7 @@ def create_app(settings=None, pool=None, extractor=None):
             return app.state.store.create(sid,'listing',{
                 "input":raw,"validation":normalized,
                 "confirmation_recorded_at":now() if body.confirmation.user_confirmed else None,
-            },links=links)
+            },links=links,request=request)
         except InvalidReference:
             raise HTTPException(404,'자료를 찾을 수 없습니다.') from None
 
@@ -188,12 +205,16 @@ def create_app(settings=None, pool=None, extractor=None):
         return Response(status_code=204)
 
     @app.post('/listings/{listing_id}/analyses',status_code=201)
-    def analyze(listing_id: str,sid=Depends(owner)):
+    def analyze(listing_id: str,sid=Depends(owner),key=Depends(retry_key)):
+        request=request_identity('POST /listings/'+listing_id+'/analyses',key,{})
+        replayed=app.state.store.replay(sid,'analysis',request)
+        if replayed is not None:
+            return replayed
         obj=find(listing_id,sid,'listing')
         if app.state.pool is None:
             raise HTTPException(503,"실거래 데이터가 연결되지 않아 분석할 수 없습니다.")
         result=service.run(obj['input'],app.state.pool)
-        return app.state.store.create(sid,'analysis',{"listing_id":listing_id,"result":result},parent=listing_id)
+        return app.state.store.create(sid,'analysis',{"listing_id":listing_id,"result":result},parent=listing_id,request=request)
 
     @app.get('/analyses/{analysis_id}')
     def get_analysis(analysis_id: str,sid=Depends(owner)):
@@ -277,7 +298,7 @@ def create_app(settings=None, pool=None, extractor=None):
         return Response(status_code=204)
 
     # CORS가 가장 바깥에서 preflight와 접속 거절 응답에도 적용되게 한다.
-    app.add_middleware(CORSMiddleware,allow_origins=settings.cors_origins,allow_methods=["GET","POST","DELETE"],allow_headers=["Authorization","Content-Type","X-Team-Key"])
+    app.add_middleware(CORSMiddleware,allow_origins=settings.cors_origins,allow_methods=["GET","POST","DELETE"],allow_headers=["Authorization","Content-Type","X-Team-Key","Idempotency-Key"])
     return app
 
 app=create_app()
