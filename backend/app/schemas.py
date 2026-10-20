@@ -69,6 +69,13 @@ class ListingInput(BaseModel):
                 if not math.isfinite(number) or number < 0:
                     raise ValueError("관리비는 0 이상의 숫자 또는 null이어야 합니다.")
         district, legal = value.get('district_code'), value.get('legal_dong_code')
+        for key in ('main_no','sub_no'):
+            if value.get(key) is not None and (not isinstance(value[key],str) or not re.fullmatch(r'[0-9]{1,4}',value[key])):
+                raise ValueError('지번 본번·부번은 1~4자리 숫자 문자열 또는 null이어야 합니다.')
+        if value.get('main_no') is not None and int(value['main_no'])==0:
+            raise ValueError('지번 본번은 1 이상이어야 합니다.')
+        if value.get('sub_no') is not None and value.get('main_no') is None:
+            raise ValueError('지번 부번을 입력할 때는 본번도 필요합니다.')
         if district and legal and not legal.startswith(district):
             raise ValueError("법정동 코드와 자치구 코드가 일치하지 않습니다.")
         floor, total = value.get('floor'), value.get('total_floors')

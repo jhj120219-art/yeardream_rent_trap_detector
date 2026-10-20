@@ -13,6 +13,13 @@
 !integration_kit_v1.1/
 !integration_kit_v1.1/image_extraction_example.json
 !integration_kit_v1.1/image_prompt_ko.md
+!machine/
+!machine/analysis_internal/
+!machine/analysis_internal/engine_v2.py
+!machine/analysis_internal/common.py
+!machine/analysis_internal/configs/
+!machine/analysis_internal/configs/candidate_v2.json
+!machine/analysis_internal/configs/trust_coef_v2.json
 # Exclude local secrets even within source directories.
 **/.env*
 **/*.key

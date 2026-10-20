@@ -6,6 +6,7 @@ COPY backend/requirements.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir -r /tmp/requirements.txt && useradd --uid 10001 --create-home appuser
 COPY analyze.py compare_rent.py normalize_listing.py ./
 COPY integration_kit_v1.1/ ./integration_kit_v1.1/
+COPY machine/analysis_internal/ ./machine/analysis_internal/
 COPY backend/app/ ./backend/app/
 COPY backend/scripts/ ./backend/scripts/
 RUN mkdir -p backend/data && chown -R appuser:appuser /app

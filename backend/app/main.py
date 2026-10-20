@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 import secrets
 import json
+from typing import Literal
 from fastapi import Depends, FastAPI, File, Header, HTTPException, UploadFile, Query
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
@@ -21,6 +22,8 @@ from .utility_estimate import UtilityScenario, estimate as estimate_utilities, c
 
 def create_app(settings=None, pool=None, extractor=None):
     settings = settings or Settings()
+    if settings.analysis_engine not in ('v1','v2'):
+        raise ValueError('ANALYSIS_ENGINE must be v1 or v2')
     team_key = ""
     if settings.shared_mode:
         if not settings.team_key_file or '*' in settings.cors_origins:
@@ -40,6 +43,15 @@ def create_app(settings=None, pool=None, extractor=None):
                 app.state.data_status = "READY"
             except (ValueError,KeyError,TypeError,OSError):
                 app.state.data_status = "INVALID"
+        app.state.v2=None
+        app.state.v2_status='DISABLED'
+        if settings.v2_enabled or settings.analysis_engine=='v2':
+            try:
+                from .analysis_v2 import V2Service
+                app.state.v2=V2Service(settings.clean_csv,settings.building_cache)
+                app.state.v2_status='READY'
+            except (OSError,ValueError,KeyError,TypeError,ImportError):
+                app.state.v2_status='UNAVAILABLE'
         yield
 
     app = FastAPI(title="월세 비교 API",version="1.1.0",lifespan=lifespan)
@@ -106,13 +118,17 @@ def create_app(settings=None, pool=None, extractor=None):
             "loaded_coverage": service.coverage(app.state.pool),
             "address_configured": bool(settings.kakao_key),
             "vision_configured": bool(settings.openai_key and settings.vision_model),
-            "same_building_first": False,
+            "same_building_first": settings.analysis_engine=='v2' and app.state.v2 is not None and bool(app.state.v2.cache),
             "comparable_transactions_available": False,
             "search_scope": "DONG_THEN_RELAXED_THEN_DISTRICT",
             "maintenance_enabled": settings.maintenance_enabled,
             "team_access_required": settings.shared_mode,
             "location_catalog_available": hasattr(app.state.pool,'backend_locations'),
             "retry_key_supported": True,
+            "analysis_engine": settings.analysis_engine,
+            "v2_status": app.state.v2_status,
+            "same_building_first_supported": app.state.v2 is not None,
+            "building_cache_status": app.state.v2.cache_status if app.state.v2 else 'NOT_LOADED',
             "note": "로드된 계약 범위이며 개별 매물의 비교 가능성이나 정확도를 보장하지 않습니다.",
         }
 
@@ -134,6 +150,8 @@ def create_app(settings=None, pool=None, extractor=None):
             raise HTTPException(503,"DB에 연결할 수 없습니다. 잠시 후 다시 시도해 주세요.")
         if app.state.pool is None:
             raise HTTPException(503,"정제된 실거래 데이터를 연결해야 합니다.")
+        if settings.analysis_engine=='v2' and app.state.v2 is None:
+            raise HTTPException(503,'개선된 분석 코드와 자료 연결을 확인해야 합니다.')
         return {"status":"ready"}
 
     @app.post('/sessions',status_code=201)
@@ -205,15 +223,21 @@ def create_app(settings=None, pool=None, extractor=None):
         return Response(status_code=204)
 
     @app.post('/listings/{listing_id}/analyses',status_code=201)
-    def analyze(listing_id: str,sid=Depends(owner),key=Depends(retry_key)):
-        request=request_identity('POST /listings/'+listing_id+'/analyses',key,{})
+    def analyze(listing_id: str,sid=Depends(owner),key=Depends(retry_key),engine: Literal['v1','v2'] | None=Query(default=None)):
+        selected=engine or settings.analysis_engine
+        request=request_identity('POST /listings/'+listing_id+'/analyses',key,{} if selected=='v1' else {'engine':'v2'})
         replayed=app.state.store.replay(sid,'analysis',request)
         if replayed is not None:
             return replayed
         obj=find(listing_id,sid,'listing')
         if app.state.pool is None:
             raise HTTPException(503,"실거래 데이터가 연결되지 않아 분석할 수 없습니다.")
-        result=service.run(obj['input'],app.state.pool)
+        if selected=='v2':
+            if app.state.v2 is None:
+                raise HTTPException(503,'개선된 분석 코드와 자료 연결을 확인해야 합니다.')
+            result=app.state.v2.run(obj['input'])
+        else:
+            result=service.run(obj['input'],app.state.pool)
         return app.state.store.create(sid,'analysis',{"listing_id":listing_id,"result":result},parent=listing_id,request=request)
 
     @app.get('/analyses/{analysis_id}')

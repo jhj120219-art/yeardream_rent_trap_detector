@@ -17,3 +17,6 @@ class Settings:
     team_key_file: str = field(default_factory=lambda: os.getenv("TEAM_ACCESS_KEY_FILE", ""))
     shared_mode: bool = field(default_factory=lambda: os.getenv("TEAM_SHARED_MODE", "false").lower() == "true")
     maintenance_enabled: bool = field(default_factory=lambda: os.getenv("MAINTENANCE_ENABLED", "true").lower() == "true")
+    analysis_engine: str = field(default_factory=lambda: os.getenv('ANALYSIS_ENGINE','v1'))
+    v2_enabled: bool = field(default_factory=lambda: os.getenv('V2_ENABLED','false').lower()=='true')
+    building_cache: str = field(default_factory=lambda: os.getenv('BUILDING_CACHE_CSV',''))
