@@ -17,6 +17,7 @@ from .maintenance import Evidence, compare as compare_maintenance
 from .maintenance import load_public_cases
 from .report import build_report
 from .input_review import listing_draft
+from .request_diagnostics import RequestDiagnostics
 from .utility_estimate import UtilityScenario, estimate as estimate_utilities, catalog as utility_catalog
 
 
@@ -326,7 +327,8 @@ def create_app(settings=None, pool=None, extractor=None):
         return Response(status_code=204)
 
     # CORS가 가장 바깥에서 preflight와 접속 거절 응답에도 적용되게 한다.
-    app.add_middleware(CORSMiddleware,allow_origins=settings.cors_origins,allow_methods=["GET","POST","DELETE"],allow_headers=["Authorization","Content-Type","X-Team-Key","Idempotency-Key"])
+    app.add_middleware(CORSMiddleware,allow_origins=settings.cors_origins,allow_methods=["GET","POST","DELETE"],allow_headers=["Authorization","Content-Type","X-Team-Key","Idempotency-Key"],expose_headers=['X-Request-ID'])
+    app.add_middleware(RequestDiagnostics)
     return app
 
 app=create_app()
