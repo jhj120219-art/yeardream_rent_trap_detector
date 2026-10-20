@@ -3,6 +3,7 @@ import argparse
 import json
 from pathlib import Path
 import sqlite3
+import os
 import httpx
 from backend.tests.test_backend import payload
 from backend.scripts.team_server import backup
@@ -51,6 +52,14 @@ def smoke(runtime):
             for token in tokens:
                 client.headers['Authorization']='Bearer '+token
                 assert client.delete('/sessions/current').status_code==204
+    if info['database']=='mysql (DATABASE_URL)':
+        from backend.app.db import Store
+        if not os.getenv('DATABASE_URL'):
+            raise RuntimeError('Set private DATABASE_URL to verify MySQL storage; SQLite backup is not applicable')
+        store=Store(database_url=os.environ['DATABASE_URL'],initialize=False)
+        assert store.available()
+        print(json.dumps({'storage':'mysql','storage_ready':True,'backup':'Use local_mysql backup or deployment backup tooling'}))
+        return
     target=backup(Path(info['database']),runtime/'backups')
     with sqlite3.connect(target) as db:
         assert db.execute('PRAGMA integrity_check').fetchone()==('ok',)
@@ -61,4 +70,9 @@ def smoke(runtime):
 if __name__=='__main__':
     parser=argparse.ArgumentParser()
     parser.add_argument('--runtime',type=Path,required=True)
-    smoke(parser.parse_args().runtime)
+    parser.add_argument('--env-file',type=Path)
+    args=parser.parse_args()
+    if args.env_file:
+        from dotenv import load_dotenv
+        load_dotenv(args.env_file,override=True)
+    smoke(args.runtime)

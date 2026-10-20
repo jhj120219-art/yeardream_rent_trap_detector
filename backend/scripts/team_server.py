@@ -136,7 +136,13 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--runtime', type=Path, required=True)
     parser.add_argument('--port', type=int, default=8012)
+    parser.add_argument('--env-file', type=Path, help='Private environment file; never put credentials in command arguments')
     args = parser.parse_args()
+    if args.env_file:
+        from dotenv import load_dotenv
+        if not args.env_file.is_file():
+            parser.error('Private environment file does not exist')
+        load_dotenv(args.env_file, override=True)
     # 동시 실행으로 DB/로그/터널이 뒤섞이지 않게 OS 파일 잠금을 유지한다.
     args.runtime.mkdir(parents=True, exist_ok=True)
     with (args.runtime / 'supervisor.lock').open('a+b') as lock:
@@ -147,4 +153,6 @@ if __name__ == '__main__':
             lock.flush()
             lock.seek(0)
             msvcrt.locking(lock.fileno(), msvcrt.LK_NBLCK, 1)
+        # A stop request left while no supervisor was running must not stop the next launch.
+        (args.runtime / 'stop.request').unlink(missing_ok=True)
         run(args.runtime, args.port)

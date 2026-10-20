@@ -1,5 +1,7 @@
 # 다른 장소에서 함께 쓰는 팀 테스트 서버
 
+> 2026-10-20: 현재 PC는 MySQL 팀 DB로 전환했다. 아래 SQLite 설명은 이전 실행 기록이며 현재 설정은 [MYSQL.md](MYSQL.md) 최신 절을 따른다. 시작 시 `--env-file`로 비공개 MySQL 환경 파일을 읽는다. 공유 검사도 `python -m backend.tests.smoke_shared --runtime <팀 runtime> --env-file <team.env>`를 사용한다. 임시 주소는 서버 재시작 때 바뀌므로 이전 보고서 링크 대신 runtime의 `접속주소.txt`를 확인한다.
+
 > MySQL을 사용할 때는 실행 전에 `DATABASE_URL`을 설정합니다. 이 경우 SQLite 파일·자동 백업은 사용하지 않으며 MySQL 백업을 별도로 운영해야 합니다. [전환 안내](MYSQL.md)를 먼저 확인하세요. `DATABASE_URL`이 없을 때만 기존 팀 SQLite 모드가 유지됩니다.
 
 2026-10-19. 관리비·공과금 비교는 분석 담당 자료 검증까지 보류한다.

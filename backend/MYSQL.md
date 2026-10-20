@@ -1,5 +1,34 @@
 # MySQL 8.x 전환 및 영속성 검증
 
+## 2026-10-20 현재 PC 연결 결과
+
+개인 main을 `02f95e6`에서 `ec03e69`까지 fast-forward pull했다. 바탕화면 `desktop_git_setup.zip`은 관리 대상 80개 파일이 이전 `02f95e6`과 모두 같았다(CRLF/LF 차이 정규화). 최신 코드에 ZIP을 덮어쓰지 않았다. 정제 CSV와 기존 SQLite도 이 PC와 SHA-256이 같아 복사하지 않았다. ZIP SHA-256은 `a09071172b0b17710afd2da01206edba2c7fbd897a2da38981e4bed6783fe1ad`.
+
+**코드는 pull로 충분하지만 PC 환경과 개인 데이터는 Git에 없다.** 이 PC에 MySQL 드라이버·환경파일 라이브러리를 설치하고 공식 MySQL 8.4.11 Windows ZIP을 준비했다. 공식 MD5 `2e833921898a9a030ea6bfe81bd811bc`로 다운로드 무결성을 대조했다. 저장 위치는 저장소·OneDrive 밖의 사용자별 보호 폴더이며 사용자 본인과 SYSTEM만 접근하도록 설정했다. 시스템 서비스·PATH·방화벽 인바운드를 변경하지 않았다.
+
+- MySQL은 `127.0.0.1:3307`에만 바인딩, MySQL X 포트 비활성화. `rent_app`, `rent_team`, `rent_test`를 분리했다. 앱·팀 계정에는 해당 DB의 SELECT/INSERT/DELETE만 부여하고 스키마 초기화는 별도 관리자 연결로 수행했다. DB 비밀번호와 환경 파일은 보호 폴더에만 저장하며 출력하거나 Git에 올리지 않았다.
+- 기존 앱이 실행 중이지 않음을 확인한 후 SQLite를 읽기 전용으로 백업하고 새 MySQL에 이전·전체 값 대조했다. 원본 해시도 그대로 유지했다. 이전 시 양쪽 원본의 sessions/objects/object_links는 모두 0건이었다. 실제 사용자 자료를 복원했다고 보고하지 않는다.
+- 실제 MySQL을 사용한 전체 테스트 **152 passed, 0 skipped**, Starlette/httpx 안내 1건. 합성 입력·분석 저장 후 독립 API 프로세스 재시작 조회와 마이그레이션·롤백 포함. 과거 집 PC/CI 통과 수를 재사용한 결과가 아니다.
+- 추가로 로컬 MySQL 서버 자체 정상 종료→재시작 후 같은 토큰·객체 값 보존, mysqldump 백업→별도 검사 DB 복원→세 테이블 전체 행 값 일치까지 확인했다. 검사 세션·검사 DB는 정리했다. 이는 이 PC의 로컬 검사이며 운영 장애 전체 복구 검증이 아니다.
+- 공유 HTTPS API도 MySQL 팀 DB에 연결했다. 키 없는 접근 차단, 세션별 격리, 실거래 READY, 가상 매물 분석 COMPARED, 보고서 관리비 ON_HOLD, 조회·삭제를 확인했다. 프론트 담당 PC의 화면 통합은 아직 확인하지 않았다. 현재 주소는 보호 runtime의 `접속주소.txt`를 기준으로 전달한다. 이전 보고서의 임시 URL은 재시작 후 사용하지 않는다.
+
+### 이 PC 시작·종료·백업
+
+`backend/scripts/local_mysql.py`는 이미 준비된 비공개 runtime을 관리한다. 설치 메타데이터·바이너리 경로와 실제 DB 데이터 경로를 확인해 다른 MySQL 인스턴스를 관리하지 않는다. `start`, `status`, `stop`, `backup` 동작을 제공한다. 저장소 밖 `deliverables/team_server`의 기존 시작·종료 버튼도 MySQL용으로 갱신했다. PC 부팅 시 자동 실행되도록 등록하지는 않았다.
+
+```powershell
+# runtime은 이 PC에서 준비한 보호 폴더로 지정한다. 비밀번호를 명령 인수에 넣지 않는다.
+python -m backend.scripts.local_mysql start --runtime C:/private/YeardreamRentMySQL
+python -m backend.scripts.team_server --runtime C:/private/YeardreamRentBackend --env-file C:/private/YeardreamRentMySQL/team.env
+python -m backend.scripts.local_mysql backup --runtime C:/private/YeardreamRentMySQL
+# API를 먼저 정상 종료한 다음 DB를 중지한다.
+python -m backend.scripts.local_mysql stop --runtime C:/private/YeardreamRentMySQL
+```
+
+백업은 `rent_app`, `rent_team` 각각 single-transaction SQL 파일로 저장한다. 비밀번호는 일시적인 보호 client 파일로 전달하고 실행 후 삭제한다. 백업 파일은 원본과 같은 디스크에 있으므로 외부 백업은 별도다. MySQL 모드에서는 이전 SQLite 24시간 백업을 실행하지 않으며, 현재 백업은 명시적 실행·종료 버튼에서 수행한다. 주기적 MySQL 백업 자동화·상시 운영 배포·프론트 화면 통합은 별도 남은 항목이다.
+
+이 PC의 정제 CSV와 DB는 준비됐지만 새 PC에서는 원본/정제 자료·비밀 설정·MySQL 설치가 따로 필요하다. `.venv`나 DB 폴더 전체를 ZIP에서 덮어쓰는 방식은 사용하지 않는다.
+
 > **최신 검증 결과:** 2026-10-19 개인 GitHub CI에서 실제 MySQL 8.0·8.4 환경 각각 **140 passed, 0 skipped**. 아래 이전 실행의 “MySQL 미검증”은 후속 CI로 해소했다. 운영 DB 이전·운영 서버 배포는 수행하지 않았다.
 
 ## 설정
