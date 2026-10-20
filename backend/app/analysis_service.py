@@ -45,7 +45,26 @@ def load_pool(path: Path):
         raise ValueError("정제 CSV의 건축연도는 정수 또는 빈 값이어야 합니다.")
     if frame.empty or not (frame['is_new']=='True').any() or pd.to_datetime(frame['date'],errors='coerce').isna().any():
         raise ValueError("비교 가능한 신규 계약과 유효한 날짜가 필요합니다.")
-    return analyze.load_pool(path)
+    pool = analyze.load_pool(path)
+    # 입력 선택용 목록만 추가한다. 거래 선택·가격 계산은 기존 분석 코드가 수행한다.
+    pool.backend_locations = location_catalog(frame)
+    return pool
+
+
+def location_catalog(frame):
+    """Loaded new-contract regions, not a complete address registry or price guarantee."""
+    districts=[]
+    new=frame[frame['is_new']=='True']
+    for code, group in new.groupby('CGG_CD',sort=True):
+        if code not in analyze.SUPPORTED_GU:
+            continue
+        dongs=[]
+        for (dong_code,dong_name),rows in group.groupby(['STDG_CD','dong'],sort=True):
+            dongs.append({'legal_dong_code':str(code)+str(dong_code),'dong_name':dong_name,
+                          'new_contract_count':len(rows)})
+        districts.append({'district_code':str(code),'district_name':analyze.SUPPORTED_GU[code],
+                          'new_contract_count':len(group),'dongs':dongs})
+    return districts
 
 
 def coverage(pool):

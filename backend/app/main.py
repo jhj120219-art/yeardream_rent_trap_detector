@@ -99,8 +99,21 @@ def create_app(settings=None, pool=None, extractor=None):
             "search_scope": "DONG_THEN_RELAXED_THEN_DISTRICT",
             "maintenance_enabled": settings.maintenance_enabled,
             "team_access_required": settings.shared_mode,
+            "location_catalog_available": hasattr(app.state.pool,'backend_locations'),
             "note": "로드된 계약 범위이며 개별 매물의 비교 가능성이나 정확도를 보장하지 않습니다.",
         }
+
+    @app.get('/locations')
+    def locations(district_code: str | None=Query(default=None,pattern=r'^[0-9]{5}$')):
+        if app.state.pool is None or not hasattr(app.state.pool,'backend_locations'):
+            raise HTTPException(503,'실거래 데이터의 지역 목록이 준비되지 않았습니다.')
+        districts=app.state.pool.backend_locations
+        if district_code is not None:
+            districts=[x for x in districts if x['district_code']==district_code]
+            if not districts:
+                raise HTTPException(404,'현재 데이터에서 지원하는 자치구가 아닙니다.')
+        return {'source':'LOADED_NEW_RENT_CONTRACTS','data_as_of':str(app.state.pool.max_date.date()),
+                'districts':districts,'note':'법정동 선택용 실거래 데이터 범위입니다. 건물 주소 검색·같은 건물 비교·개별 매물 분석 가능성을 보장하지 않습니다.'}
 
     @app.get('/ready', include_in_schema=False)
     def ready():
