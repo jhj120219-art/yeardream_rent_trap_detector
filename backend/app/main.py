@@ -48,7 +48,7 @@ def create_app(settings=None, pool=None, extractor=None):
         if settings.v2_enabled or settings.analysis_engine=='v2':
             try:
                 from .analysis_v2 import V2Service
-                app.state.v2=V2Service(settings.clean_csv,settings.building_cache)
+                app.state.v2=V2Service(settings.clean_csv,settings.building_cache,settings.same_building_enabled)
                 app.state.v2_status='READY'
             except (OSError,ValueError,KeyError,TypeError,ImportError):
                 app.state.v2_status='UNAVAILABLE'
@@ -127,7 +127,7 @@ def create_app(settings=None, pool=None, extractor=None):
             "retry_key_supported": True,
             "analysis_engine": settings.analysis_engine,
             "v2_status": app.state.v2_status,
-            "same_building_first_supported": app.state.v2 is not None,
+            "same_building_first_supported": settings.same_building_enabled and app.state.v2 is not None,
             "building_cache_status": app.state.v2.cache_status if app.state.v2 else 'NOT_LOADED',
             "note": "로드된 계약 범위이며 개별 매물의 비교 가능성이나 정확도를 보장하지 않습니다.",
         }

@@ -1,3 +1,24 @@
+## 현재 진행 범위 — 2026-10-20 확정
+
+**동네 비교로 진행한다.** 같은 건물 우선 비교와 관리비는 보류한다.
+`SAME_BUILDING_ENABLED=false`가 기본값이며, 건물 자료가 들어와도 자동으로 같은 건물 비교를 켜지 않는다. 분석 원본은 보존하고 백엔드가 사용하는 정책 복사본에서 해당 단계를 끈다.
+같은 법정동의 유사 거래부터 찾고, 부족하면 기존 규칙에 따라 조건을 완화하거나 같은 구로 넓힌다. 화면에는 실제 비교 범위를 표시한다. 현재 범위를 진행하기 위해 건물 동수 CSV를 요청할 필요는 없다. 아래 같은 건물 설명은 향후 범위를 바꿀 때 참고할 보존 기록이다.
+
+### 화면과 서버가 주고받는 순서
+
+사용자는 화면에서 입력하고 확인 버튼만 누른다. 아래 연결은 프론트 담당자가 구현한다.
+
+| 순서 | 쉬운 설명 | 프론트 담당자용 연결 |
+| --- | --- | --- |
+| 1 | 팀원만 서버에 들어오도록 접속키를 사용 | 별도 전달한 키를 기존 인증 규격으로 사용 |
+| 2 | 내 매물을 구분할 임시 이용표 발급 | POST /sessions |
+| 3 | 비교 가능한 지역·건물 종류 표시 | GET /capabilities 및 GET /locations |
+| 4 | 사용자가 확인한 매물 정보를 저장 | POST /listings |
+| 5 | 저장한 매물을 동네 실거래와 비교 | POST /listings/{id}/analyses |
+| 6 | 가격 범위·차액·표본 수·보류 이유 표시 | GET /listings/{id}/report |
+
+백엔드는 저장·분석 호출·결과 전달을 맡고, 프론트는 입력칸·버튼·결과 화면을 연결한다. 접속키는 문서나 채팅에 적지 않고 따로 전달한다. 프론트 실제 화면에서의 최종 확인은 별도 작업이다.
+
 # 분석가 개선판 실제 연결
 
 ## 이번에 연결한 것
@@ -11,6 +32,7 @@
 ```dotenv
 ANALYSIS_ENGINE=v2
 V2_ENABLED=true
+SAME_BUILDING_ENABLED=false
 # 분석가가 제공한 성공 조회 캐시가 있을 때만 지정한다. 없으면 비워둔다.
 BUILDING_CACHE_CSV=
 ```
@@ -19,7 +41,7 @@ BUILDING_CACHE_CSV=
 
 기존 매물·분석은 그대로 남는다. 새로운 분석은 새 Idempotency-Key를 사용한다. 같은 키를 다른 엔진에 재사용하면 409다. v1의 기존 재시도 fingerprint는 유지했다. 기존 입력·응답 상태와 금액 만원·면적 ㎡ 단위도 유지한다.
 
-`GET /capabilities`: `analysis_engine`, `v2_status`, `same_building_first_supported`, `building_cache_status`를 확인한다. `same_building_first_supported=true`는 코드가 준비됐다는 뜻이다. 건물 캐시가 없으면 현재 `same_building_first=false`이며 실제 결과의 `reference.conditions.scope`를 표시해야 한다.
+`GET /capabilities`: `analysis_engine`, `v2_status`, `same_building_first_supported`, `building_cache_status`를 확인한다. 현재 `same_building_first_supported=false`, `same_building_first=false`로 고정한다. 실제 결과의 `reference.conditions.scope`를 표시한다.
 
 ## 지번 입력
 
@@ -54,4 +76,4 @@ BUILDING_CACHE_CSV=
 
 배포 Docker에는 원본 엔진·공통 모듈·정책/계수 JSON만 포함하도록 준비했다. 현재 PC에는 Docker가 없어 새 이미지 빌드 자체는 미검증이다. 원본 NumPy 날짜 연산에서 폐기 예정 경고가 관찰됐으며 원본을 임의 수정하거나 경고를 숨기지 않았다.
 
-분석 담당 요청: 성공 조회 건물 캐시(또는 건축HUB 키 로컬 설정), 유형 혼합 필터·공급/계약면적 보호의 정식 규칙 확인, 개별 비교 거래 행 반환 규격. 프론트 요청: 기존 결과 화면에서 reference의 실제 범위·보류 이유와 v2 버전을 표시. 관리비는 보류. 요청은 초안이며 직접 보내지 않았다.
+분석 담당 요청(건물 캐시는 현재 범위에서 요청하지 않음): 유형 혼합 필터·공급/계약면적 보호의 정식 규칙 확인, 개별 비교 거래 행 반환 규격. 프론트 요청: 기존 결과 화면에서 reference의 실제 범위·보류 이유와 v2 버전을 표시. 관리비는 보류. 요청은 초안이며 직접 보내지 않았다.

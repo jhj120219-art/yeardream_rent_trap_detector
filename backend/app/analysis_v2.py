@@ -35,7 +35,7 @@ def load_cache(path):
 
 
 class V2Service:
-    def __init__(self,csv_path,cache_path=None):
+    def __init__(self,csv_path,cache_path=None,same_building_enabled=False):
         self.legacy_pool=load_pool(csv_path) # Reuse strict CSV validation, including boolean strings.
         frame=pd.read_csv(csv_path,dtype=str)
         if not {'MNO','SNO','flr'}.issubset(frame.columns):raise ValueError('V2 requires lot and floor columns')
@@ -48,8 +48,11 @@ class V2Service:
                 raise ValueError('Invalid lot data; never infer missing lot numbers')
             frame[column]=values.str.zfill(4)
         self.frame=frame
-        self.cache,self.cache_status=load_cache(cache_path)
+        self.same_building_enabled=same_building_enabled
+        self.cache,self.cache_status=load_cache(cache_path) if same_building_enabled else ({},'DISABLED')
         self.policy=json.loads((INTERNAL/'configs/candidate_v2.json').read_text(encoding='utf-8'))
+        if not same_building_enabled:
+            self.policy['stage0']['enabled']=False
         self.engines={}
         for usage,group in frame.groupby('usage'):
             # Analyst stage0 groups lots without usage in the key. Isolate input by usage
@@ -61,7 +64,8 @@ class V2Service:
     def run(self,raw):
         base=json_safe(analyze_raw(raw,self.legacy_pool))
         meta={'version':self.policy['version'],'adapter':'backend-v2.1',
-              'building_cache_status':self.cache_status,'same_building_requires_verified_single_main':True}
+              'comparison_mode':'SAME_BUILDING_THEN_NEIGHBORHOOD' if self.same_building_enabled else 'NEIGHBORHOOD',
+              'same_building_enabled':self.same_building_enabled,'building_cache_status':self.cache_status,'same_building_requires_verified_single_main':True}
         if base['status'] in ('INPUT_REVIEW_REQUIRED','OUT_OF_SCOPE'):
             return dict(base,analysis_engine=meta)
         n=normalize_listing(raw);p=n['payload'];listing=raw['listing']
@@ -84,7 +88,7 @@ class V2Service:
                  STDG_CD=dong_code or '',MNO=str(main).zfill(4) if valid_lot else np.nan,
                  SNO=str(sub or '0').zfill(4) if valid_lot else np.nan)
         engine=self.engines[usage];rec=engine.evaluate(row,as_of=when)
-        meta.update(source=rec['source'],stage0_reason=rec['stage0_reason'])
+        meta.update(source=rec['source'],stage0_reason=rec['stage0_reason'] if self.same_building_enabled else 'DISABLED_BY_SCOPE')
         result=analyze._base_result('INSUFFICIENT_DATA',data_as_of=str(self.legacy_pool.max_date.date()))
         result.update(analysis_engine=meta,options=n['options'],input_notes=n['notes'])
         if rec['source']=='NONE':
@@ -126,7 +130,7 @@ class V2Service:
                        'window_days':selected.get('window_days'),'search_stage':stage,
                        'conditions':conditions,'sample_count':int(rec['n_use']),
                        'relaxed_conditions':[] if stage==0 else [analyze.RELAX_CODES[k] for k in ('area','arch','dep','months','scope') if selected[k]!=compare_rent.STAGES[0][k]],'prices_10k_krw':prices,
-                       'notice':'같은 지번의 주건축물 1동 확인 시에만 같은 건물 비교를 적용합니다.'},
+                       'notice':'같은 동네의 유사 거래부터 비교하고 자료가 부족하면 조건과 지역 범위를 넓힙니다.' if not self.same_building_enabled else '같은 지번의 주건축물 1동 확인 시에만 같은 건물 비교를 적용합니다.'},
             confidence_details={'method':'ANALYST_V2_FIXED_LOGISTIC','grade':analyze.GRADE_EN[grade],
                                 'comparability_score':None,'data_sufficiency_score':None,
                                 'recent_share_6m':None,'relative_iqr':float(rec['iqr']),
@@ -140,7 +144,7 @@ class V2Service:
             if code in base.get('warnings',[]):
                 result['warnings'].append(code)
                 result['warning_texts'][code]=analyze.WARNING_TEXT.get(code,code)
-        if self.cache_status!='READY':
+        if self.same_building_enabled and self.cache_status!='READY':
             result['warnings'].append('BUILDING_CACHE_UNAVAILABLE')
             result['warning_texts']['BUILDING_CACHE_UNAVAILABLE']='건물 동수 확인 자료가 없어 같은 건물 비교를 적용하지 않았습니다.'
         return json_safe(result)

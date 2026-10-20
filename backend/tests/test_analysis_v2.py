@@ -30,7 +30,7 @@ def input_body():
 
 def test_verified_same_building_isolates_usage_and_holds_border(tmp_path):
     clean,cache=files(tmp_path,mixed=True)
-    engine=V2Service(clean,cache)
+    engine=V2Service(clean,cache,same_building_enabled=True)
     result=engine.run(input_body())
     assert result['stage']==0
     assert result['sample_count']==12
@@ -49,7 +49,7 @@ def test_verified_same_building_isolates_usage_and_holds_border(tmp_path):
 
 def test_unverified_building_falls_back_without_fake_single_building(tmp_path):
     clean,cache=files(tmp_path,cache=False)
-    engine=V2Service(clean,cache)
+    engine=V2Service(clean,cache,same_building_enabled=True)
     result=engine.run(input_body())
     assert result['stage']!=0
     assert result['analysis_engine']['stage0_reason']=='BUILDING_UNVERIFIED'
@@ -75,7 +75,7 @@ def test_failed_and_conflicting_building_records_are_not_trusted(tmp_path):
 
 def test_v2_default_and_v1_compatibility_store_and_report(tmp_path):
     clean,cache=files(tmp_path)
-    settings=Settings(db_path=tmp_path/'db',clean_csv=clean,analysis_engine='v2',building_cache=str(cache))
+    settings=Settings(db_path=tmp_path/'db',clean_csv=clean,analysis_engine='v2',building_cache=str(cache),same_building_enabled=True)
     with TestClient(create_app(settings)) as client:
         assert client.get('/ready').status_code==200
         assert client.get('/capabilities').json()['v2_status']=='READY'
@@ -102,6 +102,7 @@ def test_v2_result_persists_after_http_restart_on_real_storage(target,tmp_path,m
     path,url=target
     clean,cache=files(tmp_path)
     monkeypatch.setenv('V2_ENABLED','true')
+    monkeypatch.setenv('SAME_BUILDING_ENABLED','true')
     monkeypatch.setenv('BUILDING_CACHE_CSV',str(cache))
     auth={}
     try:
@@ -121,3 +122,20 @@ def test_v2_result_persists_after_http_restart_on_real_storage(target,tmp_path,m
             store=Store(path,database_url=url,initialize=False)
             owner=store.owner(auth['Authorization'][7:])
             if owner:store.delete_session(owner)
+
+
+def test_neighborhood_scope_ignores_even_verified_building_cache(tmp_path):
+    clean,cache=files(tmp_path)
+    settings=Settings(db_path=tmp_path/'neighborhood',clean_csv=clean,analysis_engine='v2',building_cache=str(cache),same_building_enabled=False)
+    with TestClient(create_app(settings)) as client:
+        caps=client.get('/capabilities').json()
+        assert caps['same_building_first'] is False
+        assert caps['same_building_first_supported'] is False
+        client.headers['Authorization']='Bearer '+client.post('/sessions').json()['token']
+        lid=client.post('/listings',json=input_body()).json()['id']
+        result=client.post('/listings/'+lid+'/analyses').json()['result']
+        assert result['stage'] in (1,2,3)
+        assert result['reference']['conditions']['scope_code'] in ('LEGAL_DONG','DISTRICT')
+        assert result['analysis_engine']['comparison_mode']=='NEIGHBORHOOD'
+        assert result['analysis_engine']['building_cache_status']=='DISABLED'
+        assert 'BUILDING_CACHE_UNAVAILABLE' not in result['warnings']

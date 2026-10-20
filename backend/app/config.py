@@ -20,3 +20,4 @@ class Settings:
     analysis_engine: str = field(default_factory=lambda: os.getenv('ANALYSIS_ENGINE','v1'))
     v2_enabled: bool = field(default_factory=lambda: os.getenv('V2_ENABLED','false').lower()=='true')
     building_cache: str = field(default_factory=lambda: os.getenv('BUILDING_CACHE_CSV',''))
+    same_building_enabled: bool = field(default_factory=lambda: os.getenv('SAME_BUILDING_ENABLED','false').lower()=='true')
