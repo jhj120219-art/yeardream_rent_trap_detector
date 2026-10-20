@@ -8,12 +8,15 @@ import sqlite3
 from uuid import uuid4, uuid5, NAMESPACE_URL
 from pathlib import Path
 from urllib.parse import urlsplit, unquote, parse_qs
+from . import maintenance_storage
 
 MYSQL_SCHEMA = (
     "CREATE TABLE IF NOT EXISTS sessions (id VARCHAR(36) PRIMARY KEY, token_hash VARCHAR(64) UNIQUE NOT NULL, created_at VARCHAR(40) NOT NULL)",
     "CREATE TABLE IF NOT EXISTS objects (id VARCHAR(36) PRIMARY KEY, owner VARCHAR(36) NOT NULL, kind VARCHAR(64) NOT NULL, parent VARCHAR(36), payload LONGTEXT NOT NULL, created_at VARCHAR(40) NOT NULL, INDEX objects_owner(owner,kind), FOREIGN KEY(owner) REFERENCES sessions(id), FOREIGN KEY(parent) REFERENCES objects(id) ON DELETE CASCADE)",
     "CREATE TABLE IF NOT EXISTS object_links (object_id VARCHAR(36) NOT NULL, relation VARCHAR(32) NOT NULL, target_id VARCHAR(36) NOT NULL, PRIMARY KEY(object_id,relation), INDEX object_links_target(target_id), FOREIGN KEY(object_id) REFERENCES objects(id) ON DELETE CASCADE, FOREIGN KEY(target_id) REFERENCES objects(id) ON DELETE CASCADE, CHECK(relation IN ('source_extraction_id','previous_listing_id')))",
 )
+
+MYSQL_SCHEMA += maintenance_storage.MYSQL_SCHEMA
 
 
 class MySQLConnection:
@@ -98,6 +101,7 @@ class Store:
             );
             CREATE INDEX IF NOT EXISTS object_links_target ON object_links(target_id);
             """)
+            db.executescript(maintenance_storage.SQLITE_SCHEMA)
 
     @contextmanager
     def connect(self, timeout=None):
@@ -134,7 +138,8 @@ class Store:
             errors += (pymysql.MySQLError,)
         try:
             with self.connect(timeout=2) as db:
-                for table, column in (("sessions", "id"), ("objects", "id"), ("object_links", "object_id")):
+                for table, column in (("sessions", "id"), ("objects", "id"), ("object_links", "object_id"),
+                                      ("listing_maintenance", "listing_id"), ("listing_maintenance_items", "listing_id")):
                     db.execute(f"SELECT {column} FROM {table} LIMIT 1").fetchone()
             return True
         except errors:
@@ -189,6 +194,8 @@ class Store:
                     if not found or kind != 'listing':
                         raise InvalidReference('자료를 찾을 수 없습니다.')
                 db.execute("INSERT INTO objects VALUES(?,?,?,?,?,?)", (oid,owner,kind,parent,json.dumps(payload,ensure_ascii=False,allow_nan=False),date))
+                if kind == 'listing':
+                    maintenance_storage.project(db, oid, payload)
                 for relation, target in (links or {}).items():
                     db.execute('INSERT INTO object_links VALUES(?,?,?)', (oid, relation, target))
         except integrity_errors:
@@ -198,6 +205,10 @@ class Store:
                 raise
             return replayed
         return self.get(oid, owner, kind)
+
+    def maintenance(self, listing_id, owner):
+        with self.connect() as db:
+            return maintenance_storage.read(db, listing_id, owner)
 
     def public_object(self, db, row):
         obj = dict(id=row['id'],created_at=row['created_at'],**json.loads(row['payload']))

@@ -558,3 +558,14 @@ reference.conditions, relaxed_conditions, sample_count와 가격 통계는 존�
 ## 운영 배포 준비 검증 결과 — 2026-10-19
 
 운영 대상·DB는 미정(사용자 확인)이므로 실제 공개 배포는 수행하지 않았다. 코드 `38647e9`에 대해 [CI 39272224153](https://github.com/jhj120219-art/yeardream_rent_trap_detector/actions/runs/39272224153)에서 MySQL8.0/8.4 각각152 passed,0 skipped. Docker build 및 deploy Compose로 non-root/read-only 실행, 접속 보호, 읽기 전용 DB preflight, 이미지 비밀파일 제외, 컨테이너 재시작 후 매물·분석 보존, 검사 세션 삭제까지 통과했다. 자동 TLS와 인증서 검증을 구분하는 사전 검사 보완도 반영했다. 상세는 DEPLOYMENT.md. 위 프론트 시안 검토는 별도의 브라우저 모의 검사이며 이152개 백엔드 테스트에 포함되지 않는다.
+
+## 2026-10-20 wlsdu PC 팀 연결 복구·관리비 DB 분리
+
+- 개인 main `7df6690` pull 후 팀 GitHub main `7c90b59`와 제공 ZIP을 대조했다. 기존 임시 호스트는 시스템 DNS 및1.1.1.1 모두 NXDOMAIN. 이전 안내의 jhj12 PC 실행환경은 이 PC에 없었다. 사용자 승인으로 wlsdu PC에 새 환경을 준비했다.
+- MySQL8.4.11 공식 ZIP을 cdn.mysql.com에서 받아 공식 MD5 sidecar/ETag `2e833921898a9a030ea6bfe81bd811bc`와 대조했다. 바이너리·DB·비밀정보는 AppData/Local/YeardreamRentMySQL, API·터널·키·주소는 AppData/Local/YeardreamRentBackend에 두고 현재 사용자/SYSTEM만 접근하도록 제한했다. 포트127.0.0.1:3307, 시스템 서비스·PATH·방화벽 미변경. 새 키를 발급했으며 채팅에 제시된 이전 값을 저장/사용하지 않았다.
+- 바탕화면 desktop_git_setup의 정제 CSV를 Git 제외 backend/data로 복사하고 기존 분석 로더로 검증했다. SHA256 `246020f396d215e54e897702d2445f1356b7937fca1161032cdaf2d7157866d5`, 30개 coverage그룹, 데이터 기준2026-10-16. 같은 원본 폴더의 SQLite는 읽기 전용 확인 결과 sessions/objects/object_links가0건이었다. 원본 파일/이전 PC 자료를 덮어쓰지 않았다.
+- 프론트 출력 구조 advertised_costs를 listing_maintenance(총액/확인/설명), listing_maintenance_items(7항목/상태/금액/기타명)로 분리했다. 원본JSON·v1.1응답·만원 단위·null과0·소유자·재시도·연쇄삭제는 유지한다. 입력·분리 행을 동일 트랜잭션으로 저장한다. 관리비 비교/추정은 계속 ON_HOLD다.
+- 실제 app/team DB SQL백업 후 스키마2개를 추가했다. 기존 매물은0건으로, backfill 검증도0건이다. 두 프론트 합성 출력JSON(api_responses,utility_estimates)은 별도 rent_examples DB에 원문2개+관리비8행+항목56행으로 적재했다. 이번 팀 ZIP의 report_response_example은 관리비 ON_HOLD라 금액 데이터로 적재하지 않았다. MAINTENANCE_DB.md 참조.
+- 현재 wlsdu PC에서 실제 MySQL 포함 전체188 passed,skip0. 추가 Node 프론트 연결 검사2개 통과. 팀 경로 통합 뒤의 Windows subprocess CP949 경고는 명시적UTF-8로 보완하고 원본 정규화38사례 단독 재검사도 통과했다. 기존 Starlette/httpx 경고1건은 남아 있다.
+- 최종 공개 HTTPS에서 CORS/허용되지 않은 origin 거절/키 없는401/6개구·60개동/저장·분석·조회/동일ID재시도를 확인했다. 관리비 입력1건이 실제7개 MySQL 행으로 분리되고 원본·보고서와 일치함, null/0구분과 관리비 비교보류도 확인했다. 검사 세션만 삭제했다. 실제 프론트 화면 버튼 연결 완료와는 구분한다.
+- 최신 주소는 runtime 접속주소.txt를 기준으로 전달한다. 재시작 때 주소가 바뀔 수 있어 Git문서에 고정주소처럼 넣지 않는다. server-start.cmd/server-stop.cmd 준비. PC부팅 자동실행·절전 설정 변경은 하지 않았다. 서버는 이 PC에서 실행 중이다.

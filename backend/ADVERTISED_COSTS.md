@@ -16,7 +16,7 @@
 
 ## 기존 저장 요청의 options에 추가합니다
 
-새 API나 DB 테이블을 만들지 않습니다. 기존 POST /listings에서 저장하고 GET /listings/{id}/report에서 읽습니다. 사용자 확인 전 입력은 미확인으로 표시하며 월세 분석은 기존처럼 차단합니다. 저장된 내용을 수정할 때는 새 매물에 previous_listing_id를 연결하는 기존 규격을 사용합니다.
+기존 POST /listings와 GET /listings/{id}/report를 그대로 사용합니다. 2026-10-20 후속 변경으로 원본 JSON과 함께 관리비 총액·항목을 별도 관계형 테이블에도 저장합니다. [항목별 DB 저장](MAINTENANCE_DB.md)을 참고하세요. 사용자 확인 전 입력은 미확인으로 표시하며 월세 분석은 기존처럼 차단합니다. 저장된 내용을 수정할 때는 새 매물에 previous_listing_id를 연결하는 기존 규격을 사용합니다.
 
 ```json
 {

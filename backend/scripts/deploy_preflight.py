@@ -70,11 +70,15 @@ def check_database(url, allow_private_network=False):
             cipher = cursor.fetchone()
             tls = bool(cipher and cipher['Value'])
             verified_tls = tls and options.get('ssl_verify_cert', False) and options.get('ssl_verify_identity', False)
+            expected_tables = dict(TABLES,
+                listing_maintenance=('listing_id','amount_10k_krw','user_confirmed','note'),
+                listing_maintenance_items=('listing_id','item','status','raw_status','amount_10k_krw','label'))
             cursor.execute("SELECT TABLE_NAME AS name, ENGINE AS engine FROM information_schema.TABLES "
-                           "WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME IN ('sessions','objects','object_links')")
+                           "WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME IN (" +
+                           ','.join('%s' for _ in expected_tables) + ")", tuple(expected_tables))
             engines = {row['name']: row['engine'] for row in cursor.fetchall()}
-            schema_ok = all(engines.get(table) == 'InnoDB' for table in TABLES)
-            for table, columns in TABLES.items():
+            schema_ok = all(engines.get(table) == 'InnoDB' for table in expected_tables)
+            for table, columns in expected_tables.items():
                 cursor.execute('SELECT ' + ','.join(columns) + ' FROM ' + table + ' LIMIT 0')
         return [result('database_connection', True, 'Connected using read-only checks.'),
                 result('mysql_version', mysql8, 'MySQL 8.x is required.'),

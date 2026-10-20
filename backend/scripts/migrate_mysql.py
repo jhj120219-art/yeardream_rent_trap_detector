@@ -1,12 +1,14 @@
 """Offline, non-destructive SQLite -> empty MySQL migration.
 Run from repository root: python -m backend.scripts.migrate_mysql --help
 """
+import json
 import argparse
 import os
 from pathlib import Path
 import sqlite3
 
 from backend.app.db import Store
+from backend.app.maintenance_storage import project
 
 TABLES = {
     'sessions': ('id', 'token_hash', 'created_at'),
@@ -62,6 +64,9 @@ def transfer(backup, target):
             expected = [tuple(row[col] for col in columns) for row in rows[table]]
             if sorted(actual, key=repr) != sorted(expected, key=repr):
                 raise ValueError('Migration verification failed; rolling back')
+        for row in rows['objects']:
+            if row['kind'] == 'listing':
+                project(db, row['id'], json.loads(row['payload']))
     return {table: len(data) for table, data in rows.items()}
 
 

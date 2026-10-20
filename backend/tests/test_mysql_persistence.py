@@ -11,7 +11,7 @@ from contextlib import contextmanager
 import httpx
 import pytest
 
-from backend.app.db import Store, mysql_options
+from backend.app.db import Store, mysql_options, MYSQL_SCHEMA
 from backend.scripts.migrate_mysql import snapshot, transfer
 from backend.tests.test_backend import payload, raw_rows
 from backend.scripts.import_data import import_raw
@@ -174,7 +174,7 @@ def test_mysql_adapter_commit_rollback_and_parameters(monkeypatch):
 
     monkeypatch.setattr(pymysql, 'connect', lambda **kwargs: Connection())
     store = Store(database_url='mysql://user:pass@localhost/test')
-    assert sum('ENGINE=InnoDB' in item[0] for item in calls if isinstance(item, tuple)) == 3
+    assert sum('ENGINE=InnoDB' in item[0] for item in calls if isinstance(item, tuple)) == len(MYSQL_SCHEMA)
     calls.clear()
     with store.connect() as db:
         db.execute('SELECT * FROM objects WHERE id=?', ('parameter',))

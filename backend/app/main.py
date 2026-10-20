@@ -209,6 +209,9 @@ def create_app(settings=None, pool=None, extractor=None):
         evidence=app.state.store.children(listing_id,sid,'maintenance_evidence',evidence_limit,evidence_offset)
         estimates=app.state.store.children(listing_id,sid,'utility_estimate',limit=1)['items']
         report=build_report(obj,analyses[0] if analyses else None,evidence,app.state.data_status)
+        stored_maintenance=app.state.store.maintenance(listing_id,sid)
+        if stored_maintenance is not None:
+            report['advertised_costs']=stored_maintenance
         report['utility_estimate']=estimates[0] if estimates else None
         if not settings.maintenance_enabled:
             for field in ('maintenance', 'utility_costs', 'monthly_cost', 'utility_estimate'):

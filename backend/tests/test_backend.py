@@ -1,5 +1,6 @@
 """실거래 원본 없이도 재현 가능한 통제 표본. 운영 데이터/정확도 검증으로 사용하지 않는다."""
 import copy
+import os
 from io import BytesIO
 import json
 from pathlib import Path
@@ -264,7 +265,8 @@ def test_team_normalize_regressions_in_isolation(tmp_path):
     for name in ('test_normalize.py','normalize_listing.py','analyze.py','compare_rent.py'):
         shutil.copy2(ANALYSIS_ROOT/name,tmp_path/name)
     (tmp_path/'output').mkdir()
-    proc=subprocess.run([sys.executable,'test_normalize.py'],cwd=tmp_path,capture_output=True,text=True)
+    proc=subprocess.run([sys.executable,'test_normalize.py'],cwd=tmp_path,capture_output=True,text=True,
+                        encoding='utf-8',env={**os.environ,'PYTHONIOENCODING':'utf-8'})
     assert proc.returncode==0,proc.stderr
     results=pd.read_csv(tmp_path/'output/test_normalize_results.csv')
     assert len(results)==38

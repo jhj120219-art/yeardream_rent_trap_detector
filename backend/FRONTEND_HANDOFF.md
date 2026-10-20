@@ -1,3 +1,5 @@
+> **2026-10-20 wlsdu PC 복구:** 이전 jhj12 PC의 임시 주소는 DNS NXDOMAIN으로 확인됐다. 현재 실행 환경은 `C:/Users/wlsdu/AppData/Local/YeardreamRentBackend`이며 최신 주소는 이 폴더의 `접속주소.txt`, 접속키는 `team-access.key`다. 문서 아래 jhj12 경로는 과거 환경이다. 새 키는 별도 1:1로 전달하며 채팅에 붙인 이전 값을 재사용하지 않는다. 시작 도구는 같은 폴더의 `server-start.cmd`, API 종료 도구는 `server-stop.cmd`다. 이 PC가 켜져 있고 절전 상태가 아니어야 접속된다. 원본 입력·DB·계정·실행 파일은 Git pull로 이전되지 않는다.
+
 # 팀 연결 안내 — 2026-10-20
 
 **관리비 입력 후속 반영:** [광고 관리비 입력·표시 안내](ADVERTISED_COSTS.md). 관리비 비교는 보류하지만 광고에 적힌 총액·포함 항목·명시 금액·설명은 입력·저장·표시합니다. report의 `advertised_costs`를 사용해주세요. 기존 보고서에서 관리비 전체를 제외하라는 안내보다 이 후속 안내가 우선합니다.
