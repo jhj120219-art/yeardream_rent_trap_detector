@@ -1,0 +1,3 @@
+case_id,month,housing_type,household_size,area_band,heating,electric_meter,water_meter,electric_kwh,electric_won,gas_nm3_or_mj,gas_won,water_m3,water_won,mgmt_fee_total_won,mgmt_fee_included_items,note
+# 개인정보(이름·전화번호·상세주소/호실·고객번호·바코드/QR·납부계좌)는 적지 않는다. 월·주택유형·가구원수·사용량·청구금액만 익명으로 기록. 20~30건은 오류 발견용 표본이며 정확도 입증용이 아님.
+# housing_type: 원룸/다가구/빌라(다세대·연립)/아파트/오피스텔, heating: 개별가스/지역난방/전기/기타, electric_meter·water_meter: 개별계량/공동계량

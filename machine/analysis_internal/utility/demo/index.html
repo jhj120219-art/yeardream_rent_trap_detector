@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>관리비 점검 예시</title>
+<style>
+:root { --bg:#f6f8fa; --surface:#fff; --fg:#16212b; --muted:#5b6b79; --line:#d9e0e6; --accent:#0b6e8a; --accent-soft:#e2f1f5; --band:#bfe0ea; --good:#1a7f4b; --good-soft:#e3f4ea; --warn:#9a5b00; --warn-soft:#fbf0dc; --hold:#5b6b79; --hold-soft:#eaeef2; --bad:#a3321f; --bad-soft:#fbe6e1;
+  --font:"Noto Sans KR","Malgun Gothic",system-ui,sans-serif; --mono:ui-monospace,Consolas,monospace; color-scheme:light; }
+@media (prefers-color-scheme: dark){ :root{ --bg:#0f161c; --surface:#172029; --fg:#e6edf2; --muted:#9aabb8; --line:#2a3742; --accent:#5cc0da; --accent-soft:#14323c; --band:#1f5666; --good:#5fd08f; --good-soft:#14301f; --warn:#e9b35a; --warn-soft:#382a10; --hold:#9aabb8; --hold-soft:#222d37; --bad:#f08a78; --bad-soft:#3c1d18; color-scheme:dark; } }
+*{box-sizing:border-box} html,body{margin:0} [hidden]{display:none!important}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:15px;line-height:1.7;padding:26px 16px 60px;word-break:keep-all;overflow-wrap:anywhere}
+main{max-width:920px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+h1{font-size:1.55rem;margin:0;line-height:1.35} h2{font-size:1.05rem;margin:0} p{margin:0}
+.meta{font-family:var(--mono);font-size:.76rem;color:var(--muted)} .lede{color:var(--muted);max-width:66ch}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px 14px}
+.f{display:flex;flex-direction:column;gap:4px;min-width:0}.f label{font-size:.78rem;color:var(--muted)}
+.f input,.f select,textarea{font:inherit;font-size:.95rem;padding:7px 9px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg);width:100%;min-width:0}
+textarea{min-height:92px;resize:vertical}
+.hint{font-size:.72rem;color:var(--muted)}
+.checks{display:flex;flex-wrap:wrap;gap:8px 16px}.checks label{display:inline-flex;gap:6px;align-items:center;font-size:.92rem;color:var(--fg)}.checks input{width:auto}
+button{font:inherit;cursor:pointer;border-radius:6px}
+.go{background:var(--accent);color:#fff;border:0;padding:9px 22px;font-weight:700}
+@media (prefers-color-scheme: dark){.go{color:#0f161c}}
+.sub{background:transparent;color:var(--accent);border:1px solid var(--line);padding:6px 14px;font-size:.86rem}
+.pill{display:inline-block;font-size:.8rem;font-weight:700;padding:3px 12px;border-radius:99px}
+.pill.ref{background:var(--accent-soft);color:var(--accent)} .pill.rev{background:var(--warn-soft);color:var(--warn)} .pill.ins{background:var(--hold-soft);color:var(--hold)}
+.big{font-size:1.25rem;font-weight:700;line-height:1.5}
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:6px}
+table{border-collapse:collapse;width:100%;font-size:.9rem}th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.78rem;color:var(--muted);background:var(--bg);font-weight:500;white-space:nowrap}tr:last-child td{border-bottom:0}
+td.n{font-family:var(--mono);text-align:right;white-space:nowrap}.m{font-family:var(--mono)}td div{margin-bottom:3px}
+.note{border-left:4px solid var(--accent);background:var(--accent-soft);padding:10px 14px;border-radius:0 6px 6px 0;font-size:.9rem}
+.note.warn{border-left-color:var(--warn);background:var(--warn-soft)}
+ul{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:6px}
+svg{width:100%;height:auto;display:block}svg text{font-family:var(--mono);fill:var(--muted);font-size:11px}
+.foot{font-size:.8rem;color:var(--muted)}
+.bar{display:flex;height:34px;border-radius:6px;overflow:hidden;border:1px solid var(--line)}.bar div{display:flex;align-items:center;justify-content:center;font-size:.78rem;color:#fff;white-space:nowrap;overflow:hidden}
+.seg-a{background:#0b6e8a}.seg-b{background:#5b8fa3}.seg-c{background:#8a97a3;background-image:repeating-linear-gradient(45deg,transparent 0 6px,rgba(255,255,255,.25) 6px 8px)}
+.lgd{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.8rem;color:var(--muted)}.lgd i{display:inline-block;width:12px;height:10px;border-radius:2px;margin-right:6px}
+.kv{font-family:var(--mono)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+details.guide summary{cursor:pointer;font-weight:700;font-size:1.05rem}
+.steps{counter-reset:s;list-style:none;padding:0;margin:12px 0;display:flex;flex-direction:column;gap:10px}
+.steps li{counter-increment:s;padding-left:38px;position:relative}
+.steps li::before{content:counter(s);position:absolute;left:0;top:0;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;text-align:center;line-height:26px;font-weight:700;font-size:.85rem}
+.scn{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
+.scn .c{border:1px solid var(--line);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:8px;background:var(--bg)}
+.scn .c h3{margin:0;font-size:.95rem}.scn .c p{margin:0;font-size:.82rem;color:var(--muted)}
+table.perf{border-collapse:collapse;width:100%;font-size:.85rem}table.perf th,table.perf td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}table.perf th{background:var(--accent-soft)}
+.no{color:var(--warn);font-weight:700}
+</style>
+</head>
+<body>
+<main>
+  <header style="display:flex;flex-direction:column;gap:8px">
+    <p class="meta">예시 서비스 · 데이터 분석 파트 시험판 · 서울 가구 평균 기준 참고값</p>
+    <h1>관리비에 들어갈 공과금, 통상 얼마일까</h1>
+    <p class="lede">광고의 관리비에 포함된다고 적힌 전기·수도·가스·인터넷을 서울 가구 평균 사용량과 2026년 요율로 계산해 참고 비용을 보여줍니다. 과하다고 단정하지 않고, 광고주에게 확인할 질문을 함께 드립니다.</p>
+  </header>
+
+
+  <section class="card">
+    <details class="guide" open><summary>이 페이지 사용 설명서 (먼저 읽어 보세요)</summary>
+      <p>이 서비스는 <b>부동산 광고에 적힌 관리비</b> 안에 들어갈 수 있는 <b>전기·수도·가스·인터넷</b>을, 서울 가구 평균 사용량과 2026년 요금표로 계산해 <b>참고값</b>으로 보여줍니다. 공용 관리비(청소·경비·승강기 등)는 &quot;기타&quot;로 남겨 두고, 광고주에게 무엇을 확인하면 좋은지 질문으로 정리해 드립니다. <b>이 금액이 비싸다·부당하다고 판정하지 않습니다.</b></p>
+      <ol class="steps">
+        <li><b>예시로 시작하기</b> — 아래 &quot;예시 시나리오&quot; 버튼을 누르면 입력이 자동으로 채워지고 결과가 나옵니다. 먼저 3개를 차례로 눌러 차이를 보세요.</li>
+        <li><b>내 광고로 해 보기</b> — 광고 문구(예: &quot;관리비 8만원 수도·인터넷 포함&quot;)를 붙여 넣고 &quot;문구로 채우기&quot; → 읽힌 값을 <b>광고 원문과 대조해 고친 뒤</b> &quot;참고 비용 계산&quot;을 누르세요.</li>
+        <li><b>결과 읽는 법</b> — ① 광고에서 확인된 사실 ② 통계로 계산한 참고 비용(폭으로 표시) ③ 가정에 따른 <i>가상</i> 나머지 금액 ④ 광고주에게 확인할 질문 순서로 보세요. 가상 구성은 실제 관리비 명세가 아닙니다.</li>
+        <li><b>이런 입력은 계산을 보류합니다</b> — 포함 항목을 모를 때, 전기·수도가 세대별 실비인지 모를 때, 같은 항목이 포함·별도 양쪽에 선택될 때, 관리비 단위가 이상할 때(월 500만원 초과).</li>
+      </ol>
+      <p class="foot">이미지(캡처) 입력은 연구 중입니다. 이 시험 페이지에는 아직 연결하지 않았고, 연결하더라도 읽힌 값은 반드시 사용자가 원문과 대조해 확인하도록 설계했습니다(아래 &quot;시험 현황&quot; 참고).</p>
+    </details>
+  </section>
+
+  <section class="card">
+    <h2>예시 시나리오 (누르면 자동 입력 후 계산)</h2>
+    <div class="scn">
+      <div class="c"><h3>① 정액 8만원, 수도·인터넷 포함</h3><p>광고에 비목만 있고 금액은 없는 흔한 형태. 포함된 항목의 참고 비용과 &quot;추가로 확인할 내역&quot;이 나옵니다. 계량 방식을 모르면 <b>구성은 보류</b>되고, 결과 화면의 &quot;가정하고 보기&quot; 버튼으로 가정을 켤 수 있습니다.</p><button class="sub" type="button" data-s="1">시나리오 1 실행</button></div>
+      <div class="c"><h3>② 공용 10만원 + 공과금 별도 실비</h3><p>공과금이 관리비 밖(별도 실비)일 때. 10만원에 공과금이 이미 들어 있는 것으로 계산하지 않고, <b>별도로 부담할 수 있는 항목</b>으로 따로 보여줍니다.</p><button class="sub" type="button" data-s="2">시나리오 2 실행</button></div>
+      <div class="c"><h3>③ 44.9만원, 항목 금액 표기</h3><p>광고에 전기·수도·가스·인터넷이 각 5만원으로 적힌 경우. 광고 금액과 통계 참고 비용을 나란히 비교합니다. 난방·TV·공용 금액은 이 도구의 계산 범위 밖이라 &quot;광고상 미분류&quot;로 남습니다.</p><button class="sub" type="button" data-s="3">시나리오 3 실행</button></div>
+    </div>
+    <p class="foot">세 예시는 실제 다방 광고 상세보기 화면(2026-10-20 관찰)의 표기 유형을 옮긴 것이며, 특정 매물이 아닙니다.</p>
+  </section>
+
+  <section class="card">
+    <h2>시험 현황 (정직하게 정리한 현재 수준)</h2>
+    <p><b>이미지에서 목록 정보 읽기</b> — 다방 웹 목록 화면 캡처, 개발에 쓰지 않은 새 카드 46개 대상, 정답은 같은 화면의 글자(DOM). 정답 카드 46개를 각각 분류한 결과입니다.</p>
+    <table class="perf"><tr><th>방식</th><th>맞게 읽음</th><th>틀리게 읽음</th><th>못 읽음(보류)</th><th>정답 카드와 연결 안 되는 틀린 읽기</th><th>속도</th></tr>
+      <tr><td>EasyOCR + 규칙 파서</td><td>30</td><td>0</td><td>16</td><td>3</td><td>5화면 약 6초</td></tr>
+      <tr><td>PaddleOCR 한국어 + 규칙 파서</td><td>28</td><td>0</td><td>18</td><td>0</td><td>5화면 약 150초(CPU)</td></tr>
+      <tr><td>Qwen2-VL-2B(VLM)</td><td>33</td><td>3</td><td>10</td><td>10</td><td>수 분</td></tr>
+      <tr><td>3개 중 2개 이상 일치</td><td>32</td><td>0</td><td>14</td><td>1</td><td>—</td></tr></table>
+    <p class="foot">&quot;정답 카드와 연결 안 되는 틀린 읽기&quot;는 면적·관리비까지 잘못 읽어 어느 카드의 오독인지 알 수 없는 출력 수입니다. 실제 사용에서는 사용자에게 잘못된 카드로 보일 수 있으므로 오류로 간주해야 합니다.</p>
+    <ul>
+      <li>다수결 조합은 이 46카드를 보고 고른 것이라 <b>독립 성능이 아닙니다</b>. 1차 후보는 EasyOCR 단독 + 규칙 파서 + 사용자 확인입니다.</li>
+      <li>다방 웹 화면 5장만 사용했습니다. 직방·모바일 화면, 관리비 <b>상세보기</b> 화면에서의 성능은 <span class="no">아직 검증하지 않았습니다.</span></li>
+      <li>같은 화면의 카드들은 글꼴·배치가 같아 서로 완전히 독립이 아닙니다.</li>
+    </ul>
+    <p><b>계산 로직</b> — 전기 요금 구간 경계 등 31개 점에서 독립 재구현과 일치, 안전 규칙 15,309개 조합에서 위반 없음(정의한 6개 규칙 기준), 안전장치를 일부러 망가뜨린 변형 3종 모두 시험이 감지, 이상 입력 11건 처리. 한전 공식 계산기·실제 고지서와의 대조는 <span class="no">아직 못 했습니다.</span></p>
+    <p><b>아직 말할 수 없는 것</b> — 개별 가구의 실제 공과금 예측 정확도, 서울 원룸 관리비의 정상 범위, 과도한 관리비를 찾아내는 정확도. 실제 고지서와 개인 단위 통계가 있어야 검증할 수 있습니다.</p>
+  </section>
+
+  <section class="card">
+    <h2>광고 문구로 채우기 (선택)</h2>
+    <div class="f"><label for="adtext">광고의 관리비 관련 문구를 붙여 넣으세요 (이미지에서 읽은 글자도 가능)</label>
+      <textarea id="adtext" placeholder="예: 관리비 10만원 (인터넷·수도·청소비 포함, 전기·가스 별도)"></textarea></div>
+    <div><button class="sub" id="fill" type="button">문구로 채우기</button> <span class="hint" id="fillmsg"></span></div>
+  </section>
+
+  <section class="card">
+    <h2>조건 입력</h2>
+    <div class="grid">
+      <div class="f"><label for="month">점검할 달</label><select id="month"></select></div>
+      <div class="f"><label for="household">가구원 수</label><select id="household"><option>1</option><option>2</option><option>3</option><option>4</option></select></div>
+      <div class="f"><label for="housing">주택 유형</label><select id="housing"><option>다세대·연립</option><option>단독·다가구</option><option>아파트</option><option>오피스텔</option></select></div>
+      <div class="f"><label for="area_band">면적</label><select id="area_band"><option>~33㎡</option><option>33~66㎡</option><option>66~99㎡</option></select></div>
+      <div class="f"><label for="heating">난방 방식</label><select id="heating"><option>모름</option><option>개별 도시가스</option><option>중앙·지역난방</option><option>전기</option></select><span class="hint">가스는 개별 도시가스일 때만 계산</span></div>
+      <div class="f"><label for="gas_user">가스를 사용하나요</label><select id="gas_user"><option>모름</option><option>예</option><option>아니오</option></select></div>
+      <div class="f"><label for="mgmt">광고 관리비 (만원)</label><input id="mgmt" type="number" step="0.5" min="0" placeholder="예: 10"></div>
+      <div class="f"><label for="metering">전기·수도·가스 계량·청구 방식</label><select id="metering"><option>모름</option><option>세대별</option><option>공동·배분·정액</option></select><span class="hint">세대별 계량·사용량만큼 실비일 때만 구성을 나눠 보여줍니다</span></div>
+    </div>
+    <div class="f"><label>관리비에 포함된다고 적힌 항목</label>
+      <div class="checks" id="inc"></div></div>
+    <div class="grid" id="itemized"></div>
+    <div class="grid" id="usage"></div>
+    <div><button class="go" id="run" type="button">참고 비용 계산</button></div>
+  </section>
+
+  <section id="out" hidden style="display:flex;flex-direction:column;gap:20px">
+    <div class="card" id="deccard" aria-live="polite"><h2>관리비 참고 구성 시뮬레이션 (실제 청구내역 아님)</h2><div id="dec" style="display:flex;flex-direction:column;gap:12px"></div></div>
+    <div class="card" aria-live="polite">
+      <h2>결과</h2>
+      <div><span class="pill" id="st"></span></div>
+      <p class="big" id="headline"></p>
+      <div id="notes" style="display:flex;flex-direction:column;gap:10px"></div>
+      <div class="tw"><table id="tbl"></table></div>
+      <div id="sep" style="display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+    <div class="card"><h2>월별 참고 금액 (포함 항목 합계, 집단 평균 환산값의 폭)</h2><svg id="chart" viewBox="0 0 700 250" role="img" aria-label="월별 참고 비용 합계"></svg>
+      <p class="foot">겨울에는 가스(난방)가 커서 합계가 가장 높고, 여름에는 전기가 높습니다. 점검하는 달에 맞춰 보세요.</p></div>
+    <div class="card"><h2>광고주에게 확인할 질문</h2><ul id="qs"></ul></div>
+    <div class="card"><h2>이 계산의 가정과 한계</h2><ul id="lim"></ul></div>
+  </section>
+</main>
+<script>
+const $=id=>document.getElementById(id), won=v=>Math.round(v).toLocaleString('ko-KR');
+const INC=['수도','전기','가스','인터넷','청소','공용전기','승강기'];
+$('month').innerHTML=[...Array(12)].map((_,i)=>`<option value="${i+1}">${i+1}월</option>`).join(''); $('month').value=new Date().getMonth()+1;
+$('inc').innerHTML=INC.map(x=>`<label><input type="checkbox" value="${x}"> ${x}</label>`).join('');
+const ITEMIZE=['수도','전기','가스','인터넷'];
+const USAGE=[['water','수도 사용량(㎥)'],['electric','전기 사용량(kWh)'],['gas','가스 사용량(N㎥)']];
+$('usage').innerHTML=USAGE.map(([k,l])=>`<div class="f"><label for="us_${k}">${l} — 고지서에 있을 때만(공식 요금표로 계산해 비교)</label><input id="us_${k}" type="number" min="0" step="0.1" placeholder="비워 두기"></div>`).join('');
+$('itemized').innerHTML=ITEMIZE.map(x=>`<div class="f"><label for="it_${x}">${x} 항목 청구액(원, 광고에 금액이 있을 때만)</label><input id="it_${x}" type="number" min="0" placeholder="비워 두기"></div>`).join('');
+$('fill').addEventListener('click',async()=>{
+  const r=await (await fetch('/parse',{method:'POST',body:JSON.stringify({text:$('adtext').value})})).json();
+  if(r.error){$('fillmsg').textContent=r.error;return;}
+  excludedParsed=r.maintenance_excluded_items||[];
+  if(r.maintenance_10k_krw!=null)$('mgmt').value=r.maintenance_10k_krw;
+  document.querySelectorAll('#inc input').forEach(c=>c.checked=(r.maintenance_included_items||[]).includes(c.value));
+  $('fillmsg').textContent=`읽은 값 — 관리비 ${r.maintenance_10k_krw??'미확인'}${r.maintenance_10k_krw!=null?'만원':''}, 포함: ${(r.maintenance_included_items||[]).join(', ')||'없음'}, 별도: ${(r.maintenance_excluded_items||[]).join(', ')||'없음'} (맞는지 확인해 주세요)`;
+});
+let excludedParsed=[];
+$('run').addEventListener('click',run);
+const SCN={
+ 1:{mgmt:8,inc:['수도','인터넷'],excl:[],itm:{},meter:'모름'},
+ 2:{mgmt:10,inc:[],excl:['수도','전기','가스','인터넷'],itm:{},meter:'모름'},
+ 3:{mgmt:44.9,inc:['수도','전기','가스','인터넷'],excl:[],itm:{수도:50000,전기:50000,가스:50000,인터넷:50000},meter:'세대별'}
+};
+document.querySelectorAll('[data-s]').forEach(b=>b.addEventListener('click',()=>{
+  const c=SCN[b.dataset.s]; $('mgmt').value=c.mgmt; $('metering').value=c.meter; excludedParsed=c.excl;
+  document.querySelectorAll('#inc input').forEach(x=>x.checked=c.inc.includes(x.value));
+  ITEMIZE.forEach(k=>{$('it_'+k).value=c.itm[k]!=null?c.itm[k]:'';});
+  $('household').value='1'; $('housing').value='다세대·연립'; $('area_band').value='~33㎡';
+  if(b.dataset.s==='3'){$('heating').value='개별 도시가스';$('gas_user').value='예';}else{$('heating').value='모름';$('gas_user').value='모름';}
+  run(); setTimeout(()=>$('out').scrollIntoView({behavior:'smooth'}),400);
+}));
+
+async function run(){
+  const body={month:+$('month').value,household:+$('household').value,housing:$('housing').value,area_band:$('area_band').value,heating:$('heating').value,gas_user:$('gas_user').value,
+    mgmt_man:$('mgmt').value,included:[...document.querySelectorAll('#inc input:checked')].map(c=>c.value),excluded:excludedParsed,itemized:Object.fromEntries(ITEMIZE.map(x=>[x,$('it_'+x).value]).filter(([k,v])=>v!=='')),metering:$('metering').value==='세대별'?'세대별':($('metering').value==='모름'?'모름':'공동'),bill_usage:Object.fromEntries(USAGE.map(([k])=>[k,$('us_'+k).value]).filter(([k,v])=>v!==''))};
+  const r=await (await fetch('/estimate',{method:'POST',body:JSON.stringify(body)})).json();
+  if(r.error){alert(r.error);return;} show(r,body);
+}
+function show(r,b){
+  $('out').hidden=false;
+  const st={REFERENCE_ONLY:['참고만','ref'],REVIEW_REQUIRED:['추가 확인 필요','rev'],INSUFFICIENT_DATA:['근거 부족','ins']}[r.status]||['참고만','ref'];
+  $('st').textContent=st[0]; $('st').className='pill '+st[1];
+  const names=Object.values(r.items).filter(v=>v.low!=null).map(v=>v.name).join('·');
+  let h=r.sum_high>0?`${r.month}월 ${names}의 참고 금액 합계는 월 약 ${won(r.sum_low)}~${won(r.sum_high)}원입니다. (서로 다른 집단 평균을 각각 환산한 값의 폭이며 정상 범위가 아닙니다)`:'참고 금액을 계산할 항목이 없습니다.';
+  if(r.mgmt_won)h+=` 광고 관리비는 ${won(r.mgmt_won)}원입니다.`;
+  $('headline').textContent=h;
+  const notes=[];
+  if(r.mgmt_won&&r.sum_high>0&&Object.keys(r.items).length&&b.included.length)notes.push(['','광고 관리비에서 위 참고 비용을 뺀 나머지가 부당한 금액이라는 뜻이 아닙니다. 청소비·공용전기·승강기 유지비 등 공용 항목이 들어갈 수 있어, 아래 질문으로 내역을 확인해 보세요.']);
+  if(!b.included.length)notes.push(['warn','포함 항목을 알 수 없어 전기·수도·가스·인터넷 전체의 참고 비용만 보여줍니다. 광고에서 포함 항목을 확인해 체크해 주세요.']);
+  if(r.status==='REVIEW_REQUIRED')notes.push(['warn','입력한 항목별 청구액 중 참고 범위를 크게 넘는 것이 있어 사용량·계량 방식·청구 내역 확인이 필요합니다. 이는 과다 청구 판정이 아닙니다.']);
+  $('notes').innerHTML=notes.map(([k,t])=>`<p class="note ${k}">${t}</p>`).join('');
+  const rows=Object.entries(r.items).map(([k,v])=>{
+    if(v.state==='HOLD')return `<tr><td>${v.name}</td><td colspan="3">${v.reason}</td></tr>`;
+    const ai=r.assess_items[k]; const amt=ai&&ai.amount?`${won(ai.amount)}원 — ${ai.state==='REVIEW_REQUIRED'?'참고 금액과 차이가 커서 내역 확인 권장':'참고 금액과 크게 다르지 않음(정상 판정 아님)'}`:'-';
+    const unit=k==='water'?' ㎥':k==='electric'?' kWh':' N㎥';
+    const bv=(v.by_view||[]).map(x=>`<div>${x.view}${x.category&&k!=='internet'?` (${x.category})`:''}: <b class="m">${won(x.bill)}원</b>${x.usage!=null?` <span class="hint">· ${x.usage}${unit}</span>`:''}</div>`).join('');
+    const sens=v.sens?`사용량 ±${v.sens.pct}% 가정 시<br><b class="m">${won(v.sens.low)}~${won(v.sens.high)}원</b>`:'-';
+    return `<tr><td>${v.name}</td><td>${bv}</td><td>${sens}</td><td>${amt}</td></tr>`;}).join('');
+  $('tbl').innerHTML=`<thead><tr><th>항목</th><th>서로 다른 집단 평균 기준 참고 금액 (각각)</th><th>민감도(가정)</th><th>광고 항목 청구액</th></tr></thead><tbody>${rows}</tbody>`;
+  const sep=Object.values(r.separate||{});
+  $('sep').innerHTML=sep.length?`<h2>관리비 밖에서 별도로 부담할 수 있는 항목 (광고에 별도·불포함으로 적힘)</h2><ul>${sep.map(x=>`<li>${x.name}: ${x.hold?'가스 사용 여부·난방 방식 확인 전이라 참고 금액을 내지 않습니다.':`참고 금액 약 ${won(x.low)}${x.low!==x.high?'~'+won(x.high):''}원/월 (집단 평균 환산)`}</li>`).join('')}</ul><p class="foot">관리비에 이미 포함된 항목과 겹쳐 더하지 않도록 따로 표시합니다.</p>`:'';
+  chart(r);
+  decshow(r);
+  $('qs').innerHTML=r.questions.length?r.questions.map(q=>`<li>${q}</li>`).join(''):'<li>포함 항목을 체크하면 항목별 확인 질문이 나옵니다.</li>';
+  const lim=[r.basis,'2023년 서울 조사 집단의 평균 사용량을 2026년 요율로 환산한 참고 금액이며 실제 2026년 평균 청구액이나 고지서 금액과 다를 수 있습니다.','사용량 ±20%(전기)·±30%(가스) 민감도는 통계적 분포가 아니라 가정입니다.',
+    '공동 계량(수도·전기), 정액제 관리비, 중앙·지역난방, 전기난방은 오차가 커서 이 범위가 맞지 않을 수 있습니다.',
+    '공용 관리비(청소·공용전기·승강기)와 인터넷 이용 조건은 근거 자료가 없어 계산하지 않습니다(인터넷은 공개 요금제 범위만 표시).',
+    ...(r.unverified.length?['확인 전 가정값: '+r.unverified.join(', ')]:[]),
+    '요금 기준: '+r.meta.tariff_date+' / 사용량 기준: '+r.meta.usage_basis];
+  $('lim').innerHTML=lim.map(x=>`<li>${x}</li>`).join('');
+}
+function decshow(r){
+  const d=r.decomposition, box=$('dec'); let h='';
+  const disc='<p class="foot">이 구성은 실제 관리비 내역이 아니라 통계적 가정에 따른 계산이며, 실제 공용관리비나 부당 청구액이 아닙니다. 막대는 참고 금액의 중앙값을 쓴 가상 배분입니다.</p>';
+  const common=`<div><b>기타(공용 관리비 등)에는 이런 항목이 들어갈 수 있습니다</b><p>${(r.common_items||[]).join(' · ')}</p><p class="foot">서울시 청년안심주택 관리비 가이드라인의 산정 항목 예시이며(ChatGPT 조사, 직접 확인 전), 일반 원룸·빌라의 기준이 아닙니다. 건물마다 크게 달라, 예를 들어 청년안심주택 공개 예상 관리비는 20.2㎡형 56,802원, 16타입 120,000원처럼 건물별로 다릅니다(맥락 참고용, 정상 상한이 아님).</p></div>`;
+  if(d.type==='NONE'){h=`<p class="note">${d.reason}</p>`;}
+  else if(d.type==='HOLD'){h=`<p class="note warn">${d.reason}</p>`+(d.can_assume?`<div><button class="sub" id="assume" type="button">세대별 계량·실비라고 가정하고 보기</button> <span class="hint">가정임을 표시하고 계산합니다</span></div>`:'');}
+  else{
+    const M=d.M, a=d.actual_sum||0, mid=((d.U_low||0)+(d.U_high||0))/2, rest=M-a-mid;
+    const parts=[]; if(a)parts.push(['seg-a',a,'광고상 확인 금액']); if(d.type!=='ACTUAL')parts.push(['seg-b',mid,'참고 비용(가상)']); parts.push(['seg-c',Math.max(rest,0),d.label]);
+    h+=`<p class="big">${d.type==='ACTUAL'
+      ?`광고 관리비 ${won(M)}원 중 광고에 금액이 적힌 항목은 ${won(a)}원이고, 광고상 금액 미분류 부분은 ${won(d.R_low)}원입니다. 이 부분에 어떤 공용관리비·기타 항목이 포함되는지 확인해 보세요.`
+      :`광고 관리비 ${won(M)}원 중 ${a?`광고에 적힌 ${won(a)}원과 `:''}${d.ref_items.map(k=>r.items[k].name).join('·')}의 참고 비용 약 ${won(d.U_low)}~${won(d.U_high)}원을 가정하면, 이를 제외한 약 ${won(d.R_low)}~${won(d.R_high)}원(${d.pct_low}~${d.pct_high}%)은 실제 공용관리비라고 단정할 수 없는 가상의 계산값입니다. 이 부분에 해당하는 구성 내역을 추가로 확인해 보세요.`}</p>`;
+    h+=`<div class="bar" role="img" aria-label="관리비 구성 가상 배분">${parts.map(([c,v,l])=>`<div class="${c}" style="width:${v/M*100}%">${v/M>0.14?l:''}</div>`).join('')}</div>`;
+    h+=`<div class="lgd">${parts.map(([c,v,l])=>`<span><i class="${c}"></i>${l} ${won(v)}원</span>`).join('')}</div>`;
+    h+=`<p class="foot">${d.type==='ACTUAL'?'광고상 금액 미분류 부분은 관리비에서 광고에 적힌 항목 금액을 뺀 값입니다.':'나머지 금액은 관리비에서 광고에 적힌 금액(있다면)과 참고 비용(중앙값)을 뺀 가상 배분입니다.'} ${r.month}월 기준 한 달치입니다.</p>`+disc;
+  }
+  const bc=r.bill_check||{}; const names={electric:'전기',water:'수도',gas:'가스'}; const bk=Object.keys(bc);
+  if(bk.length)h+=`<div><b>고지서 사용량으로 공식 요금표 계산</b><ul>${bk.map(k=>{const ai=r.assess_items[k]&&r.assess_items[k].amount; return `<li>${names[k]}: 입력한 사용량으로 계산한 요금 약 ${won(bc[k])}원${ai?` (입력한 청구액 ${won(ai)}원, 차이 ${won(ai-bc[k])}원 — 계약 방식·기간·할인에 따라 다를 수 있음)`:''}</li>`;}).join('')}</ul></div>`;
+  h+=common; box.innerHTML=h;
+  const ab=$('assume'); if(ab)ab.addEventListener('click',()=>{$('metering').value='세대별';run();});
+}
+function chart(r){
+  const W=700,H=250,L=56,R=12,T=14,B=30,months=[...Array(12)].map((_,i)=>i+1);
+  const lo=months.map(m=>Object.values(r.monthly[m]).reduce((a,v)=>a+v.low,0)), hi=months.map(m=>Object.values(r.monthly[m]).reduce((a,v)=>a+v.high,0));
+  const max=Math.max(...hi,1000)*1.08, X=m=>L+(m-1)/11*(W-L-R), Y=v=>T+(1-v/max)*(H-T-B);
+  let g='';
+  for(let i=0;i<=4;i++){const v=max*i/4;g+=`<line x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)"/><text x="${L-6}" y="${Y(v)+4}" text-anchor="end">${Math.round(v/10000)}만</text>`;}
+  months.forEach(m=>g+=`<text x="${X(m)}" y="${H-8}" text-anchor="middle">${m}</text>`);
+  const band=months.map((m,i)=>`${X(m)},${Y(hi[i])}`).join(' ')+' '+months.slice().reverse().map(m=>`${X(m)},${Y(lo[m-1])}`).join(' ');
+  g+=`<polygon points="${band}" fill="var(--band)" opacity=".8"/><polyline points="${months.map((m,i)=>`${X(m)},${Y(hi[i])}`).join(' ')}" fill="none" stroke="var(--accent)" stroke-width="2"/><polyline points="${months.map((m,i)=>`${X(m)},${Y(lo[i])}`).join(' ')}" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="4 3"/>`;
+  g+=`<line x1="${X(r.month)}" x2="${X(r.month)}" y1="${T}" y2="${H-B}" stroke="var(--muted)" stroke-dasharray="4 4"/><circle cx="${X(r.month)}" cy="${Y(hi[r.month-1])}" r="4.5" fill="var(--accent)"/>`;
+  $('chart').innerHTML=g;
+}
+</script>
+</body>
+</html>

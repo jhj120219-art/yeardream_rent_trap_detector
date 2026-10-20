@@ -1,0 +1,44 @@
+{
+  "version": "candidate_v2.0",
+  "note": "분석 내부 후보 정책. 홀드아웃(송파·강북) 평가 전에 고정하고, 평가 후에는 이 파일을 수정하지 않는다(수정 시 새 version).",
+  "stage0": {
+    "enabled": true,
+    "min_n": 3,
+    "window_days": 730,
+    "area_tol": 0.15,
+    "dep_tol": 0.5,
+    "dep_floor": 500,
+    "dedupe_keys": ["date", "area", "dep", "rent", "flr"],
+    "usages": ["아파트", "연립다세대", "오피스텔"],
+    "require_single_building": true,
+    "building_cache": "data/lot_buildings_cache.csv"
+  },
+  "trust": {
+    "features": ["logn", "iqr", "iqr90", "stage_new"],
+    "cut_high": 0.75,
+    "cut_mid": 0.55,
+    "coef_file": "configs/trust_coef_v2.json"
+  },
+  "label": {
+    "margin": 0.05,
+    "no_tail_usages": ["단독다가구"],
+    "hold_stage": [3],
+    "strong_label_min_n_stage0": 10,
+    "hold_when_grade": ["낮음"]
+  },
+  "evaluation": {
+    "seed": 7,
+    "bases_per_gu": 1500,
+    "recent_months": 3,
+    "pass_criteria": {
+      "overall_median_err_not_worse_than_pp": 1.0,
+      "within20_not_lower_than_baseline": true,
+      "grade_monotonic": true,
+      "high_grade_within20_min_vs_design_pp": -5.0,
+      "trust_auc_min": 0.70,
+      "trust_brier_below": 0.2236,
+      "safety_violations": 0,
+      "leakage_violations": 0
+    }
+  }
+}

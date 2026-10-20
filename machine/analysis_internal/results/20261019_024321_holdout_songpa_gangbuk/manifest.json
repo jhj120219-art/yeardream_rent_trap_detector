@@ -1,0 +1,29 @@
+{
+ "run_id": "20261019_024321_holdout_songpa_gangbuk",
+ "label": "holdout_songpa_gangbuk",
+ "created": "2026-10-19T02:43:21",
+ "mode": "frozen",
+ "data_file": "holdout2_clean.csv",
+ "data_sha256": "8183cc3fcfcbffc1a59dbc6a58eb36d0da6981e5c726241ad9f62f231800e74b",
+ "data_rows": 97481,
+ "building_cache_file": "lot_buildings_cache_holdout2.csv",
+ "building_cache_sha256": "ce60e129b3d682f0e4138c77a1bd18d53bfe5e5bf46062b9c2e9eb94b1ead40b",
+ "building_cache_lots": 1043,
+ "policy_file": "candidate_v2.json",
+ "policy_sha256": "413734f9c589e0e30430eac64cf46abecd34eb46b5e605a11bad607f9ded7de4",
+ "policy_version": "candidate_v2.0",
+ "trust_coef_sha256": "83396582ee754af1d92bb70cc9bb5d1a96e6c89501375aef4317a3a1c94bf87d",
+ "code_version": "11ad4af+local",
+ "seed": 7,
+ "bases_per_gu": 1500,
+ "eval_units": 2859,
+ "dedupe": [
+  "date",
+  "area",
+  "dep",
+  "rent",
+  "flr"
+ ],
+ "building_identification": "건축HUB 표제부 주건축물 1동",
+ "baseline_check": null
+}

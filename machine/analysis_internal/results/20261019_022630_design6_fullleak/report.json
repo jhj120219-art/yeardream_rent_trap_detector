@@ -1,0 +1,218 @@
+{
+ "label": "design6_fullleak",
+ "n_bases": 8995,
+ "n_valid": 8991,
+ "n_stage0": 1945,
+ "trust_scores_loo": {
+  "auc": 0.7642431194788566,
+  "brier": 0.19476308878842621
+ },
+ "grade_table": [
+  {
+   "grade": "높음",
+   "n": 2238,
+   "share_pct": 24.9,
+   "within20_pct": 88.9,
+   "ci95": [
+    87.6,
+    90.2
+   ],
+   "median_err_pct": 6.25,
+   "stage0_share_pct": 72.3
+  },
+  {
+   "grade": "보통",
+   "n": 3712,
+   "share_pct": 41.3,
+   "within20_pct": 62.4,
+   "ci95": [
+    60.8,
+    64.0
+   ],
+   "median_err_pct": 15.56,
+   "stage0_share_pct": 5.3
+  },
+  {
+   "grade": "낮음",
+   "n": 3041,
+   "share_pct": 33.8,
+   "within20_pct": 35.8,
+   "ci95": [
+    34.1,
+    37.5
+   ],
+   "median_err_pct": 30.0,
+   "stage0_share_pct": 4.3
+  }
+ ],
+ "grade_monotonic": true,
+ "calibration": [
+  {
+   "bin": "0.0-0.3",
+   "n": 1025,
+   "predicted_pct": 18.1,
+   "actual_pct": 25.0
+  },
+  {
+   "bin": "0.3-0.5",
+   "n": 1488,
+   "predicted_pct": 41.0,
+   "actual_pct": 38.4
+  },
+  {
+   "bin": "0.5-0.6",
+   "n": 1165,
+   "predicted_pct": 55.3,
+   "actual_pct": 49.4
+  },
+  {
+   "bin": "0.6-0.7",
+   "n": 1800,
+   "predicted_pct": 65.4,
+   "actual_pct": 60.6
+  },
+  {
+   "bin": "0.7-0.8",
+   "n": 1973,
+   "predicted_pct": 74.2,
+   "actual_pct": 73.6
+  },
+  {
+   "bin": "0.8-1.0",
+   "n": 1540,
+   "predicted_pct": 85.6,
+   "actual_pct": 94.1
+  }
+ ],
+ "accuracy": {
+  "n_common": 8991,
+  "baseline_median_err_pct": 16.67,
+  "v2_median_err_pct": 15.38,
+  "baseline_within20_pct": 57.9,
+  "v2_within20_pct": 60.0,
+  "all_valid_v2_median_err_pct": 15.38,
+  "all_valid_v2_within20_pct": 60.0,
+  "stage0_only": {
+   "n": 1945,
+   "v2_median_err_pct": 6.0,
+   "baseline_median_err_pct": 8.7
+  },
+  "by_usage": {
+   "단독다가구": {
+    "n": 3865,
+    "baseline": 16.0,
+    "v2": 16.0
+   },
+   "아파트": {
+    "n": 1909,
+    "baseline": 19.7,
+    "v2": 18.18
+   },
+   "연립다세대": {
+    "n": 1734,
+    "baseline": 25.0,
+    "v2": 23.08
+   },
+   "오피스텔": {
+    "n": 1483,
+    "baseline": 9.09,
+    "v2": 6.67
+   }
+  }
+ },
+ "stage0_building_bootstrap": {
+  "n_cases": 1945,
+  "n_buildings": 771,
+  "improvement_pp_mean": 2.69,
+  "ci95": [
+   1.93,
+   3.51
+  ]
+ },
+ "labels": {
+  "margin_0": {
+   "UNRATED": 3048,
+   "TYPICAL_RANGE": 2963,
+   "UPPER_RANGE": 1325,
+   "LOWER_RANGE": 1102,
+   "UPPER_TAIL": 553
+  },
+  "margin_5": {
+   "UNRATED": 3823,
+   "TYPICAL_RANGE": 2963,
+   "LOWER_RANGE": 921,
+   "UPPER_RANGE": 921,
+   "UPPER_TAIL": 363
+  },
+  "margin_10": {
+   "UNRATED": 4609,
+   "TYPICAL_RANGE": 2963,
+   "LOWER_RANGE": 725,
+   "UPPER_RANGE": 503,
+   "UPPER_TAIL": 191
+  }
+ },
+ "label_stability": {
+  "upper_tail_m0": 553,
+  "upper_tail_retained_m5": 363,
+  "upper_range_m0": 1325,
+  "upper_range_retained_m5": 921,
+  "unrated_reasons_m5": {
+   "LOW_TRUST": 3041,
+   "BORDER_MARGIN": 775,
+   "STAGE3_REFERENCE": 7
+  }
+ },
+ "safety_violations": 0,
+ "leakage": [
+  {
+   "name": "L1_stage0_comparable_before_as_of",
+   "checked": 1945,
+   "violations": 0
+  },
+  {
+   "name": "L2_truncated_pool_equivalence",
+   "checked": 40,
+   "violations": 0
+  },
+  {
+   "name": "L3_future_injection",
+   "checked": 30,
+   "violations": 0
+  },
+  {
+   "name": "U1_unique_base_rows",
+   "checked": 8995,
+   "violations": 0
+  },
+  {
+   "name": "U1_info_duplicate_contract_keys_in_bases",
+   "checked": 8995,
+   "violations": 0,
+   "info": "동일 계약 키를 가진 기준 매물 행 152건(제외하지 않음, 보고만)"
+  }
+ ],
+ "leakage_violations": 0,
+ "high_grade": {
+  "grade": "높음",
+  "n": 2238,
+  "share_pct": 24.9,
+  "within20_pct": 88.9,
+  "ci95": [
+   87.6,
+   90.2
+  ],
+  "median_err_pct": 6.25,
+  "stage0_share_pct": 72.3
+ },
+ "criteria_checks": {
+  "overall_median_err": true,
+  "within20_not_lower": true,
+  "grade_monotonic": true,
+  "trust_auc": true,
+  "trust_brier": true,
+  "safety": true,
+  "leakage": true,
+  "high_grade_within20_ref_needed": null
+ }
+}

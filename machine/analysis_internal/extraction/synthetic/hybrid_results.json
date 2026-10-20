@@ -1,0 +1,205 @@
+{
+ "ad_01": {
+  "transcript": "부동산 매물\n신림역 도보 5분 까지한 원룸\n보증금 1,000만원 / 월세 50만원\n관리비 7만원 (수도, 인터넷 포함)\n전용면적 20m² · 3층 / 5층\n서울 관악구 신림동 · 빌라(다세대)\n남향, 풀옵션\n연락처 010-****-**** (가림) · 등록일 2026.10.18",
+  "parsed": {
+   "deposit_10k_krw": 1000.0,
+   "rent_10k_krw": 50.0,
+   "maintenance_10k_krw": 7.0,
+   "maintenance_state": "AMOUNT",
+   "maintenance_included_items": [
+    "수도",
+    "인터넷"
+   ],
+   "maintenance_excluded_items": [],
+   "area_m2": 20.0,
+   "area_basis": "전용",
+   "floor": "3"
+  },
+  "ok": {
+   "deposit": true,
+   "rent": true,
+   "maint": true,
+   "included": true,
+   "area": true,
+   "floor": true
+  }
+ },
+ "ad_02": {
+  "transcript": "부동산 매물\n봉천동 투룸 급매\n보증금 500 / 월세 45\n관리비: 별도 (사용량만큼 실비)\n전용 33.5㎡ · 2층\n서울 관악구 봉천동 · 다가구주택\n연락처 010-****-**** (가림) · 등록일 2026.10.18",
+  "parsed": {
+   "deposit_10k_krw": 500.0,
+   "rent_10k_krw": 45.0,
+   "maintenance_10k_krw": null,
+   "maintenance_state": "ACTUAL_COST",
+   "maintenance_included_items": [],
+   "maintenance_excluded_items": [],
+   "area_m2": 33.5,
+   "area_basis": "전용",
+   "floor": "2"
+  },
+  "ok": {
+   "deposit": true,
+   "rent": true,
+   "maint": true,
+   "included": true,
+   "area": true,
+   "floor": true
+  }
+ },
+ "ad_03": {
+  "transcript": "부동산 매물\n합정동 신축 오피스텔\n보증금 2,000만원 / 월세 70만원\n관리비 10만원 (인터넷·수도·청소비 포함, 전기·가스 별도)\n전용 24㎡·8층\n서울 마포구 합정동·오피스텔\n연락처 010-****-**** (가림) · 등록일 2026.10.18",
+  "parsed": {
+   "deposit_10k_krw": 2000.0,
+   "rent_10k_krw": 70.0,
+   "maintenance_10k_krw": 10.0,
+   "maintenance_state": "AMOUNT",
+   "maintenance_included_items": [
+    "수도",
+    "인터넷",
+    "청소"
+   ],
+   "maintenance_excluded_items": [
+    "가스",
+    "전기"
+   ],
+   "area_m2": 24.0,
+   "area_basis": "전용",
+   "floor": "8"
+  },
+  "ok": {
+   "deposit": true,
+   "rent": true,
+   "maint": true,
+   "included": true,
+   "area": true,
+   "floor": true
+  }
+ },
+ "ad_04": {
+  "transcript": "부동산 매물\n상도동 저렴한 원룸\n월세 40만원 / 보증금 300만원\n관리비 없음 (공과금 별도)\n전용 16m² · 4층\n서울 동작구 상도동 · 다세대주택\n연락처 010-****-**** (가림) · 등록일 2026.10.18",
+  "parsed": {
+   "deposit_10k_krw": 300.0,
+   "rent_10k_krw": 40.0,
+   "maintenance_10k_krw": 0.0,
+   "maintenance_state": "NONE",
+   "maintenance_included_items": [],
+   "maintenance_excluded_items": [
+    "공과금"
+   ],
+   "area_m2": 16.0,
+   "area_basis": "전용",
+   "floor": "4"
+  },
+  "ok": {
+   "deposit": true,
+   "rent": true,
+   "maint": true,
+   "included": true,
+   "area": true,
+   "floor": true
+  }
+ },
+ "ad_05": {
+  "transcript": "부동산 매물\n노원 반지하 투룸\n보증금 1억 / 월세 45만원\n관리비 12만원 (전기·수도·인터넷 포함)\n전용 29㎡·반지하\n서울 노원구 공릉동·연립주택\n연락처 010-****-**** (가림)·등록일 2026.10.18",
+  "parsed": {
+   "deposit_10k_krw": 10000.0,
+   "rent_10k_krw": 45.0,
+   "maintenance_10k_krw": 12.0,
+   "maintenance_state": "AMOUNT",
+   "maintenance_included_items": [
+    "수도",
+    "인터넷",
+    "전기"
+   ],
+   "maintenance_excluded_items": [],
+   "area_m2": 29.0,
+   "area_basis": "전용",
+   "floor": "반지하"
+  },
+  "ok": {
+   "deposit": true,
+   "rent": true,
+   "maint": true,
+   "included": true,
+   "area": true,
+   "floor": true
+  }
+ },
+ "ad_06": {
+  "transcript": "부동산 매물\n광진구 자양동 원룸\n보증금 1,000 / 월세 55\n관리비 5.5만원 (수도 포함)\n전용 18㎡ (공급 26㎡) · 6층\n서울 광진구 자양동 · 오피스텔\n연락처 010-****-**** (가림) · 등록일 2026.10.18",
+  "parsed": {
+   "deposit_10k_krw": 1000.0,
+   "rent_10k_krw": 55.0,
+   "maintenance_10k_krw": 5.5,
+   "maintenance_state": "AMOUNT",
+   "maintenance_included_items": [
+    "수도"
+   ],
+   "maintenance_excluded_items": [],
+   "area_m2": 18.0,
+   "area_basis": "전용",
+   "floor": "6"
+  },
+  "ok": {
+   "deposit": true,
+   "rent": true,
+   "maint": true,
+   "included": true,
+   "area": true,
+   "floor": true
+  }
+ },
+ "ad_07": {
+  "transcript": "부동산 매물\n강서구 화곡동 신축 빌라\n월세 500/45\n관리비 8만원 포함: 인터넷 · 가스(난방) · 공용전기\n전용 22㎡ · 1층\n서울 강서구 화곡동 · 신축 빌라\n연락처 010-****-**** (가림) · 등록일 2026.10.18",
+  "parsed": {
+   "deposit_10k_krw": 500.0,
+   "rent_10k_krw": 45.0,
+   "maintenance_10k_krw": 8.0,
+   "maintenance_state": "AMOUNT",
+   "maintenance_included_items": [
+    "가스",
+    "공용전기",
+    "인터넷"
+   ],
+   "maintenance_excluded_items": [],
+   "area_m2": 22.0,
+   "area_basis": "전용",
+   "floor": "1"
+  },
+  "ok": {
+   "deposit": true,
+   "rent": true,
+   "maint": true,
+   "included": true,
+   "area": true,
+   "floor": true
+  }
+ },
+ "ad_08": {
+  "transcript": "부동산 매물\n성수동 품움선 스튜디오\n보증금 2,000만원 / 월세 60만원\n관리비 15만원\n전용 26㎡ · 5층\n서울 성동구 성수동1가 · 오피스텔\n※ 인터넷, 수도 포함 / 전기는 각 호실 별도 청구\n연락처 010-****-**** (가림) · 등록일 2026.10.18",
+  "parsed": {
+   "deposit_10k_krw": 2000.0,
+   "rent_10k_krw": 60.0,
+   "maintenance_10k_krw": 15.0,
+   "maintenance_state": "AMOUNT",
+   "maintenance_included_items": [
+    "수도",
+    "인터넷"
+   ],
+   "maintenance_excluded_items": [
+    "전기"
+   ],
+   "area_m2": 26.0,
+   "area_basis": "전용",
+   "floor": "5"
+  },
+  "ok": {
+   "deposit": true,
+   "rent": true,
+   "maint": true,
+   "included": true,
+   "area": true,
+   "floor": true
+  }
+ }
+}

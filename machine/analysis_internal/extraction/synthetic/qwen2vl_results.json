@@ -1,0 +1,159 @@
+{
+ "ad_01": {
+  "extracted": {
+   "deposit_10k_krw": 10000,
+   "rent_10k_krw": 50000,
+   "maintenance_10k_krw": null,
+   "maintenance_included_items": [
+    "수도",
+    "인터넷"
+   ],
+   "maintenance_excluded_items": null,
+   "area_m2": 20,
+   "area_basis": "전용",
+   "floor": "5층",
+   "address_text": "서울 관악구 신림동 빌라(다세대)",
+   "evidence": {
+    "price": "없음",
+    "maintenance": "없음"
+   }
+  },
+  "raw": "{\n \"deposit_10k_krw\": 10000,\n \"rent_10k_krw\": 50000,\n \"maintenance_10k_krw\": null,\n \"maintenance_included_items\": [\"수도\", \"인터넷\"],\n \"maintenance_excluded_items\": null,\n \"area_m2\": 20,\n \"area_basis\": \"전용\",\n \"floor\": \"5층\",\n \"address_text\": \"서울 관악구 신림동 빌라(다세대)\",\n \"evidence\": {\n \"price\": \"없음\",\n \"maintenance\": \"없음\"\n }\n}"
+ },
+ "ad_02": {
+  "extracted": {
+   "deposit_10k_krw": 500,
+   "rent_10k_krw": 45,
+   "maintenance_10k_krw": null,
+   "maintenance_included_items": [
+    "청소"
+   ],
+   "maintenance_excluded_items": null,
+   "area_m2": 33.5,
+   "area_basis": "전용",
+   "floor": "2층",
+   "address_text": "부동산 매물",
+   "evidence": {
+    "price": "500",
+    "maintenance": "45"
+   }
+  },
+  "raw": "{\n \"deposit_10k_krw\": 500,\n \"rent_10k_krw\": 45,\n \"maintenance_10k_krw\": null,\n \"maintenance_included_items\": [\"청소\"],\n \"maintenance_excluded_items\": null,\n \"area_m2\": 33.5,\n \"area_basis\": \"전용\",\n \"floor\": \"2층\",\n \"address_text\": \"부동산 매물\",\n \"evidence\": {\n \"price\": \"500\",\n \"maintenance\": \"45\"\n }\n}"
+ },
+ "ad_03": {
+  "extracted": {
+   "deposit_10k_krw": 2000,
+   "rent_10k_krw": 70,
+   "maintenance_10k_krw": null,
+   "maintenance_included_items": [
+    "인터넷",
+    "청소"
+   ],
+   "maintenance_excluded_items": null,
+   "area_m2": 24,
+   "area_basis": "전용",
+   "floor": "8층",
+   "address_text": "서울 마포구 합정동 100-1",
+   "evidence": {
+    "price": "2000 만원",
+    "maintenance": "70 만원"
+   }
+  },
+  "raw": "{\n \"deposit_10k_krw\": 2000,\n \"rent_10k_krw\": 70,\n \"maintenance_10k_krw\": null,\n \"maintenance_included_items\": [\"인터넷\", \"청소\"],\n \"maintenance_excluded_items\": null,\n \"area_m2\": 24,\n \"area_basis\": \"전용\",\n \"floor\": \"8층\",\n \"address_text\": \"서울 마포구 합정동 100-1\",\n \"evidence\": {\n \"price\": \"2000 만원\",\n \"maintenance\": \"70 만원\"\n }\n}"
+ },
+ "ad_04": {
+  "extracted": {
+   "deposit_10k_krw": 10000,
+   "rent_10k_krw": 40000,
+   "maintenance_10k_krw": null,
+   "maintenance_included_items": [
+    "청소"
+   ],
+   "maintenance_excluded_items": null,
+   "area_m2": 16,
+   "area_basis": "전용",
+   "floor": "4층",
+   "address_text": "서울 동작구 상도동 123-456",
+   "evidence": {
+    "price": "300만원",
+    "maintenance": "300만원"
+   }
+  },
+  "raw": "{\n \"deposit_10k_krw\": 10000,\n \"rent_10k_krw\": 40000,\n \"maintenance_10k_krw\": null,\n \"maintenance_included_items\": [\"청소\"],\n \"maintenance_excluded_items\": null,\n \"area_m2\": 16,\n \"area_basis\": \"전용\",\n \"floor\": \"4층\",\n \"address_text\": \"서울 동작구 상도동 123-456\",\n \"evidence\": {\n \"price\": \"300만원\",\n \"maintenance\": \"300만원\"\n }\n}"
+ },
+ "ad_05": {
+  "extracted": {
+   "deposit_10k_krw": 10000,
+   "rent_10k_krw": 45000,
+   "maintenance_10k_krw": null,
+   "maintenance_included_items": [
+    "수도",
+    "인터넷"
+   ],
+   "maintenance_excluded_items": null,
+   "area_m2": 29,
+   "area_basis": "전용",
+   "floor": "반지하",
+   "address_text": "서울 노원구 공릉동 연립주택",
+   "evidence": {
+    "price": "010-****-****",
+    "maintenance": "없음"
+   }
+  },
+  "raw": "{\n \"deposit_10k_krw\": 10000,\n \"rent_10k_krw\": 45000,\n \"maintenance_10k_krw\": null,\n \"maintenance_included_items\": [\"수도\",\"인터넷\"],\n \"maintenance_excluded_items\": null,\n \"area_m2\": 29,\n \"area_basis\": \"전용\",\n \"floor\": \"반지하\",\n \"address_text\": \"서울 노원구 공릉동 연립주택\",\n \"evidence\": {\n \"price\": \"010-****-****\",\n \"maintenance\": \"없음\"\n }\n}"
+ },
+ "ad_06": {
+  "extracted": {
+   "deposit_10k_krw": 1000,
+   "rent_10k_krw": 55,
+   "maintenance_10k_krw": null,
+   "maintenance_included_items": [
+    "수도",
+    "인터넷",
+    "청소"
+   ],
+   "maintenance_excluded_items": null,
+   "area_m2": 18,
+   "area_basis": "공급",
+   "floor": "6층",
+   "address_text": "광진구 자양동 원룸",
+   "evidence": {
+    "price": "없음",
+    "maintenance": "5.5만원"
+   }
+  },
+  "raw": "{\n \"deposit_10k_krw\": 1000,\n \"rent_10k_krw\": 55,\n \"maintenance_10k_krw\": null,\n \"maintenance_included_items\": [\"수도\", \"인터넷\", \"청소\"],\n \"maintenance_excluded_items\": null,\n \"area_m2\": 18,\n \"area_basis\": \"공급\",\n \"floor\": \"6층\",\n \"address_text\": \"광진구 자양동 원룸\",\n \"evidence\": {\n \"price\": \"없음\",\n \"maintenance\": \"5.5만원\"\n }\n}"
+ },
+ "ad_07": {
+  "extracted": {
+   "rent_10k_krw": 500,
+   "maintenance_10k_krw": null,
+   "area_m2": 22,
+   "area_basis": "전용",
+   "floor": "1층",
+   "address_text": "강서구 화곡동 신축 빌라"
+  },
+  "raw": "{\n \"rent_10k_krw\": 500,\n \"maintenance_10k_krw\": null,\n \"area_m2\": 22,\n \"area_basis\": \"전용\",\n \"floor\": \"1층\",\n \"address_text\": \"강서구 화곡동 신축 빌라\"\n}"
+ },
+ "ad_08": {
+  "extracted": {
+   "deposit_10k_krw": 2000000,
+   "rent_10k_krw": 10000,
+   "maintenance_10k_krw": null,
+   "maintenance_included_items": [
+    "인터넷",
+    "청소"
+   ],
+   "maintenance_excluded_items": null,
+   "area_m2": 26,
+   "area_basis": "전용",
+   "floor": "5층",
+   "address_text": "서울 성동구 성수동1가 10000",
+   "evidence": {
+    "price": "2000000",
+    "maintenance": "10000"
+   }
+  },
+  "raw": "{\n \"deposit_10k_krw\": 2000000,\n \"rent_10k_krw\": 10000,\n \"maintenance_10k_krw\": null,\n \"maintenance_included_items\": [\"인터넷\", \"청소\"],\n \"maintenance_excluded_items\": null,\n \"area_m2\": 26,\n \"area_basis\": \"전용\",\n \"floor\": \"5층\",\n \"address_text\": \"서울 성동구 성수동1가 10000\",\n \"evidence\": {\n \"price\": \"2000000\",\n \"maintenance\": \"10000\"\n }\n}"
+ }
+}

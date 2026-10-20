@@ -1,0 +1,125 @@
+{
+ "ad_01": {
+  "deposit": 1000,
+  "rent": 50,
+  "maint": 7,
+  "included": [
+   "수도",
+   "인터넷"
+  ],
+  "excluded": [],
+  "area": 20,
+  "area_basis": "전용",
+  "floor": "3",
+  "dong": "신림동",
+  "gu": "관악구"
+ },
+ "ad_02": {
+  "deposit": 500,
+  "rent": 45,
+  "maint": null,
+  "included": [],
+  "excluded": [],
+  "area": 33.5,
+  "area_basis": "전용",
+  "floor": "2",
+  "dong": "봉천동",
+  "gu": "관악구"
+ },
+ "ad_03": {
+  "deposit": 2000,
+  "rent": 70,
+  "maint": 10,
+  "included": [
+   "인터넷",
+   "수도",
+   "청소"
+  ],
+  "excluded": [
+   "전기",
+   "가스"
+  ],
+  "area": 24,
+  "area_basis": "전용",
+  "floor": "8",
+  "dong": "합정동",
+  "gu": "마포구"
+ },
+ "ad_04": {
+  "deposit": 300,
+  "rent": 40,
+  "maint": 0,
+  "included": [],
+  "excluded": [
+   "공과금"
+  ],
+  "area": 16,
+  "area_basis": "전용",
+  "floor": "4",
+  "dong": "상도동",
+  "gu": "동작구"
+ },
+ "ad_05": {
+  "deposit": 10000,
+  "rent": 45,
+  "maint": 12,
+  "included": [
+   "전기",
+   "수도",
+   "인터넷"
+  ],
+  "excluded": [],
+  "area": 29,
+  "area_basis": "전용",
+  "floor": "반지하",
+  "dong": "공릉동",
+  "gu": "노원구"
+ },
+ "ad_06": {
+  "deposit": 1000,
+  "rent": 55,
+  "maint": 5.5,
+  "included": [
+   "수도"
+  ],
+  "excluded": [],
+  "area": 18,
+  "area_basis": "전용",
+  "floor": "6",
+  "dong": "자양동",
+  "gu": "광진구"
+ },
+ "ad_07": {
+  "deposit": 500,
+  "rent": 45,
+  "maint": 8,
+  "included": [
+   "인터넷",
+   "가스",
+   "공용전기"
+  ],
+  "excluded": [],
+  "area": 22,
+  "area_basis": "전용",
+  "floor": "1",
+  "dong": "화곡동",
+  "gu": "강서구"
+ },
+ "ad_08": {
+  "deposit": 2000,
+  "rent": 60,
+  "maint": 15,
+  "included": [
+   "인터넷",
+   "수도"
+  ],
+  "excluded": [
+   "전기"
+  ],
+  "area": 26,
+  "area_basis": "전용",
+  "floor": "5",
+  "dong": "성수동1가",
+  "gu": "성동구"
+ }
+}

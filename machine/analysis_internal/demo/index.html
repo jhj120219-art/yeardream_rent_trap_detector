@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>월세 함정 탐지기 시연</title>
+<style>
+:root {
+  --bg: #f6f8fa; --surface: #ffffff; --fg: #16212b; --muted: #5b6b79; --line: #d9e0e6;
+  --accent: #0b6e8a; --accent-soft: #e2f1f5; --band: #bfe0ea; --tail: #f0c9c0; --rentmark: #16212b;
+  --good: #1a7f4b; --good-soft: #e3f4ea; --warn: #9a5b00; --warn-soft: #fbf0dc; --hold: #5b6b79; --hold-soft: #eaeef2;
+  --alert: #a3321f; --alert-soft: #fbe6e1;
+  --font-body: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --font-mono: ui-monospace, Consolas, "SF Mono", monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f161c; --surface: #172029; --fg: #e6edf2; --muted: #9aabb8; --line: #2a3742;
+    --accent: #5cc0da; --accent-soft: #14323c; --band: #1f5666; --tail: #5a2c25; --rentmark: #e6edf2;
+    --good: #5fd08f; --good-soft: #14301f; --warn: #e9b35a; --warn-soft: #382a10; --hold: #9aabb8; --hold-soft: #222d37;
+    --alert: #f08a78; --alert-soft: #3c1d18; color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.7; padding: 28px 16px 60px; word-break: keep-all; overflow-wrap: anywhere; }
+main { max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+h1 { font-size: 1.6rem; margin: 0; line-height: 1.35; }
+h2 { font-size: 1.05rem; margin: 0; }
+p { margin: 0; }
+.meta { font-family: var(--font-mono); font-size: 0.76rem; color: var(--muted); }
+.lede { color: var(--muted); max-width: 64ch; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 18px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+form { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px 14px; }
+.f { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.f label { font-size: 0.78rem; color: var(--muted); }
+.f input, .f select { font: inherit; font-size: 0.95rem; padding: 7px 9px; border: 1px solid var(--line); border-radius: 6px; background: var(--bg); color: var(--fg); min-width: 0; width: 100%; }
+.f .hint { font-size: 0.72rem; color: var(--muted); }
+.actions { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+button { font: inherit; cursor: pointer; border-radius: 6px; }
+.go { background: var(--accent); color: #fff; border: 0; padding: 9px 22px; font-weight: 700; }
+@media (prefers-color-scheme: dark) { .go { color: #0f161c; } }
+.ex { background: transparent; color: var(--accent); border: 1px solid var(--line); padding: 5px 12px; font-size: 0.84rem; }
+.verdict { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.pill { font-size: 0.82rem; font-weight: 700; padding: 3px 12px; border-radius: 99px; white-space: nowrap; }
+.pill.typ { background: var(--good-soft); color: var(--good); } .pill.up { background: var(--warn-soft); color: var(--warn); }
+.pill.tail { background: var(--alert-soft); color: var(--alert); } .pill.low { background: var(--accent-soft); color: var(--accent); }
+.pill.hold { background: var(--hold-soft); color: var(--hold); }
+.verdict .big { font-size: 1.25rem; font-weight: 700; }
+.scale { position: relative; height: 74px; }
+.scale .track { position: absolute; left: 0; right: 0; top: 34px; height: 10px; background: var(--hold-soft); border-radius: 5px; }
+.scale .band { position: absolute; top: 34px; height: 10px; background: var(--band); }
+.scale .tailzone { position: absolute; top: 34px; height: 10px; background: var(--tail); border-radius: 0 5px 5px 0; }
+.scale .mark { position: absolute; top: 24px; width: 3px; height: 30px; background: var(--rentmark); border-radius: 2px; transform: translateX(-1.5px); }
+.scale .lbl { position: absolute; font-family: var(--font-mono); font-size: 0.72rem; color: var(--muted); transform: translateX(-50%); white-space: nowrap; }
+.scale .lbl.bot { top: 54px; } .scale .lbl.rent { top: 2px; color: var(--fg); font-weight: 600; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 0.78rem; color: var(--muted); }
+.legend i { display: inline-block; width: 12px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+.rows { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.rows li { display: grid; grid-template-columns: 7.5em 1fr; gap: 10px; }
+.rows .k { color: var(--muted); font-size: 0.86rem; }
+.note { border-left: 4px solid var(--accent); background: var(--accent-soft); padding: 10px 14px; border-radius: 0 6px 6px 0; font-size: 0.9rem; }
+.note.alert { border-left-color: var(--alert); background: var(--alert-soft); } .note.warn { border-left-color: var(--warn); background: var(--warn-soft); }
+.foot { font-size: 0.8rem; color: var(--muted); }
+.steps, .read { margin: 0; padding-left: 1.3em; display: flex; flex-direction: column; gap: 6px; }
+.card h2:not(:first-child) { margin-top: 6px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+</head>
+<body>
+<main>
+  <header style="display:flex;flex-direction:column;gap:8px">
+    <p class="meta">로컬 시연 · 데이터 분석 파트 · 비교 데이터: 서울 6개 구 신규 월세 실거래</p>
+    <h1>입력한 월세가 주변 실거래에서 어느 가격대인가</h1>
+    <p class="lede">광고에서 읽은 값을 입력하면 분석 엔진이 같은 건물 또는 비슷한 조건의 신규 계약을 찾아 가격 위치를 보여줍니다. 강서·관악·광진·노원·동작·마포구만 가능합니다.</p>
+  </header>
+
+  <section class="card" aria-label="사용 방법">
+    <h2>이렇게 사용합니다</h2>
+    <ol class="steps">
+      <li><b>광고에서 읽은 값을 입력합니다.</b> 지역, 건물 유형, 면적, 보증금, 월세는 필수이고, 지번을 알면 같은 건물의 과거 거래와 먼저 비교합니다.</li>
+      <li><b>엔진이 비교 거래를 찾습니다.</b> 지번이 확인되면 같은 건물, 아니면 같은 동에서 면적·보증금·준공연도가 비슷한 최근 신규 계약을 찾고, 부족하면 조건을 넓힙니다.</li>
+      <li><b>가격 위치와 근거를 보여줍니다.</b> 입력한 월세가 비교 거래의 어느 가격대인지, 몇 건을 근거로 했는지, 신뢰도는 어떤지 함께 표시합니다. 근거가 약하거나 값이 의심스러우면 판정하지 않고 이유를 알려줍니다.</li>
+    </ol>
+    <h2>결과 읽는 법</h2>
+    <ul class="read">
+      <li><b>파란 구간</b> 비교 거래의 중간 50% 가격대입니다. 검은 선이 입력한 월세입니다. 분홍 구간은 상위 10% 경계 이상입니다.</li>
+      <li><b>판정 라벨</b> 낮은 편 · 중간 범위 · 다소 높은 편 · 상위 가격대 중 하나이며, 모두 유사 거래와 비교한 위치일 뿐 바가지나 사기 판정이 아닙니다.</li>
+      <li><b>신뢰도 높음·보통·낮음</b> 비슷한 조건에서 중앙값의 오차가 20% 이내였던 비율이 높았는지를 뜻합니다. 낮음이면 위치만 참고로 보여줍니다.</li>
+      <li><b>판정 보류</b> 근거가 약함, 월세가 5%만 달라도 라벨이 바뀌는 경계, 값이 시세에서 크게 벗어남(자릿수 오독 의심), 층·면적 기준 미확인 중 하나입니다.</li>
+    </ul>
+    <h2>시연 순서 추천 (아래 예시 버튼을 순서대로)</h2>
+    <ol class="steps">
+      <li><b>① 같은 건물</b> 지번이 확인된 오피스텔: 같은 건물 거래 171건으로 비교, 신뢰도 높음.</li>
+      <li><b>② 지번 없이 동 단위</b> 같은 값으로 지번만 비우면 비교 범위가 넓어지고 신뢰도와 근거 건수가 달라집니다.</li>
+      <li><b>③ 월세 자릿수 오독</b> 50만원을 500만원으로 잘못 읽은 경우: 판정 대신 입력 확인을 요청.</li>
+      <li><b>④ 단독다가구 층 미확인</b> 반지하 여부를 알 수 없어 지상 확인 전에는 판정하지 않음.</li>
+      <li><b>⑤ 공급면적 입력</b> 전용면적 기준 거래와 비교되지 않아 판정하지 않음.</li>
+    </ol>
+  </section>
+
+  <section class="card">
+    <h2>광고 정보 입력</h2>
+    <form id="form" autocomplete="off">
+      <div class="f"><label for="gu">자치구</label><select id="gu" name="gu"></select></div>
+      <div class="f"><label for="dong">법정동</label><select id="dong" name="dong"></select></div>
+      <div class="f"><label for="usage">건물 유형</label>
+        <select id="usage" name="usage"><option>아파트</option><option>연립다세대</option><option>오피스텔</option><option>단독다가구</option></select></div>
+      <div class="f"><label for="area">면적 (㎡)</label><input id="area" name="area" type="number" step="0.01" min="5" max="200" value="26" required>
+        <span class="hint">전용면적 기준 (단독다가구는 계약면적)</span></div>
+      <div class="f"><label for="area_basis">면적 종류</label><select id="area_basis" name="area_basis"><option value="전용">전용(또는 단독다가구 계약면적)</option><option value="공급">공급·계약면적</option></select></div>
+      <div class="f"><label for="dep">보증금 (만원)</label><input id="dep" name="dep" type="number" min="0" value="1000" required></div>
+      <div class="f"><label for="rent">월세 (만원)</label><input id="rent" name="rent" type="number" step="0.5" min="0.5" value="50" required></div>
+      <div class="f"><label for="arch">준공연도 (선택)</label><input id="arch" name="arch" type="number" min="1950" max="2030" placeholder="예: 2015"></div>
+      <div class="f"><label for="floor_type">층</label>
+        <select id="floor_type" name="floor_type"><option value="UNKNOWN">모름</option><option value="GROUND">지상 (확인함)</option><option value="BASEMENT">반지하·지하</option></select>
+        <span class="hint">단독다가구는 지상 확인이 있어야 판정</span></div>
+      <div class="f"><label for="main_no">지번 본번 (선택)</label><input id="main_no" name="main_no" inputmode="numeric" placeholder="예: 279"><span class="hint">입력하면 같은 건물 비교(0단계) 시도</span></div>
+      <div class="f"><label for="sub_no">지번 부번 (선택)</label><input id="sub_no" name="sub_no" inputmode="numeric" placeholder="예: 235"></div>
+      <div class="actions">
+        <button class="go" type="submit">분석하기</button>
+        <button class="ex" type="button" data-ex="a">① 같은 건물</button>
+        <button class="ex" type="button" data-ex="f">② 지번 없이 동 단위</button>
+        <button class="ex" type="button" data-ex="b">③ 월세 자릿수 오독</button>
+        <button class="ex" type="button" data-ex="d">④ 단독다가구 층 미확인</button>
+        <button class="ex" type="button" data-ex="e">⑤ 공급면적 입력</button>
+      </div>
+    </form>
+  </section>
+
+  <section class="card" id="result" aria-live="polite" hidden>
+    <h2>분석 결과</h2>
+    <p class="note" id="exnote" hidden></p>
+    <div class="verdict" id="verdict"></div>
+    <div class="scale" id="scale"></div>
+    <div class="legend" id="legend"><span><i style="background:var(--band)"></i>비교 거래의 중간 50% 범위 (Q25~Q75)</span><span><i style="background:var(--tail)"></i>상위 10% 경계(Q90) 이상</span><span><i style="background:var(--rentmark);width:3px"></i>입력한 월세</span></div>
+    <div id="alerts"></div>
+    <ul class="rows" id="basis"></ul>
+  </section>
+
+  <p class="foot">비교 대상은 실제 체결된 신규 계약이며, 광고 월세가 적정한지의 정확도를 보장하지 않습니다. '상위 가격대'는 유사 거래와 비교한 위치이고 바가지·사기 판정이 아닙니다. 평균 월세 오차는 약 17만원입니다. 입력값은 이 PC 안에서만 처리됩니다.</p>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const won = v => Math.round(v).toLocaleString('ko-KR');
+const LABELS = { LOWER_RANGE: ['유사 거래보다 낮은 편', 'low'], TYPICAL_RANGE: ['유사 거래의 중간 범위', 'typ'], UPPER_RANGE: ['유사 거래보다 다소 높은 편', 'up'], UPPER_TAIL: ['유사 거래의 상위 가격대', 'tail'], UNRATED: ['판정 보류', 'hold'] };
+const STAGE_TXT = { 0: '같은 지번의 최근 24개월 신규 계약', 1: '같은 동에서 면적·보증금·준공연도가 비슷한 최근 12개월 신규 계약', 2: '같은 동에서 조건을 넓힌 최근 18개월 신규 계약', 3: '같은 구 전체의 최근 24개월 신규 계약' };
+const REASON = {
+  LOW_TRUST: ['warn', '비교 근거가 충분하지 않아 가격 위치만 참고로 보여주고 판정은 하지 않습니다.'],
+  BORDER_MARGIN: ['warn', '판정 경계에 가깝습니다. 월세가 5%만 달라져도 라벨이 바뀌어서 강한 판정을 보류했습니다.'],
+  STAGE3_REFERENCE: ['warn', '같은 구 전체로 넓혀 찾은 사례라 참고용으로만 씁니다.'],
+  TAIL_FORBIDDEN_USAGE: ['warn', '단독다가구는 층(반지하 여부)을 알 수 없어 가장 강한 라벨은 쓰지 않고 한 단계 낮춰 표시합니다.'],
+  STAGE0_SMALL_N: ['warn', '같은 건물 비교 사례가 10건 미만이라 가장 강한 라벨은 쓰지 않습니다.'],
+  INPUT_CHECK: ['alert', '입력한 월세가 비교 거래의 중앙값에서 크게 벗어나 있습니다. 단위나 자릿수를 잘못 읽었는지 확인을 요청하고, 확인 전에는 가격 판정을 하지 않습니다.'],
+  FLOOR_UNCONFIRMED: ['warn', '단독다가구는 지상층임을 확인해야 가격 판정을 합니다. (반지하 여부는 거래 데이터에서 알 수 없습니다)'],
+  BASEMENT_LISTING: ['warn', '반지하·지하 매물은 비교 데이터가 부족해 가격 판정을 하지 않습니다.'],
+  AREA_BASIS_SUPPLY: ['warn', '공급(계약)면적은 전용면적 기준 거래와 정확히 비교되지 않아 판정하지 않습니다. 전용면적을 입력해 주세요.']
+};
+const S0 = { MULTI_BUILDING: '이 지번에는 건물이 여러 동이라 같은 건물 비교를 쓰지 않았습니다.', BUILDING_UNVERIFIED: '지번의 건물 정보를 확인하지 못해 같은 건물 비교를 쓰지 않았습니다.',
+  N_TOO_SMALL: '같은 건물의 비교 사례가 3건 미만이라 같은 건물 비교를 쓰지 않았습니다.', NO_POOL: '이 지번의 비교 가능한 거래가 없어 같은 건물 비교를 쓰지 않았습니다.',
+  NO_LOT: '지번이 없어 같은 건물 비교는 하지 않고 같은 동 단위로 분석했습니다.' };
+let META = {};
+
+async function init() {
+  META = await (await fetch('/meta')).json();
+  $('gu').innerHTML = Object.keys(META).map(g => `<option>${g}</option>`).join('');
+  fillDong();
+}
+function fillDong(sel) { $('dong').innerHTML = META[$('gu').value].map(d => `<option>${d}</option>`).join(''); if (sel) $('dong').value = sel; }
+$('gu').addEventListener('change', () => fillDong());
+
+const EX = {
+  a: { gu: '강서구', dong: '마곡동', usage: '오피스텔', area: 24.57, dep: 500, rent: 84, floor_type: 'UNKNOWN', main_no: '773', sub_no: '3' },
+  f: { gu: '강서구', dong: '마곡동', usage: '오피스텔', area: 24.57, dep: 500, rent: 84, floor_type: 'UNKNOWN' },
+  b: { gu: '관악구', dong: '신림동', usage: '연립다세대', area: 26, dep: 1000, rent: 500, floor_type: 'UNKNOWN' },
+  d: { gu: '관악구', dong: '신림동', usage: '단독다가구', area: 22, dep: 1000, rent: 55, floor_type: 'UNKNOWN' },
+  e: { gu: '동작구', dong: '상도동', usage: '연립다세대', area: 74.19, dep: 5000, rent: 100, floor_type: 'UNKNOWN', area_basis: '공급' }
+};
+const EXNOTE = {
+  a: '같은 지번의 거래를 먼저 비교했습니다. 비교 건수가 많고 가격이 모여 있어 신뢰도가 높게 나옵니다.',
+  f: '①과 같은 값에서 지번만 비웠습니다. 같은 동의 유사 거래로 넓어져 비교 근거와 신뢰도가 달라지는지 보세요.',
+  b: '월세 50만원 자리에 500을 넣은 경우입니다. 시세에서 크게 벗어나 가격 판정 대신 입력 확인을 요청합니다.',
+  d: '단독다가구는 거래 데이터에 층 정보가 없어서, 사용자가 지상층임을 확인하기 전에는 판정하지 않습니다. 층에서 "지상 (확인함)"을 고르면 판정합니다.',
+  e: '면적 종류를 공급·계약면적으로 고르면 전용면적 기준 거래와 비교되지 않아 판정하지 않습니다.'
+};
+document.querySelectorAll('[data-ex]').forEach(b => b.addEventListener('click', () => {
+  const e = EX[b.dataset.ex === 'a' ? 'a' : b.dataset.ex]; $('gu').value = e.gu; fillDong(e.dong || undefined);
+  ['usage', 'area', 'dep', 'rent', 'floor_type'].forEach(k => $(k).value = e[k]);
+  $('arch').value = ''; $('main_no').value = e.main_no || ''; $('sub_no').value = e.sub_no || '';
+  $('area_basis').value = e.area_basis || '전용';
+  pendingNote = EXNOTE[b.dataset.ex];
+  $('form').requestSubmit();
+}));
+let pendingNote = '';
+
+$('form').addEventListener('submit', async ev => {
+  ev.preventDefault();
+  const body = Object.fromEntries(new FormData($('form')).entries());
+  const btn = ev.submitter || document.querySelector('.go'); btn.disabled = true;
+  let res;
+  try { res = await (await fetch('/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })).json(); }
+  catch (e) { res = { status: 'ERROR', message: '서버에 연결하지 못했습니다.' }; }
+  btn.disabled = false; show(res);
+});
+
+function show(r) {
+  $('result').hidden = false;
+  $('exnote').textContent = pendingNote ? '이 예시에서 볼 것: ' + pendingNote : '';
+  $('exnote').hidden = !pendingNote;
+  pendingNote = '';
+  const pill = (t, k) => `<span class="pill ${k}">${t}</span>`;
+  if (!r.q25) {      // 비교군이 없거나 입력 오류
+    $('verdict').innerHTML = pill(r.status === 'INPUT_REVIEW_REQUIRED' ? '입력 확인' : '보류', 'hold') + `<span class="big">${r.status === 'OUT_OF_SCOPE' ? '지원하지 않는 지역' : '판정 보류'}</span>`;
+    $('scale').innerHTML = ''; $('legend').hidden = true; $('basis').innerHTML = '';
+    $('alerts').innerHTML = `<p class="note ${r.status === 'ERROR' ? 'alert' : 'warn'}">${r.message || ''}</p>` + (r.reason && REASON[r.reason] ? `<p class="note ${REASON[r.reason][0]}">${REASON[r.reason][1]}</p>` : '');
+    return;
+  }
+  $('legend').hidden = false;
+  const lab = LABELS[r.label];
+  const kind = r.label === 'UNRATED' ? (r.reason === 'INPUT_CHECK' ? '확인 요청' : '보류') : '판정';
+  $('verdict').innerHTML = pill(kind, lab[1]) + `<span class="big">${r.reason === 'INPUT_CHECK' ? '입력값 확인 필요' : lab[0]}</span>` + pill('신뢰도 ' + r.grade, r.grade === '높음' ? 'typ' : (r.grade === '보통' ? 'up' : 'hold'));
+  const max = Math.max(r.q90 * 1.3, r.rent * 1.08, 20), pos = v => Math.min(Math.max(v / max, 0), 1) * 100;
+  const p25 = pos(r.q25), p75 = pos(r.q75), p90 = pos(r.q90), pr = pos(r.rent);
+  $('scale').innerHTML = `<div class="track"></div><div class="band" style="left:${p25}%;width:${p75 - p25}%"></div><div class="tailzone" style="left:${p90}%;width:${100 - p90}%"></div>`
+    + `<div class="mark" style="left:${pr}%"></div><div class="lbl rent" style="left:${Math.min(Math.max(pr, 6), 94)}%">입력 ${won(r.rent)}</div>`
+    + `<div class="lbl bot" style="left:${p25}%">Q25 ${won(r.q25)}</div><div class="lbl bot" style="left:${Math.max(p75, p25 + 14)}%">Q75 ${won(r.q75)}</div>` + (p90 - p75 > 12 ? `<div class="lbl bot" style="left:${p90}%">Q90 ${won(r.q90)}</div>` : '');
+  const al = [];
+  if (r.reason && REASON[r.reason]) al.push(REASON[r.reason]);
+  (r.notes || []).forEach(n => al.push(['warn', n]));
+  if (r.source !== 'STAGE0' && S0[r.stage0_reason]) al.push(['', S0[r.stage0_reason]]);
+  $('alerts').innerHTML = al.map(([k, t]) => `<p class="note ${k}">${t}</p>`).join('');
+  $('basis').innerHTML = [
+    ['비교 근거', `${STAGE_TXT[r.stage]} <b>${r.n}건</b>` + (r.source === 'STAGE0' ? ' (건축물대장상 주건축물 1동인 지번)' : '')],
+    ['시세 범위', `중앙값 ${won(r.pred)}만원, 중간 50% 범위 ${won(r.q25)}~${won(r.q75)}만원, 상위 10% 경계 ${won(r.q90)}만원`],
+    ['신뢰도', `예측 점수 ${r.p} → ${r.grade}. 비슷한 조건 사례에서 중앙값 오차가 20% 이내였던 정도를 나타내며, 가격 판정이 옳을 확률은 아닙니다.`],
+    ['안내 문구', '실제 계약가격과 광고가격은 다를 수 있고 관리비·옵션·내부 상태는 반영되지 않았습니다. 시세와의 차이는 계약 전에 더 확인할 근거이며 부당하거나 불법이라는 뜻이 아닙니다.']
+  ].map(([k, v]) => `<li><span class="k">${k}</span><span>${v}</span></li>`).join('');
+}
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,39 @@
+﻿테스트,통과,상세
+"F01 ""반지하 원룸"" -> BASEMENT",PASS,"{'floor': -1, 'total_floors': None, 'floor_type': 'BASEMENT', 'review_required': False, 'reason': 'BASEMENT_TEXT'}"
+"F02 ""지층 1000/45"" -> BASEMENT",PASS,"{'floor': -1, 'total_floors': None, 'floor_type': 'BASEMENT', 'review_required': False, 'reason': 'BASEMENT_TEXT'}"
+"F03 ""B1 원룸"" -> BASEMENT",PASS,"{'floor': -1, 'total_floors': None, 'floor_type': 'BASEMENT', 'review_required': False, 'reason': 'BASEMENT_TEXT'}"
+"F04 ""지하주차장 있음"" -> UNKNOWN",PASS,"{'floor': None, 'total_floors': None, 'floor_type': 'UNKNOWN', 'review_required': True, 'reason': 'PARKING_BASEMENT_ONLY'}"
+"F05 ""저층 원룸"" -> UNKNOWN",PASS,"{'floor': None, 'total_floors': None, 'floor_type': 'UNKNOWN', 'review_required': True, 'reason': 'LOW_FLOOR_AMBIGUOUS'}"
+"F06 ""4층 건물"" -> UNKNOWN, floor=None",PASS,"{'floor': None, 'total_floors': 4, 'floor_type': 'UNKNOWN', 'review_required': True, 'reason': 'TOTAL_FLOORS_ONLY'}"
+"F06 총 층수만 추출(total_floors=4, floor=None)",PASS,"{'floor': None, 'total_floors': 4, 'floor_type': 'UNKNOWN', 'review_required': True, 'reason': 'TOTAL_FLOORS_ONLY'}"
+"F07 ""4층 중 3층"" -> GROUND, floor=3",PASS,"{'floor': 3, 'total_floors': 4, 'floor_type': 'GROUND', 'review_required': False, 'reason': 'FLOOR_OF_TOTAL'}"
+F07 total_floors=4,PASS,"{'floor': 3, 'total_floors': 4, 'floor_type': 'GROUND', 'review_required': False, 'reason': 'FLOOR_OF_TOTAL'}"
+"F08 ""1층 매물"" -> GROUND, floor=1",PASS,"{'floor': 1, 'total_floors': None, 'floor_type': 'GROUND', 'review_required': False, 'reason': 'LISTING_FLOOR'}"
+"F09 ""1층인데 실제 반지하"" -> BASEMENT",PASS,"{'floor': -1, 'total_floors': None, 'floor_type': 'BASEMENT', 'review_required': True, 'reason': 'CONTRADICTION_GROUND_AND_BASEMENT'}"
+"F10 ""층 정보 없음"" -> UNKNOWN",PASS,"{'floor': None, 'total_floors': None, 'floor_type': 'UNKNOWN', 'review_required': True, 'reason': 'NO_FLOOR_INFO'}"
+"F11 ""1층 매물, 3층 매물 동시 노출"" -> UNKNOWN",PASS,"{'floor': None, 'total_floors': None, 'floor_type': 'UNKNOWN', 'review_required': True, 'reason': 'MULTIPLE_LISTINGS'}"
+F11 다중 매물 사유 표시,PASS,"{'floor': None, 'total_floors': None, 'floor_type': 'UNKNOWN', 'review_required': True, 'reason': 'MULTIPLE_LISTINGS'}"
+"F-extra1 ""4층"" -> UNKNOWN, floor=None",PASS,"{'floor': None, 'total_floors': None, 'floor_type': 'UNKNOWN', 'review_required': True, 'reason': 'SINGLE_FLOOR_AMBIGUOUS'}"
+"F-extra2 ""지하 1층 매물"" -> BASEMENT, floor=-1",PASS,"{'floor': -1, 'total_floors': None, 'floor_type': 'BASEMENT', 'review_required': False, 'reason': 'BASEMENT_TEXT'}"
+"F-extra3 """" -> UNKNOWN",PASS,"{'floor': None, 'total_floors': None, 'floor_type': 'UNKNOWN', 'review_required': True, 'reason': 'NO_FLOOR_INFO'}"
+v1.1 입력 정상 변환,PASS,"{'ok': True, 'payload': {'district_code': '11620', 'building_type': 'DETACHED_MULTI', 'area_m2': 25.0, 'area_basis': 'CONTRACT', 'deposit_10k_krw': 1000.0, 'ren"
+옵션은 시세 입력과 분리(options),PASS,"{'maintenance_10k_krw': 7, 'internet_status': 'UNKNOWN'}"
+user_confirmed 없으면 USER_CONFIRMATION_REQUIRED,PASS,
+"floor=0 -> 미확인(None), 층 유형도 판정에 쓰지 않음(확인 목록에 floor_type 없음 + 출처 불명)",PASS,
+AI 추출 GROUND 는 사용자 확인 전 판정 근거에서 제외,PASS,"{'ok': True, 'payload': {'district_code': '11620', 'building_type': 'DETACHED_MULTI', 'area_m2': 25.0, 'area_basis': 'CONTRACT', 'deposit_10k_krw': 1000.0, 'ren"
+district_code 숫자 입력도 5자리 문자열로 변환,PASS,"{'district_code': '11620', 'building_type': 'DETACHED_MULTI', 'area_m2': 25.0, 'area_basis': 'CONTRACT', 'deposit_10k_krw': 1000.0, 'rent_10k_krw': 50.0, 'legal"
+district_code 4자리면 ADDRESS_REVIEW_REQUIRED,PASS,
+"building_type ""빌라""는 모호 -> 확인 필요",PASS,
+"금액 문자열 ""1,000"" 변환",PASS,
+월세 0 -> RENT_REVIEW_REQUIRED,PASS,
+legal_dong_name 만 있으면 dong 으로 변환,PASS,
+준비팩 평면 형식도 변환,PASS,"{'ok': True, 'payload': {'district_code': '11620', 'building_type': 'MULTI_UNIT', 'area_m2': 26.45, 'area_basis': 'EXCLUSIVE', 'deposit_10k_krw': 1000.0, 'rent_"
+requires_address_confirmation 이면 입력 확인 요구,PASS,
+단독다가구 + 사용자 확인 지상층 + 높음 -> COMPARED/UPPER_RANGE,PASS,"('COMPARED', 'UPPER_RANGE')"
+결과에 reference/confidence_details/reason_codes 포함,PASS,"['status', 'stage', 'sample_count', 'confidence_grade', 'price_label', 'prices_10k_krw', 'rent_difference_10k_krw', 'rent_difference_pct', 'percentile', 'warnin"
+"reference 에 renewals_excluded=True, months_used, search_stage, sample_count",PASS,"{'source': '서울 열린데이터광장 부동산 전월세가 정보(tbLnOpendataRentV)', 'contract_type': 'NEW', 'renewals_excluded': True, 'renewals_excluded_in_data_for_gu': None, 'months_use"
+F12 AI GROUND -> 사용자 BASEMENT 수정 시 REFERENCE_ONLY,PASS,"('REFERENCE_ONLY', ['FLOOR_UNCONFIRMED_COMPARABLES', 'BASEMENT_LISTING'])"
+AI 추출 지상층(사용자 미확인)이면 단독다가구 판정 실행 안 됨,PASS,"('REFERENCE_ONLY', ['floor_unknown'])"
+미확인 입력은 분석하지 않고 INPUT_REVIEW_REQUIRED,PASS,
+SINGLE_MULTI_HOUSEHOLD 별칭이 analyze_listing 에서도 허용,PASS,
+CONTRACT 면적 기준은 단독다가구 AREA_BASIS_CONTRACT_AREA 경고 없음,PASS,"['FLOOR_UNCONFIRMED_COMPARABLES', 'DETACHED_STABILITY_RULE']"

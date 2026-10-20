@@ -1,0 +1,102 @@
+{
+  "extraction_status": "EXTRACTED_NEEDS_REVIEW",
+  "source_type": "IMAGE",
+  "fields": {
+    "address_text": {
+      "value": "서울특별시 관악구 신림동 (가상 예시)",
+      "raw_text": "신림동 원룸",
+      "review_required": true
+    },
+    "building_type": {
+      "value": "UNKNOWN",
+      "raw_text": null,
+      "review_required": true
+    },
+    "area_m2": {
+      "value": 26.45,
+      "raw_text": "전용 26.45㎡",
+      "review_required": false
+    },
+    "area_basis": {
+      "value": "EXCLUSIVE",
+      "raw_text": "전용 26.45㎡",
+      "review_required": false
+    },
+    "deposit_10k_krw": {
+      "value": 1000,
+      "raw_text": "보증금 1,000만",
+      "review_required": false
+    },
+    "rent_10k_krw": {
+      "value": 50,
+      "raw_text": "월세 50만",
+      "review_required": false
+    },
+    "maintenance_10k_krw": {
+      "value": 7,
+      "raw_text": "관리비 7만",
+      "review_required": false
+    },
+    "floor": {
+      "value": 3,
+      "raw_text": "4층 중 3층",
+      "review_required": false
+    },
+    "total_floors": {
+      "value": 4,
+      "raw_text": "4층 중 3층",
+      "review_required": false
+    },
+    "built_year": {
+      "value": null,
+      "raw_text": null,
+      "review_required": true
+    },
+    "internet_status": {
+      "value": "UNKNOWN",
+      "raw_text": "인터넷 가능",
+      "review_required": true
+    },
+    "elevator_status": {
+      "value": "UNKNOWN",
+      "raw_text": null,
+      "review_required": true
+    },
+    "parking_status": {
+      "value": "UNKNOWN",
+      "raw_text": null,
+      "review_required": true
+    },
+    "electricity_in_maintenance": {
+      "value": "UNKNOWN",
+      "raw_text": null,
+      "review_required": true
+    },
+    "gas_in_maintenance": {
+      "value": "UNKNOWN",
+      "raw_text": null,
+      "review_required": true
+    },
+    "water_in_maintenance": {
+      "value": "UNKNOWN",
+      "raw_text": null,
+      "review_required": true
+    },
+    "floor_type": {
+      "value": "GROUND",
+      "raw_text": "4층 중 3층",
+      "review_required": true,
+      "note": "AI가 읽은 값. 사용자가 확인하기 전에는 단독다가구 가격 판정에 사용되지 않음"
+    },
+    "floor_source": {
+      "value": "IMAGE_EXTRACTED",
+      "raw_text": null,
+      "review_required": false
+    }
+  },
+  "review_messages": [
+    "주소가 건물 단위까지 확인되지 않습니다.",
+    "인터넷 가능은 인터넷 요금 포함을 의미하지 않습니다."
+  ],
+  "schema_version": "1.1"
+}

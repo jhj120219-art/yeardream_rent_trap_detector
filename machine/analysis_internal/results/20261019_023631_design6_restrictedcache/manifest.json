@@ -1,0 +1,33 @@
+{
+ "run_id": "20261019_023631_design6_restrictedcache",
+ "label": "design6_restrictedcache",
+ "created": "2026-10-19T02:36:31",
+ "mode": "design",
+ "data_file": "clean_rent_data.csv",
+ "data_sha256": "e4c310cf1ca903919ff50e6d2c1adaaef29b1205f3ddfaf5259a133aadc365d2",
+ "data_rows": 305646,
+ "building_cache_file": "lot_buildings_cache_design_baselots.csv",
+ "building_cache_sha256": "a68a6b872e8678c1f9ea56c50e304394804c31ba497a608457defb762041c747",
+ "building_cache_lots": 1965,
+ "policy_file": "candidate_v2.json",
+ "policy_sha256": "413734f9c589e0e30430eac64cf46abecd34eb46b5e605a11bad607f9ded7de4",
+ "policy_version": "candidate_v2.0",
+ "trust_coef_sha256": "83396582ee754af1d92bb70cc9bb5d1a96e6c89501375aef4317a3a1c94bf87d",
+ "code_version": "11ad4af+local",
+ "seed": 7,
+ "bases_per_gu": 1500,
+ "eval_units": 8995,
+ "dedupe": [
+  "date",
+  "area",
+  "dep",
+  "rent",
+  "flr"
+ ],
+ "building_identification": "건축HUB 표제부 주건축물 1동",
+ "baseline_check": {
+  "same_n": true,
+  "same_actual": true,
+  "same_rule_pred": true
+ }
+}

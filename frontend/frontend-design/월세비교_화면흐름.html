@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; connect-src 'none'; base-uri 'none'; form-action 'none'">
+<title>월세 비교 · 백엔드 연동 화면 시안 v0.2</title>
+<style>
+#rent-input-flow {padding:16px 0;color-scheme:light dark;font-family:system-ui,-apple-system,"Malgun Gothic",sans-serif;}
+#rent-input-flow .preview {margin:0 12px 12px;color:light-dark(#555,#bbb);font-size:12px;line-height:1.6;}
+#rent-input-flow .app {--bg:light-dark(#fff,#202124);--fg:light-dark(#22272d,#f1f2f3);--sub:light-dark(#5f6772,#bdc5cf);--line:light-dark(#d9dfe6,#4b535d);--soft:light-dark(#f3f5f8,#2b3037);--key:light-dark(#24364a,#dce7f5);--on:light-dark(#fff,#20252b);--need:light-dark(#91600a,#f1c16d);--needbg:light-dark(#fff8e9,#3a3021);max-width:680px;margin:auto;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:16px;overflow:hidden;font:14px/1.6 system-ui,-apple-system,"Malgun Gothic",sans-serif;}
+#rent-input-flow .app * {box-sizing:border-box;}
+#rent-input-flow .top {padding:17px 22px;display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;border-bottom:1px solid var(--line);}
+#rent-input-flow .small {font-size:12px;color:var(--sub);}
+#rent-input-flow .steps {display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:18px 22px 0;padding:0;list-style:none;font-size:12px;}
+#rent-input-flow .steps li {padding:9px 4px;text-align:center;border-bottom:2px solid var(--line);}
+#rent-input-flow .steps [aria-current="step"] {border-color:var(--key);font-weight:600;}
+#rent-input-flow main {padding:24px 22px;}
+#rent-input-flow h2 {font-size:22px;line-height:1.4;font-weight:600;margin:0 0 8px;}
+#rent-input-flow h3 {font-size:15px;line-height:1.5;font-weight:600;margin:20px 0 10px;}
+#rent-input-flow p {margin:0 0 16px;}
+#rent-input-flow button,#rent-input-flow .file-button {font:inherit;min-height:44px;border:1px solid var(--line);border-radius:8px;padding:10px 14px;background:var(--bg);color:var(--fg);}
+#rent-input-flow button:disabled {opacity:.4;}
+#rent-input-flow .primary,#rent-input-flow button[aria-pressed="true"] {background:var(--key);color:var(--on);border-color:var(--key);}
+#rent-input-flow .choices {display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:20px 0;}
+#rent-input-flow .choices button {text-align:left;padding:17px;}
+#rent-input-flow .choices span {display:block;font-size:12px;opacity:.8;margin-top:5px;}
+#rent-input-flow .box {padding:17px;background:var(--soft);border-radius:10px;}
+#rent-input-flow .row {display:flex;align-items:center;flex-wrap:wrap;gap:10px;}
+#rent-input-flow .row input {flex:1;min-width:160px;}
+#rent-input-flow .actions {display:flex;gap:10px;margin-top:22px;}
+#rent-input-flow .actions button {flex:1;}
+#rent-input-flow .field {display:grid;gap:6px;}
+#rent-input-flow input:not([type="checkbox"]):not([type="file"]),#rent-input-flow select {width:100%;min-width:0;font:inherit;font-size:16px;line-height:1.4;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:7px;padding:10px;min-height:44px;}
+#rent-input-flow input[type="file"] {display:block;max-width:100%;font:inherit;margin:12px 0;}
+#rent-input-flow .candidate {display:block;width:100%;text-align:left;margin-top:10px;}
+#rent-input-flow .candidate span {display:block;font-size:12px;}
+#rent-input-flow .tag {font-size:11px;padding:3px 7px;background:var(--soft);border-radius:5px;white-space:nowrap;}
+#rent-input-flow .need {color:var(--need);background:var(--needbg);}
+#rent-input-flow .info-row {display:grid;grid-template-columns:105px 1fr auto;gap:10px;padding:12px 0;border-bottom:1px solid var(--line);align-items:start;}
+#rent-input-flow .info-row strong {font-weight:500;}
+#rent-input-flow .info-row>span:first-child {color:var(--sub);}
+#rent-input-flow .grid {display:grid;grid-template-columns:1fr 1fr;gap:17px;margin-top:18px;}
+#rent-input-flow .missing-field input,#rent-input-flow .missing-field select {border-color:var(--need)!important;}
+#rent-input-flow .field-heading {display:flex;align-items:center;justify-content:space-between;gap:8px;}
+#rent-input-flow .notice {padding:12px 14px;margin:16px 0;background:var(--soft);border-radius:8px;}
+#rent-input-flow .check {display:flex;gap:10px;align-items:flex-start;padding:16px 0 0;}
+#rent-input-flow .check input {width:18px;height:18px;flex-shrink:0;margin-top:3px;accent-color:var(--key);}
+#rent-input-flow details {margin-top:20px;border-top:1px solid var(--line);padding-top:12px;}
+#rent-input-flow summary {min-height:44px;}
+#rent-input-flow blockquote {margin:14px 0;padding:13px 15px;background:var(--soft);border-left:3px solid var(--line);}
+#rent-input-flow .result-price {font-size:28px;font-weight:600;margin:14px 0;}
+#rent-input-flow .range {height:24px;background:var(--soft);position:relative;margin:22px 0 8px;}
+#rent-input-flow .band {position:absolute;left:21.25%;width:53.75%;height:100%;background:light-dark(#aebdce,#687b93);}
+#rent-input-flow .marker {position:absolute;left:50%;top:-6px;height:36px;width:3px;background:var(--key);}
+#rent-input-flow .axis {display:flex;justify-content:space-between;font-size:12px;color:var(--sub);}
+#rent-input-flow [hidden] {display:none!important;}
+@media(max-width:440px){#rent-input-flow main,#rent-input-flow .top {padding:17px;}#rent-input-flow .steps {margin:14px 17px 0;}#rent-input-flow .grid,#rent-input-flow .choices {grid-template-columns:1fr;}#rent-input-flow .info-row {grid-template-columns:1fr auto;}#rent-input-flow .info-row>span:first-child {grid-column:1/-1;}#rent-input-flow .actions {flex-wrap:wrap;}}
+
+:root{color-scheme:light dark}body{margin:0;background:light-dark(#f4f6f8,#15171b)}
+#rent-input-flow .app{max-width:760px}#rent-input-flow .preview{max-width:760px;margin:0 auto 12px;padding:0 12px}
+#rent-input-flow button{cursor:pointer}#rent-input-flow button:disabled{cursor:not-allowed}#rent-input-flow :focus-visible{outline:3px solid #658fc2;outline-offset:3px}
+#rent-input-flow .top button{font-size:12px;min-height:36px;padding:5px 10px}#rent-input-flow pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;background:var(--soft);padding:14px;border-radius:8px}
+#rent-input-flow .notice p:last-child{margin-bottom:0}#rent-input-flow .process{padding-left:22px}#rent-input-flow .process li{padding:7px 0}
+#rent-input-flow .metric{display:grid;grid-template-columns:1fr 1fr;gap:14px}#rent-input-flow .metric strong{font-size:24px;display:block}
+#rent-input-flow .error{color:light-dark(#a12220,#ffafa7);background:light-dark(#fff0ee,#412528);padding:12px;border-radius:8px;margin-top:12px}
+#rent-input-flow h2:focus{outline:none}#rent-input-flow .tag{white-space:normal}#rent-input-flow .listitem{border-bottom:1px solid var(--line);padding:16px 0}
+#rent-input-flow .listitem p{margin:5px 0}#rent-input-flow .footer{padding:16px 22px;border-top:1px solid var(--line)}
+#rent-input-flow .progressline{font-size:12px;color:var(--sub);margin:10px 0}#rent-input-flow .choices{margin:14px 0}#rent-input-flow .pending{border:1px dashed var(--line)}
+@media(max-width:440px){#rent-input-flow .metric{grid-template-columns:1fr}#rent-input-flow .actions button{flex-basis:140px}}
+</style></head><body><div id="rent-input-flow">
+<p class="preview">v0.2 · 백엔드 전달 자료 62888e2 반영 · 오프라인 화면 시안<br>실제 API·이미지 분석·DB 저장은 하지 않습니다. 아래 기능 상태는 백엔드 전달 문서 기준입니다.</p>
+<div class="app">
+<header class="top"><strong>월세 비교</strong><span class="small">관리비 제외 · 신규 월세 실거래</span><button id="open-list" type="button">내 매물 · 범위 논의</button></header>
+<ol class="steps" aria-label="진행 단계"><li data-step="start" aria-current="step">1. 입력 방식</li><li data-step="collect">2. 정보 가져오기</li><li data-step="fill">3. 입력·확인</li><li data-step="result">4. 결과</li></ol>
+<main>
+<section data-screen="start">
+<h2 tabindex="-1">어떤 방법으로 입력할까요?</h2><p class="small">현재는 직접 입력부터 연결합니다. 주소 검색과 캡처 자동 입력은 외부 API 검증 후 연결할 예정입니다.</p>
+<div class="box"><h3 style="margin-top:0">매물 조건 직접 입력</h3><p>동네·면적·보증금·월세를 입력하고 확인해 주세요.</p><button id="manual-start" class="primary" type="button">직접 입력으로 시작</button><p class="small" style="margin-top:12px">구·법정동 수준 비교를 허용하는 화면 제안입니다. 정확한 주소 필수 여부는 팀에서 결정합니다.</p></div>
+<h3>자동 입력 경로 · 연결 검증 전</h3>
+<div class="choices"><button data-mode="address" type="button" aria-pressed="true">주소로 직접 찾기<span>주소 후보 선택 · 시연용</span></button><button data-mode="capture" type="button" aria-pressed="false">캡처로 입력<span>텍스트 추출 · 시연용</span></button></div>
+<div data-route="address" class="box pending"><label for="address-query">건물명 · 도로명 · 지번주소</label><div class="row" style="margin-top:8px"><input id="address-query" placeholder="예: 봉천동 아파트"><button id="search-demo" type="button">가상 검색 결과 보기</button></div><div id="candidates" hidden><button id="select-address" class="candidate" type="button"><strong>검사용 가상 주소</strong><span>관악구 봉천동 · 실제 건물 조회 결과가 아닙니다.</span></button></div><p class="small" style="margin-top:12px">주소 검색 API는 실제 외부 호출 미검증입니다. 유형·준공연도 자동 조회는 별도 협의가 필요합니다.</p></div>
+<div data-route="capture" class="box pending" hidden><label for="capture-file">매물 이미지 한 장</label><input id="capture-file" type="file" accept="image/png,image/jpeg,image/webp" aria-describedby="file-note"><p id="file-note" class="small">이미지 8MB · 전체 요청 9MB 제한. JPG·PNG·WebP는 형식 제안입니다. 이 시안은 내용을 읽거나 전송하지 않습니다.</p><p id="file-message" class="small" role="status"></p><div class="row"><button id="file-demo" disabled type="button">첨부 후 고정 예시 보기</button><button id="capture-demo" type="button">파일 없이 예시 보기</button></div></div>
+<p class="small" style="margin-top:18px">현재 전달된 지원 지역: 강서·관악·광진·노원·동작·마포구. 실제 서비스에서는 지원 범위 API 응답을 사용합니다.</p>
+</section>
+<section data-screen="collect" hidden>
+<h2 id="collect-title" tabindex="-1">가져온 정보를 확인해 주세요</h2><p class="small">자동 입력 경로의 고정 예시입니다. 실제 조회·추출 결과가 아닙니다.</p>
+<blockquote id="capture-quote" hidden>가상 캡처: “관악구 봉천동 / 아파트 / 면적 59.9㎡ / 보증금 5,000만 / 월세 80만”</blockquote>
+<div id="collected"></div><div class="notice"><strong>건물 정보 자동 조회는 아직 확인되지 않았어요.</strong><p class="small">주소만으로 현재 보증금·월세·호실 면적을 알 수 없습니다. 준공연도·유형은 확인 가능한 값만 입력해 주세요.</p></div>
+<div class="actions"><button id="collect-back" type="button">다시 선택</button><button id="to-form" class="primary" type="button">부족한 정보 입력</button></div>
+</section>
+<section data-screen="fill" hidden>
+<h2 tabindex="-1">매물 조건을 확인해 주세요</h2><p id="missing-count" class="small" role="status"></p>
+<form id="listing-form">
+<div class="grid">
+<label class="field">자치구 *<select name="district" required><option value="">선택하세요</option><option value="11620">관악구</option><option value="11215">광진구</option><option value="11440">마포구</option><option value="11590">동작구</option><option value="11500">강서구</option><option value="11350">노원구</option></select></label>
+<label class="field">법정동 *<input name="dong" required placeholder="예: 봉천동" maxlength="30"></label>
+<label class="field">주택 유형 *<span class="small" data-origin="type">직접 입력</span><select name="type" required><option value="">선택하세요</option><option value="APARTMENT">아파트</option><option value="MULTI_UNIT">연립·다세대</option><option value="OFFICETEL">오피스텔</option><option value="DETACHED_MULTI">단독·다가구</option></select></label>
+<label class="field">면적 기준 *<select name="basis" required><option value="">선택하세요</option><option value="EXCLUSIVE">전용면적</option><option value="CONTRACT">계약면적</option><option value="SUPPLY">공급면적</option><option value="UNKNOWN">모르겠어요</option></select></label>
+<label class="field">면적 (㎡) *<span class="small" data-origin="area">직접 입력</span><input name="area" type="number" required min="5" max="200" step="any" placeholder="예: 59.9"></label>
+<label class="field">보증금 (만원) *<span class="small" data-origin="deposit">직접 입력</span><input name="deposit" type="number" required min="0" step="any" placeholder="예: 5000"></label>
+<label class="field">월세 (만원) *<span class="small" data-origin="rent">직접 입력</span><input name="rent" type="number" required min="1" max="500" step="any" placeholder="예: 80"></label>
+<label class="field">주소 설명 · 선택<input name="address" placeholder="현재 광고에 적힌 주소" maxlength="150"></label>
+</div>
+<div id="basis-note" class="notice" hidden></div>
+<details open><summary>추가 정보 · 아는 범위에서 입력해 주세요</summary><div class="grid"><label class="field">해당 호실 층<input name="floor" type="number" step="1" placeholder="미확인 · 지하는 음수"></label><label class="field">지상·지하<select name="floorType"><option value="UNKNOWN">미확인</option><option value="GROUND">지상</option><option value="BASEMENT">지하·반지하</option></select></label><label class="field">준공연도 · 선택<input name="year" type="number" min="1950" step="1" placeholder="미확인"></label></div><label class="check"><input name="floorConfirmed" type="checkbox"><span>해당 호실의 층 또는 지상·지하 여부를 확인했어요.</span></label><p class="small">단독·다가구의 반지하·층 미확인은 참고 처리됩니다. 건물 전체 층수와 호실 층을 구분해 주세요.</p></details>
+<div class="row" style="margin-top:18px"><button id="fill-example" type="button">백엔드 예시 값 불러오기</button><span class="small">기존 입력을 가상 예시로 바꿉니다.</span></div>
+<label class="check"><input name="confirmed" type="checkbox" required><span>입력한 지역·유형·면적·금액과 자동 입력값을 매물 정보와 대조했어요.</span></label>
+<p class="small">관리비·공과금 입력과 총 주거비 계산은 보류 중입니다.</p><div id="form-error" class="error" role="alert" hidden></div>
+<details><summary>팀 연동 메모 · 요청 예시</summary><p class="small">schema_version 1.1 · listing/options/confirmation. 실제 전송은 하지 않습니다. 캡처 연결 ID는 서버가 발급한 값을 사용해야 합니다.</p><pre id="payload-preview"></pre><label class="field">통신 오류 시안<select id="failure-mode"><option value="">정상 흐름</option><option value="save:422">저장 실패 422</option><option value="analyze:503">분석 요청 실패 503</option><option value="report:404">보고서 조회 실패 404</option></select></label></details>
+<div class="actions"><button id="form-back" type="button">입력 방식 선택</button><button id="submit" type="submit" class="primary" disabled>확인 후 저장·비교 시연</button></div>
+</form></section>
+<section data-screen="processing" hidden><h2 tabindex="-1">저장하고 비교 결과를 가져와요</h2><p class="small">API 순서를 보여주는 모의 동작입니다.</p><ol class="process"><li data-phase="save">매물 저장 대기</li><li data-phase="analyze">월세 분석 대기</li><li data-phase="report">보고서 조회 대기</li></ol><div id="process-error" class="error" role="alert" hidden></div><div class="actions" id="retry-actions" hidden><button id="process-edit" type="button">입력 확인</button><button id="retry" class="primary" type="button">실패 단계부터 재시도</button></div></section>
+<section data-screen="result" hidden><h2 tabindex="-1">월세 비교 결과</h2><p class="small">가상 입력·백엔드 예시 응답으로 검토하는 화면입니다.</p><div id="input-summary" class="notice"></div>
+<div id="example-result" hidden><span class="tag">비교 완료 · COMPARED</span><h3>비슷한 조건의 거래보다 낮은 편이에요</h3><p class="small">하위 25% 구간입니다. 층·옵션·상태 등 낮은 이유를 확인해 보세요.</p><div class="result-price">156~200만원 <span class="small">중간 50% 가격대</span></div><div class="metric"><div class="box">비교 중앙값<strong>180만원</strong></div><div class="box">입력한 월세<strong>80만원</strong></div></div><div class="info-row"><span>중앙값 대비</span><strong>-100만원 · -55.6%</strong></div><details open><summary>비교 근거</summary><p>같은 법정동(관악구 봉천동) · 최근 12개월 · 신규 계약 42건<br>아파트 · 면적 ±10% · 보증금 ±30% · 준공연도 ±5년</p><p>신뢰도 등급: 높음(HIGH)</p><p class="small">데이터 기준일: 2026-10-16<br>출처: 서울 열린데이터광장 부동산 전월세가 정보</p></details><p class="small">백엔드 제공 예시를 재현했습니다. 실제 주소를 조회한 결과가 아닙니다.</p></div>
+<div id="no-result" class="notice" hidden><strong>이 입력의 실제 분석 결과는 아직 없어요.</strong><p>이 HTML은 서버에 연결되어 있지 않습니다. 임의로 바꾼 값에 고정 예시 가격을 적용하지 않습니다.</p></div>
+<div class="notice"><p>현재 비교 범위는 동네의 유사 거래입니다. 같은 건물 우선 비교·개별 비교 거래 목록·새 신뢰도 %는 미제공입니다.</p><p class="small">관리비·옵션·내부 상태는 월세 비교에 반영되지 않습니다. 가격 위치는 사기 판정이 아닙니다.</p></div>
+<details open><summary>팀 검토 · 결과 상태별 화면 예시</summary><p class="small">아래 상태는 입력과 무관한 UI 예시입니다. 서버 판단을 변경하는 기능이 아닙니다.</p><label class="field">검토할 상태<select id="state-preview"><option value="COMPARED">비교 완료</option><option value="REFERENCE_ONLY">참고용</option><option value="INSUFFICIENT_DATA">자료 부족</option><option value="INPUT_REVIEW_REQUIRED">입력 확인 필요</option><option value="OUT_OF_SCOPE">지원 범위 밖</option></select></label><div id="state-card" class="notice" role="status"></div></details>
+<div class="actions"><button id="edit" type="button">조건 수정</button><button id="new" type="button">다른 매물 입력</button></div></section>
+<section data-screen="list" hidden><h2 tabindex="-1">내 매물 · 설계 후보</h2><p class="small">MVP 포함 여부는 논의 중입니다. 이 목록은 페이지 메모리의 시연 자료로, 실제 서버 목록이 아니며 새로고침하면 사라집니다.</p><div id="listing-items"></div><div id="delete-question" class="notice" hidden><p id="delete-text"></p><div class="row"><button id="delete-cancel" type="button">취소</button><button id="delete-confirm" type="button">예시 자료 삭제</button></div></div><div class="actions"><button id="list-back" type="button">입력으로</button><button id="clear-demo" type="button">세션 자료 전체 삭제 시안</button></div><p class="small" style="margin-top:16px">실제 DELETE /sessions/current는 저장 자료도 모두 삭제합니다. 창을 닫을 때 자동 호출하지 않습니다.</p></section>
+</main>
+<footer class="footer"><details><summary>팀 연동 기준과 남은 논의</summary><p>실제 연동: 팀 접속키 입력 → POST /sessions → 지원 범위 확인 → POST /listings → POST /listings/{id}/analyses → GET /listings/{id}/report.</p><p class="small">모든 실제 요청에 X-Team-Key, 세션 이후 Bearer 토큰 사용. 결과는 property.input / rent.result. 키는 소스·로그·배포 파일에 넣지 않습니다. 이 시안은 키를 받지 않습니다.</p><p class="small">논의: 주택 유형 범위, 건물 자동 조회, 정확한 주소 필수 여부, v2 기능, 목록·삭제, 미확인 면적 정책, 외부 API 검증·이미지 보관, 조건 수정 저장 방식.</p><p class="small">자세한 내용: 같은 폴더의 사용흐름.md · <a href="https://docs.google.com/spreadsheets/d/1D8E9QjkNiDwWqL32SAmZechF-bOX3Pjsi92FhLItBRE/edit" target="_blank" rel="noopener noreferrer">요구사항 정의서 Google 스프레드시트</a></p></details></footer>
+</div>
+<script>
+'use strict';
+const form = document.getElementById('listing-form');
+const $ = id => document.getElementById(id);
+const fields = ['district','dong','type','basis','area','deposit','rent','address','floor','floorType','year'];
+const requiredFields = ['district','dong','type','basis','area','deposit','rent'];
+const example = {district:'11620',dong:'봉천동',type:'APARTMENT',basis:'EXCLUSIVE',area:'59.9',deposit:'5000',rent:'80',address:'검사용 가상 주소',floor:'5',floorType:'GROUND',year:'2005'};
+const state = {screen:'start', mode:'manual', exampleLoaded:false, listingId:null, nextPhase:0, saved:[], sequence:0, pendingDelete:null, busy:false};
+const names = {APARTMENT:'아파트',MULTI_UNIT:'연립·다세대',OFFICETEL:'오피스텔',DETACHED_MULTI:'단독·다가구'};
+const numOrNull = v => v.trim()==='' ? null : Number(v);
+const percentText = ratio => (ratio == null ? '미제공' : `${(ratio * 100).toFixed(1)}%`);
+function read(){return Object.fromEntries(fields.map(k=>[k,form.elements.namedItem(k).value.trim()]));}
+function setForm(values){for(const k of fields) form.elements.namedItem(k).value=values[k] ?? (k==='floorType'?'UNKNOWN':''); form.elements.confirmed.checked=false; form.elements.floorConfirmed.checked=false;}
+function show(screen){state.screen=screen;document.querySelectorAll('[data-screen]').forEach(el=>el.hidden=el.dataset.screen!==screen);document.querySelectorAll('[data-step]').forEach(el=>{if(el.dataset.step===(screen==='processing'?'fill':screen))el.setAttribute('aria-current','step');else el.removeAttribute('aria-current');});document.querySelector(`[data-screen="${screen}"] h2`)?.focus();}
+function floorIssue(v){const f=numOrNull(v.floor);if(f!==null&&f!==0&&((f>0&&v.floorType==='BASEMENT')||(f<0&&v.floorType==='GROUND')))return '층 숫자와 지상·지하 선택이 달라요. 해당 호실 기준으로 다시 확인해 주세요.';if(form.elements.floorConfirmed.checked&&(f===null||f===0)&&v.floorType==='UNKNOWN')return '확인한 층 또는 지상·지하를 입력하거나, 층 확인 체크를 해제해 주세요.';return '';}
+function payload(){const v=read(), f=numOrNull(v.floor), floor=f===0?null:f, trusted=form.elements.floorConfirmed.checked;let type=v.floorType;if(trusted&&type==='UNKNOWN'&&floor!==null)type=floor>0?'GROUND':'BASEMENT';const listing={district_code:v.district,dong:v.dong,building_type:v.type,area_m2:numOrNull(v.area),area_basis:v.basis,deposit_10k_krw:numOrNull(v.deposit),rent_10k_krw:numOrNull(v.rent),built_year:numOrNull(v.year),floor,floor_type:type,floor_source:trusted?'USER_CONFIRMED':'UNKNOWN',address_text:v.address||null,unit_ho:null};if(v.district==='11620'&&v.dong==='봉천동')listing.legal_dong_code='1162010100';if(state.exampleLoaded)listing.as_of='2026-10-19';const confirmed=form.elements.confirmed.checked;const p={schema_version:'1.1',listing,options:{},confirmation:{user_confirmed:confirmed,input_source:state.mode==='capture'?'IMAGE_REVIEWED':'ADDRESS_MANUAL',confirmed_fields:confirmed?['district_code',listing.legal_dong_code?'legal_dong_code':'dong','building_type','area_m2','area_basis','deposit_10k_krw','rent_10k_krw',...(v.year?['built_year']:[]),...(v.address?['address_text']:[]),...(trusted?['floor','floor_type']:[])]:[]}};if(state.mode==='capture')p.source_extraction_id='DEMO_ONLY_NOT_A_SERVER_ID';return p;}
+function exampleEligible(){return state.exampleLoaded&&form.elements.floorConfirmed.checked&&Object.entries(example).every(([key,value])=>read()[key]===value);}
+function update(){const v=read();const missing=requiredFields.filter(k=>v[k]==='').length;$('missing-count').textContent=missing?`필수 정보 ${missing}개를 입력해 주세요.`:'필수 정보가 채워졌어요. 값과 단위를 확인해 주세요.';const n=$('basis-note');n.hidden=!['SUPPLY','UNKNOWN','CONTRACT'].includes(v.basis);n.textContent=v.basis==='SUPPLY'?'공급면적은 가격 판정이 보류됩니다. 전용면적을 알면 수정해 주세요.':v.basis==='UNKNOWN'?'현재 규격은 미확인 면적을 전용면적으로 가정하고 경고합니다. 실제 결과는 유형·층 등 분석 정책에 따라 달라질 수 있어요.':'단독·다가구 실거래는 계약면적 기준입니다. 다른 유형은 전용면적을 확인해 주세요.';const issue=floorIssue(v);$('form-error').hidden=!issue;$('form-error').textContent=issue;$('submit').disabled=!!issue||!form.checkValidity();$('payload-preview').textContent=JSON.stringify(payload(),null,2);}
+function fresh(mode='manual'){state.mode=mode;state.exampleLoaded=false;state.listingId=null;state.nextPhase=0;setForm({});document.querySelectorAll('[data-origin]').forEach(el=>el.textContent='직접 입력');$('failure-mode').value='';update();}
+function chooseMode(mode){document.querySelectorAll('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===mode)));document.querySelectorAll('[data-route]').forEach(el=>el.hidden=el.dataset.route!==mode);}
+function collect(mode){fresh(mode);const v=mode==='capture'?{district:'11620',dong:'봉천동',type:'APARTMENT',area:'59.9',deposit:'5000',rent:'80'}:{district:'11620',dong:'봉천동',address:'검사용 가상 주소'};setForm(v);if(mode==='capture')document.querySelectorAll('[data-origin]').forEach(el=>el.textContent='캡처 고정 예시 · 확인 필요');$('capture-quote').hidden=mode!=='capture';$('collect-title').textContent=mode==='capture'?'캡처에서 읽은 값을 확인해 주세요':'선택한 주소를 확인해 주세요';$('collected').replaceChildren();for(const [label,value] of [['지역','관악구 봉천동 · 가상 예시'],['주택 유형',v.type?'아파트 · 캡처 예시':'직접 입력 필요'],['준공연도','미확인 · 자동 조회 미제공'],['면적',v.area?'59.9㎡ · 기준 확인 필요':'직접 입력 필요'],['보증금·월세',v.rent?'5,000만원 / 80만원 · 캡처 예시':'현재 광고 조건 직접 입력']]){const row=document.createElement('div');row.className='info-row';const a=document.createElement('span'),b=document.createElement('strong');a.textContent=label;b.textContent=value;row.append(a,b);$('collected').append(row);}update();show('collect');}
+function renderResult(record){state.activeRecord=record;$('input-summary').textContent=`${record.values.dong} · ${names[record.values.type]||'유형 확인'} · ${record.values.area}㎡ · 보증금 ${record.values.deposit}만원 / 월세 ${record.values.rent}만원`;$('example-result').hidden=!record.example;$('no-result').hidden=record.example;$('state-preview').value='COMPARED';renderState();show('result');}
+const statusViews={COMPARED:['비교 완료','서버가 반환한 가격 위치·범위·차이·근거를 표시합니다.'],REFERENCE_ONLY:['참고용 가격 범위','보류 이유와 제공된 범위만 표시합니다. 높다·낮다 판정은 표시하지 않습니다.'],INSUFFICIENT_DATA:['비교 자료가 부족해요','가격을 임의로 만들지 않습니다. 조건을 확인하거나 나중에 다시 시도하도록 안내합니다.'],INPUT_REVIEW_REQUIRED:['입력 정보를 확인해 주세요','서버가 알려준 수정 항목과 이유를 입력칸에 연결합니다.'],OUT_OF_SCOPE:['현재 지원 범위 밖이에요','지원 범위 API가 알려주는 지역·유형을 안내합니다.']};
+function renderState(){const s=$('state-preview').value;const [title,body]=statusViews[s];$('state-card').textContent=`[UI 예시: ${s}] ${title} — ${body}`;}
+const phases=[['save','POST /listings','매물 저장'],['analyze','POST /listings/{id}/analyses','월세 분석'],['report','GET /listings/{id}/report','보고서 조회']];
+async function run(){if(state.busy)return;state.busy=true;$('open-list').disabled=true;$('retry-actions').hidden=true;$('process-error').hidden=true;show('processing');try{for(let i=0;i<phases.length;i++){const [key,,label]=phases[i];document.querySelector(`[data-phase="${key}"]`).textContent=i<state.nextPhase?`${label} · 모의 완료`:`${label} 대기`;}for(let i=state.nextPhase;i<phases.length;i++){const [key,route,label]=phases[i];const li=document.querySelector(`[data-phase="${key}"]`);li.textContent=`${label} 중 · ${route}`;await new Promise(resolve=>setTimeout(resolve,250));if($('failure-mode').value.startsWith(key+':')){const code=$('failure-mode').value.split(':')[1];$('failure-mode').value='';state.nextPhase=i;li.textContent=`${label} 실패 · HTTP ${code} 예시`;$('process-error').hidden=false;$('process-error').textContent=`HTTP ${code} 모의 오류. 입력과 ${state.listingId?'저장된 예시 ID를':'현재 단계를'} 유지합니다. 재시도하면 이 단계부터 이어집니다.`;$('retry-actions').hidden=false;return;}if(key==='save')state.listingId=`demo-${++state.sequence}`;state.nextPhase=i+1;li.textContent=`${label} · 모의 완료`;}const record={id:state.listingId,values:read(),payload:payload(),example:exampleEligible()};const index=state.saved.findIndex(r=>r.id===record.id);if(index<0)state.saved.push(record);else state.saved[index]=record;renderResult(record);}finally{state.busy=false;$('open-list').disabled=false;}}
+function list(){if(state.busy)return;$('delete-question').hidden=true;state.pendingDelete=null;$('listing-items').replaceChildren();if(!state.saved.length){const p=document.createElement('p');p.textContent='아직 시연한 매물이 없어요.';$('listing-items').append(p);}for(const r of state.saved){const div=document.createElement('div');div.className='listitem';const p=document.createElement('p');p.textContent=`${r.values.dong} · ${names[r.values.type]} · 월세 ${r.values.rent}만원`;const view=document.createElement('button');view.type='button';view.textContent='결과 보기';view.onclick=()=>{setForm(r.values);state.mode=r.payload.confirmation.input_source==='IMAGE_REVIEWED'?'capture':'manual';state.exampleLoaded=r.example;state.listingId=r.id;renderResult(r);};const del=document.createElement('button');del.type='button';del.textContent='삭제';del.onclick=()=>askDelete(r.id);const row=document.createElement('div');row.className='row';row.append(view,del);div.append(p,row);$('listing-items').append(div);}$('clear-demo').disabled=!state.saved.length;show('list');}
+function askDelete(id){state.pendingDelete=id;$('delete-text').textContent=id==='ALL'?'이 페이지의 모든 예시 매물을 삭제할까요? 실제 서비스에서는 세션의 저장 자료 전체가 삭제되는 동작입니다.':'이 예시 매물과 결과를 목록에서 삭제할까요?';$('delete-question').hidden=false;$('delete-cancel').focus();}
+$('manual-start').onclick=()=>{fresh();show('fill');};document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>chooseMode(b.dataset.mode));$('search-demo').onclick=()=>{$('candidates').hidden=false;};$('select-address').onclick=()=>collect('address');$('capture-demo').onclick=()=>collect('capture');$('file-demo').onclick=()=>collect('capture');
+$('capture-file').onchange=event=>{const f=event.target.files[0],valid=f&&['image/jpeg','image/png','image/webp'].includes(f.type)&&f.size<=8000000&&f.size>0;$('file-demo').disabled=!valid;$('file-message').textContent=!f?'':valid?'파일 선택됨. 파일과 무관한 고정 예시로 진행하며 전송하지 않습니다.':'형식 또는 크기를 확인해 주세요. JPG·PNG·WebP, 8MB 이하의 비어 있지 않은 파일을 선택해 주세요.';};
+$('collect-back').onclick=()=>show('start');$('to-form').onclick=()=>show('fill');$('form-back').onclick=()=>show('start');form.elements.year.max=String(new Date().getFullYear()+1);
+form.addEventListener('input',event=>{if(![...fields,'floorConfirmed','confirmed'].includes(event.target.name))return;if(event.target.name!=='confirmed'){form.elements.confirmed.checked=false;state.exampleLoaded=false;state.listingId=null;state.nextPhase=0;if(['floor','floorType'].includes(event.target.name))form.elements.floorConfirmed.checked=false;const origin=document.querySelector(`[data-origin="${event.target.name}"]`);if(origin)origin.textContent='직접 입력';}update();});form.addEventListener('change',update);
+$('fill-example').onclick=()=>{state.exampleLoaded=true;state.listingId=null;state.nextPhase=0;setForm(example);form.elements.floorConfirmed.checked=true;document.querySelectorAll('[data-origin]').forEach(el=>el.textContent='백엔드 가상 예시');update();};
+form.onsubmit=event=>{event.preventDefault();update();if(!form.reportValidity()||floorIssue(read()))return;state.nextPhase=0;state.listingId=null;run();};$('retry').onclick=()=>run();$('process-edit').onclick=()=>{form.elements.confirmed.checked=false;state.listingId=null;state.nextPhase=0;update();show('fill');};$('state-preview').onchange=renderState;
+$('edit').onclick=()=>{setForm(state.activeRecord.values);form.elements.floorConfirmed.checked=state.activeRecord.payload.listing.floor_source==='USER_CONFIRMED';state.exampleLoaded=state.activeRecord.example;state.listingId=null;state.nextPhase=0;update();show('fill');};$('new').onclick=()=>{fresh();show('start');};$('open-list').onclick=list;$('list-back').onclick=()=>show('start');$('clear-demo').onclick=()=>askDelete('ALL');$('delete-cancel').onclick=()=>{$('delete-question').hidden=true;state.pendingDelete=null;};$('delete-confirm').onclick=()=>{state.saved=state.pendingDelete==='ALL'?[]:state.saved.filter(r=>r.id!==state.pendingDelete);list();};
+fresh();chooseMode('address');
+</script></div></body></html>

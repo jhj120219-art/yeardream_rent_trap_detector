@@ -1,0 +1,41 @@
+﻿테스트,기대,실제,통과
+지원하지 않는 자치구 -> OUT_OF_SCOPE,{'status': 'OUT_OF_SCOPE'},{'status': 'OUT_OF_SCOPE'},PASS
+지원하지 않는 주택 유형 -> OUT_OF_SCOPE,{'status': 'OUT_OF_SCOPE'},{'status': 'OUT_OF_SCOPE'},PASS
+동/법정동코드 없음 -> INPUT_REVIEW_REQUIRED,{'status': 'INPUT_REVIEW_REQUIRED'},{'status': 'INPUT_REVIEW_REQUIRED'},PASS
+면적 3㎡ -> INPUT_REVIEW_REQUIRED,{'status': 'INPUT_REVIEW_REQUIRED'},{'status': 'INPUT_REVIEW_REQUIRED'},PASS
+월세 0 -> INPUT_REVIEW_REQUIRED,{'status': 'INPUT_REVIEW_REQUIRED'},{'status': 'INPUT_REVIEW_REQUIRED'},PASS
+법정동 코드가 다른 구 -> INPUT_REVIEW_REQUIRED,{'status': 'INPUT_REVIEW_REQUIRED'},{'status': 'INPUT_REVIEW_REQUIRED'},PASS
+area_basis 값 오류 -> INPUT_REVIEW_REQUIRED,{'status': 'INPUT_REVIEW_REQUIRED'},{'status': 'INPUT_REVIEW_REQUIRED'},PASS
+존재하지 않는 동 -> INPUT_REVIEW_REQUIRED,{'status': 'INPUT_REVIEW_REQUIRED'},{'status': 'INPUT_REVIEW_REQUIRED'},PASS
+아파트·전용면적·높음: 월세 80 -> COMPARED/UPPER_TAIL,"{'status': 'COMPARED', 'price_label': 'UPPER_TAIL', 'confidence_grade': 'HIGH', 'stage': 1}","{'status': 'COMPARED', 'price_label': 'UPPER_TAIL', 'confidence_grade': 'HIGH', 'stage': 1}",PASS
+월세 50 -> TYPICAL_RANGE,"{'status': 'COMPARED', 'price_label': 'TYPICAL_RANGE'}","{'status': 'COMPARED', 'price_label': 'TYPICAL_RANGE'}",PASS
+월세 30 -> LOWER_RANGE,"{'status': 'COMPARED', 'price_label': 'LOWER_RANGE'}","{'status': 'COMPARED', 'price_label': 'LOWER_RANGE'}",PASS
+월세 52 -> UPPER_RANGE 이하(UPPER_TAIL 아님),"{'status': 'COMPARED', 'price_label': '조건'}","{'status': 'COMPARED', 'price_label': 'UPPER_RANGE'}",PASS
+공급면적 입력 -> REFERENCE_ONLY + AREA_BASIS_MISMATCH,"{'status': 'REFERENCE_ONLY', 'price_label': 'UNRATED', 'warnings': '조건'}","{'status': 'REFERENCE_ONLY', 'price_label': 'UNRATED', 'warnings': ['AREA_BASIS_MISMATCH']}",PASS
+연립다세대(면적 기준 확인됨·신뢰도 높음) -> COMPARED + 편차 경고,"{'status': 'COMPARED', 'price_label': 'UPPER_TAIL', 'warnings': '조건'}","{'status': 'COMPARED', 'price_label': 'UPPER_TAIL', 'warnings': ['MULTI_UNIT_VARIANCE']}",PASS
+오피스텔 전용면적 입력 -> COMPARED,"{'status': 'COMPARED', 'price_label': 'TYPICAL_RANGE'}","{'status': 'COMPARED', 'price_label': 'TYPICAL_RANGE'}",PASS
+면적 기준 UNKNOWN 이면 전용면적 가정 경고만(보류 아님),"{'status': 'COMPARED', 'warnings': '조건'}","{'status': 'COMPARED', 'warnings': ['AREA_BASIS_ASSUMED_EXCLUSIVE']}",PASS
+단독다가구·지상층 확인·신뢰도 높음·월세 80 -> COMPARED/UPPER_RANGE(UPPER_TAIL 아님),"{'status': 'COMPARED', 'price_label': 'UPPER_RANGE', 'confidence_grade': 'HIGH', 'warnings': '조건'}","{'status': 'COMPARED', 'price_label': 'UPPER_RANGE', 'confidence_grade': 'HIGH', 'warnings': ['AREA_BASIS_CONTRACT_AREA', 'FLOOR_UNCONFIRMED_COMPARABLES', 'DETACHED_STABILITY_RULE']}",PASS
+단독다가구 월세 54(Q75 위이지만 Q75×1.10 이하) -> TYPICAL_RANGE,"{'status': 'COMPARED', 'price_label': 'TYPICAL_RANGE'}","{'status': 'COMPARED', 'price_label': 'TYPICAL_RANGE'}",PASS
+단독다가구 월세 500(극단값)도 UPPER_TAIL 금지,{'price_label': 'UPPER_RANGE'},{'price_label': 'UPPER_RANGE'},PASS
+단독다가구 월세 30 -> LOWER_RANGE,{'price_label': 'LOWER_RANGE'},{'price_label': 'LOWER_RANGE'},PASS
+단독다가구 floor_type=GROUND(광고 추출) -> COMPARED,"{'status': 'COMPARED', 'floor': '조건'}","{'status': 'COMPARED', 'floor': {'listing_floor_type': 'GROUND', 'listing_floor_source': 'AD_EXTRACTED', 'comparable_floor_known': False, 'rule': 'Q75x1.10 초과일 때만 UPPER_RANGE, UPPER_TAIL 금지'}}",PASS
+단독다가구 반지하(floor_type=BASEMENT) -> REFERENCE_ONLY + BASEMENT_LISTING,"{'status': 'REFERENCE_ONLY', 'price_label': 'UNRATED', 'warnings': '조건'}","{'status': 'REFERENCE_ONLY', 'price_label': 'UNRATED', 'warnings': ['AREA_BASIS_CONTRACT_AREA', 'FLOOR_UNCONFIRMED_COMPARABLES', 'BASEMENT_LISTING']}",PASS
+단독다가구 층 숫자 -1 -> REFERENCE_ONLY,{'status': 'REFERENCE_ONLY'},{'status': 'REFERENCE_ONLY'},PASS
+단독다가구 신뢰도 보통 -> REFERENCE_ONLY(높음만 판정),"{'status': 'REFERENCE_ONLY', 'confidence_grade': 'MEDIUM', 'hold_reasons': '조건'}","{'status': 'REFERENCE_ONLY', 'confidence_grade': 'MEDIUM', 'hold_reasons': ['detached_requires_high_confidence']}",PASS
+단독다가구 공급면적 입력 -> REFERENCE_ONLY,"{'status': 'REFERENCE_ONLY', 'warnings': '조건'}","{'status': 'REFERENCE_ONLY', 'warnings': ['AREA_BASIS_MISMATCH', 'FLOOR_UNCONFIRMED_COMPARABLES']}",PASS
+단독다가구 계약면적 입력(RENTAL_REPORTED) -> 경고 없이 COMPARED,"{'status': 'COMPARED', 'warnings': '조건'}","{'status': 'COMPARED', 'warnings': ['FLOOR_UNCONFIRMED_COMPARABLES', 'DETACHED_STABILITY_RULE']}",PASS
+floor_type 값 오류 -> INPUT_REVIEW_REQUIRED,{'status': 'INPUT_REVIEW_REQUIRED'},{'status': 'INPUT_REVIEW_REQUIRED'},PASS
+단독다가구 -> REFERENCE_ONLY + FLOOR_UNKNOWN,"{'status': 'REFERENCE_ONLY', 'warnings': '조건', 'hold_reasons': '조건'}","{'status': 'REFERENCE_ONLY', 'warnings': ['AREA_BASIS_CONTRACT_AREA', 'FLOOR_UNCONFIRMED_COMPARABLES', 'FLOOR_UNKNOWN'], 'hold_reasons': ['floor_unknown']}",PASS
+단독다가구도 가격 범위는 제공,{'prices_10k_krw': '조건'},"{'prices_10k_krw': {'q10': 48.0, 'q25': 49.0, 'median': 50.0, 'q75': 51.0, 'q90': 52.0}}",PASS
+지하(floor=-1) -> 지하 거래끼리 비교 + 경고,"{'status': 'COMPARED', 'warnings': '조건'}","{'status': 'COMPARED', 'warnings': ['BASEMENT_COMPARED_SEPARATELY']}",PASS
+지하 매물인데 지하 거래가 없는 풀 -> INSUFFICIENT_DATA,{'status': 'INSUFFICIENT_DATA'},{'status': 'INSUFFICIENT_DATA'},PASS
+3차(같은 구 전체) 확대 -> REFERENCE_ONLY,"{'status': 'REFERENCE_ONLY', 'stage': 3, 'warnings': '조건'}","{'status': 'REFERENCE_ONLY', 'stage': 3, 'warnings': ['RELAXED_CONDITIONS', 'STAGE3_SAME_GU', 'LOW_CONFIDENCE']}",PASS
+비교 사례 부족 -> INSUFFICIENT_DATA,{'status': 'INSUFFICIENT_DATA'},{'status': 'INSUFFICIENT_DATA'},PASS
+낮은 신뢰도 -> 판정 보류,{'price_label': 'UNRATED'},{'price_label': 'UNRATED'},PASS
+기준일이 너무 멀면 DATA_STALE,{'warnings': '조건'},{'warnings': ['DATA_STALE']},PASS
+실제 풀·법정동 코드·한글 용도명 -> COMPARED 또는 REFERENCE_ONLY,"{'status': '조건', 'comparison': '조건'}","{'status': 'COMPARED', 'comparison': {'dong': '봉천동', 'gu': '관악구', 'building_type': '아파트', 'trace': [{'stage': '1차', 'n': 43}]}}",PASS
+status·price_label 이 정의된 값만 사용,enum 안,True,PASS
+결과가 JSON 직렬화 가능,True,True,PASS
+"사용자 문구에 ""함정/사기/불법/바가지"" 표현 없음",없음,[],PASS
+판정 보류 상태에서는 UPPER_*/LOWER_* 라벨 없음,UNRATED,UNRATED,PASS

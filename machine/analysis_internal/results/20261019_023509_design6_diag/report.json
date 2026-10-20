@@ -1,0 +1,333 @@
+{
+ "label": "design6_diag",
+ "n_bases": 8995,
+ "n_valid": 8991,
+ "n_stage0": 1945,
+ "trust_scores_loo": {
+  "auc": 0.7642431194788566,
+  "brier": 0.19476308878842621
+ },
+ "grade_table": [
+  {
+   "grade": "높음",
+   "n": 2238,
+   "share_pct": 24.9,
+   "within20_pct": 88.9,
+   "ci95": [
+    87.6,
+    90.2
+   ],
+   "median_err_pct": 6.25,
+   "stage0_share_pct": 72.3
+  },
+  {
+   "grade": "보통",
+   "n": 3712,
+   "share_pct": 41.3,
+   "within20_pct": 62.4,
+   "ci95": [
+    60.8,
+    64.0
+   ],
+   "median_err_pct": 15.56,
+   "stage0_share_pct": 5.3
+  },
+  {
+   "grade": "낮음",
+   "n": 3041,
+   "share_pct": 33.8,
+   "within20_pct": 35.8,
+   "ci95": [
+    34.1,
+    37.5
+   ],
+   "median_err_pct": 30.0,
+   "stage0_share_pct": 4.3
+  }
+ ],
+ "grade_monotonic": true,
+ "calibration": [
+  {
+   "bin": "0.0-0.3",
+   "n": 1025,
+   "predicted_pct": 18.1,
+   "actual_pct": 25.0
+  },
+  {
+   "bin": "0.3-0.5",
+   "n": 1488,
+   "predicted_pct": 41.0,
+   "actual_pct": 38.4
+  },
+  {
+   "bin": "0.5-0.6",
+   "n": 1165,
+   "predicted_pct": 55.3,
+   "actual_pct": 49.4
+  },
+  {
+   "bin": "0.6-0.7",
+   "n": 1800,
+   "predicted_pct": 65.4,
+   "actual_pct": 60.6
+  },
+  {
+   "bin": "0.7-0.8",
+   "n": 1973,
+   "predicted_pct": 74.2,
+   "actual_pct": 73.6
+  },
+  {
+   "bin": "0.8-1.0",
+   "n": 1540,
+   "predicted_pct": 85.6,
+   "actual_pct": 94.1
+  }
+ ],
+ "accuracy": {
+  "n_common": 8991,
+  "baseline_median_err_pct": 16.67,
+  "v2_median_err_pct": 15.38,
+  "baseline_within20_pct": 57.9,
+  "v2_within20_pct": 60.0,
+  "all_valid_v2_median_err_pct": 15.38,
+  "all_valid_v2_within20_pct": 60.0,
+  "stage0_only": {
+   "n": 1945,
+   "v2_median_err_pct": 6.0,
+   "baseline_median_err_pct": 8.7
+  },
+  "by_usage": {
+   "단독다가구": {
+    "n": 3865,
+    "baseline": 16.0,
+    "v2": 16.0
+   },
+   "아파트": {
+    "n": 1909,
+    "baseline": 19.7,
+    "v2": 18.18
+   },
+   "연립다세대": {
+    "n": 1734,
+    "baseline": 25.0,
+    "v2": 23.08
+   },
+   "오피스텔": {
+    "n": 1483,
+    "baseline": 9.09,
+    "v2": 6.67
+   }
+  }
+ },
+ "stage0_building_bootstrap": {
+  "n_cases": 1945,
+  "n_buildings": 771,
+  "improvement_pp_mean": 2.69,
+  "ci95": [
+   1.93,
+   3.51
+  ]
+ },
+ "labels": {
+  "margin_0": {
+   "UNRATED": 3048,
+   "TYPICAL_RANGE": 2963,
+   "UPPER_RANGE": 1325,
+   "LOWER_RANGE": 1102,
+   "UPPER_TAIL": 553
+  },
+  "margin_5": {
+   "UNRATED": 3823,
+   "TYPICAL_RANGE": 2963,
+   "LOWER_RANGE": 921,
+   "UPPER_RANGE": 921,
+   "UPPER_TAIL": 363
+  },
+  "margin_10": {
+   "UNRATED": 4609,
+   "TYPICAL_RANGE": 2963,
+   "LOWER_RANGE": 725,
+   "UPPER_RANGE": 503,
+   "UPPER_TAIL": 191
+  }
+ },
+ "label_stability": {
+  "upper_tail_m0": 553,
+  "upper_tail_retained_m5": 363,
+  "upper_range_m0": 1325,
+  "upper_range_retained_m5": 921,
+  "unrated_reasons_m5": {
+   "LOW_TRUST": 3041,
+   "BORDER_MARGIN": 775,
+   "STAGE3_REFERENCE": 7
+  }
+ },
+ "safety_violations": 0,
+ "diagnostics_not_criteria": {
+  "stage0_reasons_all_bases": {
+   "NO_LOT": 3865,
+   "OK": 1945,
+   "MULTI_BUILDING": 1598,
+   "N_TOO_SMALL": 965,
+   "BUILDING_UNVERIFIED": 622
+  },
+  "stage0_rate_all_bases_pct": 21.6,
+  "stage0_rate_among_non_detached_pct": 37.9,
+  "stage0_by_usage": {
+   "단독다가구": 0,
+   "아파트": 381,
+   "연립다세대": 341,
+   "오피스텔": 1223
+  },
+  "valid_rate_pct": 100.0,
+  "rated_rate_m5_pct": 57.5,
+  "by_gu": {
+   "강서구": {
+    "n": 1500,
+    "baseline_med": 14.88,
+    "v2_med": 12.5,
+    "baseline_w20": 59.3,
+    "v2_w20": 62.6,
+    "stage0_n": 590,
+    "stage_share": {
+     "0": 590,
+     "1": 559,
+     "2": 292,
+     "3": 59
+    }
+   },
+   "관악구": {
+    "n": 1500,
+    "baseline_med": 16.3,
+    "v2_med": 15.38,
+    "baseline_w20": 59.9,
+    "v2_w20": 61.7,
+    "stage0_n": 289,
+    "stage_share": {
+     "1": 983,
+     "0": 289,
+     "2": 192,
+     "3": 36
+    }
+   },
+   "광진구": {
+    "n": 1500,
+    "baseline_med": 15.79,
+    "v2_med": 15.0,
+    "baseline_w20": 59.8,
+    "v2_w20": 61.5,
+    "stage0_n": 253,
+    "stage_share": {
+     "1": 812,
+     "2": 371,
+     "0": 253,
+     "3": 64
+    }
+   },
+   "노원구": {
+    "n": 1494,
+    "baseline_med": 19.17,
+    "v2_med": 18.65,
+    "baseline_w20": 53.8,
+    "v2_w20": 54.9,
+    "stage0_n": 137,
+    "stage_share": {
+     "1": 927,
+     "2": 354,
+     "0": 137,
+     "3": 76
+    }
+   },
+   "동작구": {
+    "n": 1498,
+    "baseline_med": 17.65,
+    "v2_med": 16.67,
+    "baseline_w20": 55.7,
+    "v2_w20": 57.9,
+    "stage0_n": 184,
+    "stage_share": {
+     "1": 780,
+     "2": 451,
+     "0": 184,
+     "3": 83
+    }
+   },
+   "마포구": {
+    "n": 1499,
+    "baseline_med": 15.62,
+    "v2_med": 14.29,
+    "baseline_w20": 59.0,
+    "v2_w20": 61.5,
+    "stage0_n": 492,
+    "stage_share": {
+     "0": 492,
+     "2": 460,
+     "1": 306,
+     "3": 241
+    }
+   }
+  },
+  "by_stage": {
+   "0": {
+    "n": 1945,
+    "med": 6.0,
+    "w20": 83.4
+   },
+   "1": {
+    "n": 4367,
+    "med": 16.18,
+    "w20": 60.5
+   },
+   "2": {
+    "n": 2120,
+    "med": 24.04,
+    "w20": 45.2
+   },
+   "3": {
+    "n": 559,
+    "med": 35.29,
+    "w20": 30.4
+   }
+  },
+  "abs_error_man": {
+   "mae": 15.44,
+   "medae": 10.0,
+   "within_3man_pct": 25.0
+  },
+  "rent_distribution": {
+   "min": 1.0,
+   "p5": 15.0,
+   "median": 58.0,
+   "share_le20_pct": 9.5
+  },
+  "stage0_arch_year_inconsistent": {
+   "n": 0,
+   "share_pct": 0.0,
+   "v2_med_inconsistent": null,
+   "v2_med_consistent": 6.0
+  }
+ },
+ "high_grade": {
+  "grade": "높음",
+  "n": 2238,
+  "share_pct": 24.9,
+  "within20_pct": 88.9,
+  "ci95": [
+   87.6,
+   90.2
+  ],
+  "median_err_pct": 6.25,
+  "stage0_share_pct": 72.3
+ },
+ "criteria_checks": {
+  "overall_median_err": true,
+  "within20_not_lower": true,
+  "grade_monotonic": true,
+  "trust_auc": true,
+  "trust_brier": true,
+  "safety": true,
+  "leakage": true,
+  "high_grade_within20_ref_needed": null
+ }
+}

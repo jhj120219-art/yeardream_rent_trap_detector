@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.1",
+  "listing": {
+    "district_code": "11620",
+    "legal_dong_code": "1162010200",
+    "building_type": "DETACHED_MULTI",
+    "area_m2": 25.0,
+    "area_basis": "CONTRACT",
+    "deposit_10k_krw": 1000,
+    "rent_10k_krw": 50,
+    "built_year": null,
+    "floor": 2,
+    "floor_type": "GROUND",
+    "floor_source": "USER_CONFIRMED"
+  },
+  "options": {
+    "maintenance_10k_krw": 7,
+    "internet_status": "UNKNOWN",
+    "elevator_status": "UNKNOWN",
+    "parking_status": "UNKNOWN",
+    "electricity_in_maintenance": "UNKNOWN",
+    "gas_in_maintenance": "UNKNOWN",
+    "water_in_maintenance": "UNKNOWN"
+  },
+  "confirmation": {
+    "user_confirmed": true,
+    "input_source": "IMAGE_REVIEWED",
+    "confirmed_fields": [
+      "address",
+      "building_type",
+      "area_m2",
+      "area_basis",
+      "deposit_10k_krw",
+      "rent_10k_krw",
+      "floor_type"
+    ]
+  }
+}
