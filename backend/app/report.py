@@ -2,6 +2,7 @@
 from .cost_items import cost_items
 from .report_money import advertised_money as money
 from .advertised_costs import advertised_costs
+from .maintenance_selection import grouped_references
 
 
 def build_report(listing, analysis, evidence, data_status):
@@ -35,6 +36,7 @@ def build_report(listing, analysis, evidence, data_status):
     return {
         'report_version':'1.0','listing_id':listing['id'],
         'advertised_costs':advertised_costs(options,confirmed),
+        'maintenance_reference_groups': grouped_references(options,confirmed),
         'property':{'input':raw['listing'],'validation':listing['validation'],
                     'confirmation':raw['confirmation'],'links':listing['links']},
         'rent':{'state':result['status'] if result else 'NOT_ANALYZED',

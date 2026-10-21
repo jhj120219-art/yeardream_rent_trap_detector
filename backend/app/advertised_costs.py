@@ -17,6 +17,17 @@ STATUSES = {'INCLUDED', 'SEPARATE_CHARGE', 'UNKNOWN'}
 
 
 def validate_advertised_options(options):
+    mode = options.get('maintenance_input_mode')
+    if mode is not None and mode != 'CHECKBOX_TOTAL_V1':
+        raise ValueError('관리비 입력 방식이 올바르지 않습니다.')
+    if mode == 'CHECKBOX_TOTAL_V1':
+        for status_field, _ in ITEMS.values():
+            if options.get(status_field) not in ('INCLUDED', 'UNKNOWN'):
+                raise ValueError('5개 체크 항목을 모두 보내주세요. 체크는 INCLUDED, 미체크는 UNKNOWN입니다.')
+        if any(options.get(amount) is not None for _, amount in STORAGE_ITEMS.values()):
+            raise ValueError('체크박스 입력에서는 항목별 금액 없이 관리비 총액만 입력합니다.')
+        if any(options.get(status) not in (None, 'UNKNOWN') for status, _ in LEGACY_ITEMS.values()):
+            raise ValueError('청소·공용은 현재 체크박스의 기타 항목으로 입력합니다.')
     for status_field, amount_field in STORAGE_ITEMS.values():
         status = options.get(status_field)
         allowed = STATUSES | ({'AVAILABLE', 'NOT_AVAILABLE'} if status_field == 'internet_status' else set())
