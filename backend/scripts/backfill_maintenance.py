@@ -21,7 +21,7 @@ def backfill(store):
             expected=advertised_costs(raw.get('options',{}),raw.get('confirmation',{}).get('user_confirmed',False))
             if read(db,row['id'],row['owner']) != expected:
                 raise ValueError('Existing normalized maintenance differs from original JSON; nothing overwritten')
-    return {'verified_listings':len(rows),'inserted_listings':inserted,'item_rows_per_listing':7}
+    return {'verified_listings':len(rows),'inserted_listings':inserted,'new_item_rows_per_listing':5}
 
 
 def main():

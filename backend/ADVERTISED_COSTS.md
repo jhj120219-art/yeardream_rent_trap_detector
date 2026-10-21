@@ -1,63 +1,45 @@
-# 광고 관리비 입력·표시 — 후속 연결 안내
+# 관리비 5항목 입력·저장·표시 — 2026-10-21
 
-관리비를 받아 적는 것과 적정한지 계산하는 것은 다릅니다. **광고에 적힌 내용은 입력·저장·표시합니다. 관리비 비교와 예상 비용 계산은 보류합니다.**
+현재 항목은 **전기세·수도세·가스비·인터넷·기타 관리비** 5가지입니다. 청소·공용관리·주차 등은 기타 관리비의 설명으로 입력합니다. 광고 입력 저장과 실제 관리비 추정 계산은 구분하며, 비교·예상 계산은 검증 전까지 ON_HOLD입니다.
 
-## 프론트에 추가해주세요
+| 화면 항목 | API 항목 | 포함 여부 필드 | 광고 명시 월 금액(만원) |
+|---|---|---|---|
+| 전기세 | ELECTRICITY | electricity_in_maintenance | electricity_10k_krw |
+| 수도세 | WATER | water_in_maintenance | water_10k_krw |
+| 가스비 | GAS | gas_in_maintenance | gas_10k_krw |
+| 인터넷 | INTERNET | internet_status | internet_10k_krw |
+| 기타 관리비 | OTHER | other_in_maintenance | other_10k_krw |
 
-| 입력칸 | 입력 방법 |
-| --- | --- |
-| 월 관리비 | 만원 단위. 미기재·모름이면 null, 실제 무료라고 적혔을 때만 0 |
-| 전기·수도·가스·인터넷·청소·공용관리·기타 | 각각 포함 / 별도 납부 / 모름 선택 |
-| 항목별 월 금액 | 광고에 따로 명시된 경우만 입력. 포함이라고 해서 금액을 0으로 채우지 않음 |
-| 기타 항목명 | 예: 주차. 광고에 적힌 이름을 입력 |
-| 관리비 설명 | 광고 문구를 입력. 예상 금액이나 추정 설명을 붙이지 않음 |
+- 총 관리비: maintenance_10k_krw. 기타 설명: other_cost_label. 전체 광고 문구: maintenance_note.
+- 선택값: INCLUDED / SEPARATE_CHARGE / UNKNOWN. 모르는 금액은 null, 실제 무료로 명시된 경우만 0.
+- 총액에서 알려진 항목을 빼서 기타 금액을 임의 생성하지 않습니다. 포함 금액을 총액에 다시 더하지 않습니다.
+- 인터넷 AVAILABLE은 사용 가능이라는 뜻이며 포함 여부는 UNKNOWN으로 표시합니다.
 
-기본 선택은 모름입니다. 인터넷 사용 가능은 관리비 포함이라는 뜻이 아닙니다. 광고에 부과 주기가 없거나 월 금액인지 확실하지 않으면 금액을 비워두고 설명에 적습니다. 개인 이름·전화번호 등 불필요한 정보는 입력하지 않습니다.
+## 연결과 표시
 
-## 기존 저장 요청의 options에 추가합니다
-
-기존 POST /listings와 GET /listings/{id}/report를 그대로 사용합니다. 2026-10-20 후속 변경으로 원본 JSON과 함께 관리비 총액·항목을 별도 관계형 테이블에도 저장합니다. [항목별 DB 저장](MAINTENANCE_DB.md)을 참고하세요. 사용자 확인 전 입력은 미확인으로 표시하며 월세 분석은 기존처럼 차단합니다. 저장된 내용을 수정할 때는 새 매물에 previous_listing_id를 연결하는 기존 규격을 사용합니다.
+기존 POST /listings의 options에 넣고, 사용자 확인 후 분석합니다. 결과는 GET /listings/{id}/report의 advertised_costs를 사용합니다. items는 위 순서로 정확히 5개이며 category_version=FIVE_ITEMS_V1입니다. /capabilities의 advertised_cost_categories·advertised_cost_category_version으로 적용 여부를 확인할 수 있습니다.
 
 ```json
 {
   "maintenance_10k_krw": 7,
-  "electricity_in_maintenance": "SEPARATE_CHARGE",
-  "electricity_10k_krw": null,
-  "water_in_maintenance": "INCLUDED",
-  "water_10k_krw": 1,
-  "gas_in_maintenance": "UNKNOWN",
-  "gas_10k_krw": null,
-  "internet_status": "INCLUDED",
-  "internet_10k_krw": null,
-  "cleaning_in_maintenance": "INCLUDED",
-  "cleaning_10k_krw": null,
-  "common_in_maintenance": "UNKNOWN",
-  "common_10k_krw": null,
-  "other_in_maintenance": "SEPARATE_CHARGE",
-  "other_cost_label": "주차",
-  "other_10k_krw": 3,
-  "maintenance_note": "광고에 수도 1만원 포함, 주차 3만원 별도라고 표시됨"
+  "electricity_in_maintenance": "SEPARATE_CHARGE", "electricity_10k_krw": null,
+  "water_in_maintenance": "INCLUDED", "water_10k_krw": 1,
+  "gas_in_maintenance": "UNKNOWN", "gas_10k_krw": null,
+  "internet_status": "INCLUDED", "internet_10k_krw": null,
+  "other_in_maintenance": "INCLUDED", "other_10k_krw": null,
+  "other_cost_label": "청소·공용관리 포함, 상세 금액 미기재",
+  "maintenance_note": "광고에 적힌 내용만 입력한 가상 예시"
 }
 ```
 
-위 내용은 options 부분만 보여주는 가상 예시입니다. 금액은 만원, 선택값은 INCLUDED / SEPARATE_CHARGE / UNKNOWN입니다. 기존 internet_status의 AVAILABLE / NOT_AVAILABLE도 저장할 수 있지만 관리비 포함 여부는 UNKNOWN으로 표시합니다. 음수·불리언·무한대·잘못된 선택값은 422입니다. 모르는 값에 문자열 '미기재' 대신 null을 보냅니다.
+위 예시는 options 부분이며 실제 광고가 아닙니다. 원본 입력은 input.options에 보존합니다. 월세 결과는 rent.result에서 가격 범위·차액·차이율·표본 수·조건·신뢰도·보류 사유를 읽습니다. 개별 비교 거래 목록은 분석 원본이 아직 반환하지 않아 NOT_PROVIDED_BY_ANALYSIS이며, 만든 목록을 실제 거래처럼 표시하지 않습니다.
 
-## 결과 화면에 표시할 위치
+## 예전 7항목 자료
 
-`report.advertised_costs`에서 관리비 총액, items, note, 사용자 확인 상태를 읽습니다. 원본 입력은 GET /listings/{id}의 input.options에 그대로 남습니다.
+기존 청소(CLEANING)·공용(COMMON) DB 행과 원본 JSON을 삭제하지 않습니다. 기존 행 7개를 읽어도 화면 주항목은 5개입니다. 옛 청소·공용 금액이 있으면 OTHER.legacy_components에 원래 값을 보존하고 needs_review=true로 표시합니다. 기존 기타와 중복될 수 있으므로 합산한 금액이나 포함 여부를 만들지 않습니다. 프론트는 기타에 “기존 세부내역 확인 필요”를 표시하고 세부내역을 펼쳐 보여줄 수 있습니다. 사용자가 확인해 수정하면 새 매물+previous_listing_id로 저장합니다.
 
-- maintenance_10k_krw: 광고 월 관리비
-- items[].item: ELECTRICITY / WATER / GAS / INTERNET / CLEANING / COMMON / OTHER
-- items[].status: 포함 / 별도 / 모름
-- items[].quoted_monthly_10k_krw: 광고에 명시한 월 금액, 없으면 null
-- state: USER_CONFIRMED 또는 NEEDS_USER_CONFIRMATION
-- comparison_state: ON_HOLD
+신규 DB 저장은 총액 1행 + 항목 5행입니다. 기존 테이블 제약의 CLEANING·COMMON 허용은 과거 기록 보존용이며 새 화면의 항목이 아닙니다. 기존 7행을 강제로 지우거나 schema를 축소하지 않아 별도 파괴적 DB 변경이 필요 없습니다.
 
-공유 모드에서 기존 maintenance / utility_costs / monthly_cost / utility_estimate는 계속 ON_HOLD입니다. 이 항목들을 다시 켜지 않고, 별도 advertised_costs만 광고 정보로 보여주세요. 총액에 항목별 금액을 다시 더하지 않고, 월세 적정성 분석에도 섞지 않습니다. 서버가 null로 보낸 가격은 '미기재'로 표시해주세요. 사용자 확인은 사실 검증·공식 자료 확인을 뜻하지 않습니다.
+## 적용 상태
 
-## 사용자님이 꼭 해주실 일
-
-1. 프론트 담당자에게 이 안내와 최신 팀 저장소를 전달해주세요. 입력칸을 추가하고 결과에 advertised_costs를 표시해달라고 부탁하시면 됩니다.
-2. 프론트 실행 주소가 바뀌면 정확한 주소를 알려주세요. 서버 접속 허용 설정에 필요합니다. 팀 접속키는 기존 방식대로 1:1 전달합니다.
-
-이 관리비 입력 기능에는 새 외부 API 키나 추가 자료가 필요하지 않습니다. 분석 담당자에게 관리비 평균을 지금 요청할 필요도 없습니다. 주소·캡처의 실제 API 검증과 상시 서버 배포는 별도 남은 작업입니다. 팀 메시지는 직접 전송하지 않았습니다.
+개발·검증 결과와 집 서버 적용은 별개입니다. 집 서버가 FIVE_ITEMS_V1을 반환하는지 확인해야 운영 반영 완료입니다. Git push만으로 실행 중인 집 서버가 변경되지는 않습니다. 실제 화면에서 5항목·미기재/0원·기타 확인 필요·재시도·저장 전후 일치를 확인해주세요. 키는 별도 전달합니다.

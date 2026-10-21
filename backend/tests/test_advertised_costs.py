@@ -30,9 +30,13 @@ def test_shared_hold_preserves_advertisement_but_not_estimates(tmp_path):
         assert quote['state']=='USER_CONFIRMED' and quote['maintenance_10k_krw']==7
         assert items['ELECTRICITY']['quoted_monthly_10k_krw'] is None
         assert items['WATER']['quoted_monthly_10k_krw']==1
-        assert items['CLEANING']['quoted_monthly_10k_krw']==0
+        assert len(items)==5
+        legacy={x['item']:x for x in items['OTHER']['legacy_components']}
+        assert legacy['CLEANING']['quoted_monthly_10k_krw']==0
         assert items['INTERNET']['status']=='UNKNOWN' # Availability is not inclusion.
-        assert items['OTHER']['label']=='주차'
+        assert legacy['OTHER']['label']=='주차'
+        assert legacy['OTHER']['quoted_monthly_10k_krw']==3
+        assert items['OTHER']['quoted_monthly_10k_krw'] is None
         assert quote['comparison_state']=='ON_HOLD'
         assert c.get('/listings/'+lid).json()['input']['options']==body['options']
         c.headers['Authorization']='Bearer '+c.post('/sessions').json()['token']

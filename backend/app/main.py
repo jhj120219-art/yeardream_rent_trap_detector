@@ -124,6 +124,8 @@ def create_app(settings=None, pool=None, extractor=None):
             "search_scope": "DONG_THEN_RELAXED_THEN_DISTRICT",
             "maintenance_enabled": settings.maintenance_enabled,
             "advertised_costs_input_supported": True,
+            "advertised_cost_categories": ["ELECTRICITY","WATER","GAS","INTERNET","OTHER"],
+            "advertised_cost_category_version": "FIVE_ITEMS_V1",
             "team_access_required": settings.shared_mode,
             "location_catalog_available": hasattr(app.state.pool,'backend_locations'),
             "retry_key_supported": True,

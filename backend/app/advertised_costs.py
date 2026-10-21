@@ -6,15 +6,18 @@ ITEMS = {
     'WATER': ('water_in_maintenance', 'water_10k_krw'),
     'GAS': ('gas_in_maintenance', 'gas_10k_krw'),
     'INTERNET': ('internet_status', 'internet_10k_krw'),
-    'CLEANING': ('cleaning_in_maintenance', 'cleaning_10k_krw'),
-    'COMMON': ('common_in_maintenance', 'common_10k_krw'),
     'OTHER': ('other_in_maintenance', 'other_10k_krw'),
 }
+LEGACY_ITEMS = {
+    'CLEANING': ('cleaning_in_maintenance', 'cleaning_10k_krw'),
+    'COMMON': ('common_in_maintenance', 'common_10k_krw'),
+}
+STORAGE_ITEMS = {**ITEMS, **LEGACY_ITEMS}
 STATUSES = {'INCLUDED', 'SEPARATE_CHARGE', 'UNKNOWN'}
 
 
 def validate_advertised_options(options):
-    for status_field, amount_field in ITEMS.values():
+    for status_field, amount_field in STORAGE_ITEMS.values():
         status = options.get(status_field)
         allowed = STATUSES | ({'AVAILABLE', 'NOT_AVAILABLE'} if status_field == 'internet_status' else set())
         if status is not None and (not isinstance(status,str) or status not in allowed):
@@ -28,18 +31,32 @@ def validate_advertised_options(options):
 
 
 def advertised_costs(options, confirmed):
+    rows = []
+    for item, (status_field, amount_field) in ITEMS.items():
+        rows.append({'item': item,
+            'status': options.get(status_field) if options.get(status_field) in STATUSES else 'UNKNOWN',
+            'quoted_monthly_10k_krw': advertised_money(options.get(amount_field)),
+            'label': options.get('other_cost_label') if item == 'OTHER' else None})
+    legacy = []
+    for item, (status_field, amount_field) in LEGACY_ITEMS.items():
+        status = options.get(status_field)
+        amount = advertised_money(options.get(amount_field))
+        if status in ('INCLUDED', 'SEPARATE_CHARGE') or amount is not None:
+            legacy.append({'item': item, 'status': status if status in STATUSES else 'UNKNOWN',
+                           'quoted_monthly_10k_krw': amount})
+    if legacy:
+        # Old cleaning/common amounts may overlap with the old OTHER amount.
+        # Keep all source details, but do not invent a new subtotal or inclusion.
+        original_other = dict(rows[-1])
+        rows[-1].update(status='UNKNOWN', quoted_monthly_10k_krw=None, label=None,
+            needs_review=True, legacy_components=legacy + [original_other],
+            review_reason='LEGACY_OTHER_COMPONENTS_REQUIRE_REVIEW')
     return {
+        'category_version': 'FIVE_ITEMS_V1',
         'state': 'USER_CONFIRMED' if confirmed else 'NEEDS_USER_CONFIRMATION',
         'source': 'USER_REVIEWED_ADVERTISEMENT' if confirmed else 'UNCONFIRMED_INPUT',
         'maintenance_10k_krw': advertised_money(options.get('maintenance_10k_krw')),
-        'items': [
-            {'item': item,
-             'status': options.get(status_field) if options.get(status_field) in STATUSES else 'UNKNOWN',
-             'quoted_monthly_10k_krw': advertised_money(options.get(amount_field)),
-             'label': options.get('other_cost_label') if item == 'OTHER' else None}
-            for item, (status_field, amount_field) in ITEMS.items()
-        ],
-        'note': options.get('maintenance_note'),
+        'items': rows, 'note': options.get('maintenance_note'),
         'comparison_state': 'ON_HOLD',
-        'notice': '광고에서 확인한 입력값입니다. 미기재 금액은 null이며 예상 비용·적정성 판정·월세 비교 계산에 사용하지 않습니다. 항목 금액의 합계를 관리비에 다시 더하지 않습니다.',
+        'notice': '광고에 적힌 전기·수도·가스·인터넷·기타 관리비 5항목입니다. 미기재는 null이며 추정·적정성 계산은 보류합니다. 기존 청소·공용·기타 세부내역은 보존하고 중복 여부가 불명확한 금액은 합산하지 않습니다.',
     }

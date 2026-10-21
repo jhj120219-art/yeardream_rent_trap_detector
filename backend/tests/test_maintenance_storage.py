@@ -23,12 +23,13 @@ def test_relational_rows_match_output_and_original_survives(target):
             fee=db.execute('SELECT * FROM listing_maintenance WHERE listing_id=?',(lid,)).fetchone()
             items={r['item']:r for r in db.execute('SELECT * FROM listing_maintenance_items WHERE listing_id=?',(lid,)).fetchall()}
             assert fee['amount_10k_krw']==7
-            assert len(items)==7
+            assert set(items)=={'ELECTRICITY','WATER','GAS','INTERNET','OTHER'}
             assert items['WATER']['status']=='INCLUDED' and items['WATER']['amount_10k_krw']==1
             assert items['ELECTRICITY']['amount_10k_krw'] is None
-            assert items['CLEANING']['amount_10k_krw']==0
+            assert items['OTHER']['amount_10k_krw'] is None
+            assert store.get(lid,owner,'listing')['input']['options']['cleaning_10k_krw']==0
             assert items['INTERNET']['raw_status']=='AVAILABLE' and items['INTERNET']['status']=='UNKNOWN'
-            assert items['OTHER']['label']=='주차'
+            assert raw['options']['other_cost_label']=='주차'
         assert store.maintenance(lid,'another-owner') is None
         reopened=Store(path,database_url=url,initialize=False)
         assert reopened.maintenance(lid,owner)==store.maintenance(lid,owner)
@@ -86,7 +87,7 @@ def test_example_json_split_is_atomic_and_separate(tmp_path):
     assert counts['sources']==2 and counts['maintenance_rows']>0
     with store.connect() as db:
         assert db.execute('SELECT COUNT(*) AS total FROM listing_maintenance').fetchone()['total']==counts['maintenance_rows']
-        assert db.execute('SELECT COUNT(*) AS total FROM listing_maintenance_items').fetchone()['total']==counts['maintenance_rows']*7
+        assert db.execute('SELECT COUNT(*) AS total FROM listing_maintenance_items').fetchone()['total']==counts['maintenance_rows']*5
         assert db.execute("SELECT COUNT(*) AS total FROM objects WHERE kind='synthetic_import_source'").fetchone()['total']==2
     with pytest.raises(ValueError,match='empty'):import_examples(wrapped,files)
     wrapped.options['database']='rent_team'

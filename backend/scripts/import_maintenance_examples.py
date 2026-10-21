@@ -43,7 +43,7 @@ def import_examples(store, paths):
                        (oid,owner,'listing',None,json.dumps(payload,ensure_ascii=False,allow_nan=False),date))
             project(db,oid,payload)
     return {'database_role':'SYNTHETIC_EXAMPLES_ONLY','sources':len(sources),'maintenance_rows':len(records),
-            'maintenance_item_rows':len(records)*7,'team_database_modified':False}
+            'maintenance_item_rows':len(records)*5,'team_database_modified':False}
 
 
 def main():
