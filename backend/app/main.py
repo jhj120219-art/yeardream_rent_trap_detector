@@ -19,6 +19,7 @@ from .report import build_report
 from .input_review import listing_draft
 from .request_diagnostics import RequestDiagnostics
 from .utility_estimate import UtilityScenario, estimate as estimate_utilities, catalog as utility_catalog
+from .service_identity import SERVICE_NAME, public_identity
 
 
 def create_app(settings=None, pool=None, extractor=None):
@@ -55,7 +56,7 @@ def create_app(settings=None, pool=None, extractor=None):
                 app.state.v2_status='UNAVAILABLE'
         yield
 
-    app = FastAPI(title="월세 비교 API",version="1.1.0",lifespan=lifespan)
+    app = FastAPI(title=SERVICE_NAME + " API",version="1.1.0",lifespan=lifespan)
 
     @app.exception_handler(RequestValidationError)
     async def validation_error(request, exc):
@@ -115,6 +116,7 @@ def create_app(settings=None, pool=None, extractor=None):
     @app.get('/capabilities')
     def capabilities():
         return {
+            "service": public_identity(),
             "schema_version": "1.1", "data_status": app.state.data_status,
             "loaded_coverage": service.coverage(app.state.pool),
             "address_configured": bool(settings.kakao_key),

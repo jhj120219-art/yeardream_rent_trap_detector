@@ -3,6 +3,7 @@ from .cost_items import cost_items
 from .report_money import advertised_money as money
 from .advertised_costs import advertised_costs
 from .maintenance_selection import grouped_references
+from .service_identity import public_identity
 
 
 def build_report(listing, analysis, evidence, data_status):
@@ -34,6 +35,7 @@ def build_report(listing, analysis, evidence, data_status):
     elif any(x['comparison']['status']=='NEEDS_REVIEW' for x in evidence['items']):
         next_actions.append('REVIEW_MAINTENANCE_EVIDENCE')
     return {
+        'service': public_identity(),
         'report_version':'1.0','listing_id':listing['id'],
         'advertised_costs':advertised_costs(options,confirmed),
         'maintenance_reference_groups': grouped_references(options,confirmed),
