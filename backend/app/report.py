@@ -6,7 +6,7 @@ from .maintenance_selection import grouped_references
 from .service_identity import public_identity
 
 
-def build_report(listing, analysis, evidence, data_status):
+def build_report(listing, analysis, evidence, data_status, references=None):
     raw=listing['input']
     confirmed=raw['confirmation']['user_confirmed']
     valid=listing['validation']['ok']
@@ -38,7 +38,7 @@ def build_report(listing, analysis, evidence, data_status):
         'service': public_identity(),
         'report_version':'1.0','listing_id':listing['id'],
         'advertised_costs':advertised_costs(options,confirmed),
-        'maintenance_reference_groups': grouped_references(options,confirmed),
+        'maintenance_reference_groups': grouped_references(options,confirmed,references),
         'property':{'input':raw['listing'],'validation':listing['validation'],
                     'confirmation':raw['confirmation'],'links':listing['links']},
         'rent':{'state':result['status'] if result else 'NOT_ANALYZED',

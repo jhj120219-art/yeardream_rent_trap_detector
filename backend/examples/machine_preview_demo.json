@@ -1,0 +1,1260 @@
+[
+  {
+    "scenario": "A. 가을(10월) · 1인 · 20㎡ · 개별 도시가스",
+    "request": {
+      "target_month": 10,
+      "household_size": 1,
+      "area_m2": 20.0,
+      "heating_type": "개별 도시가스",
+      "gas_user": "예",
+      "metering": "INDIVIDUAL",
+      "acknowledge_reference_limits": true
+    },
+    "response": {
+      "version": "machine-preview-1",
+      "state": "CALCULATED",
+      "reasons": [],
+      "result": {
+        "schema_version": "maintenance.v1",
+        "request_id": "1511ce45-bab4-489b-b128-0c9870070861",
+        "calculation_version": "utility-v0.2",
+        "source_contract_version": "FIVE_ITEMS_V1",
+        "tariff_version": "2026-10-20 확인(한전 주택용 저압, 서울가스 2026.10.01, 아리수 가정용)",
+        "status": "REFERENCE_ONLY",
+        "status_reason": [],
+        "advertised": {
+          "maintenance_total_krw": 90000,
+          "total_source": "AD",
+          "mode": "불명",
+          "undisclosed": false,
+          "parse_incomplete": false,
+          "incomplete_reasons": [],
+          "parse_incomplete_unresolved": false,
+          "user_confirmed": true,
+          "conflicts": [],
+          "other_included": []
+        },
+        "items": {
+          "OTHER": {
+            "inclusion": "INCLUDED",
+            "advertised_amount_krw": null,
+            "amount_source": "NOT_PROVIDED",
+            "descriptions": [
+              "청소·공용관리 포함, 상세 금액 미기재"
+            ],
+            "legacy_components": [],
+            "note": "기타는 광고에 명시된 금액만 표시하며 총액에서 다른 항목을 빼서 만들지 않습니다."
+          },
+          "internet_availability": null
+        },
+        "conditions_used": {
+          "target_month": 10,
+          "household_size": 1,
+          "housing_type": "다세대·연립",
+          "area_band": "~33㎡",
+          "heating_type": "개별 도시가스",
+          "gas_user": "예"
+        },
+        "utility_estimates": [
+          {
+            "utility_type": "WATER",
+            "inclusion": "INCLUDED",
+            "billing_basis": "UNKNOWN",
+            "metering": "INDIVIDUAL",
+            "advertised_amount_krw": null,
+            "user_confirmed": true,
+            "estimate_status": "AVAILABLE",
+            "reference_low_krw": 10950,
+            "reference_high_krw": 10950,
+            "reference_groups": [
+              {
+                "group": "서울 세대원 수별 평균 사용량",
+                "category": "1명",
+                "bill_krw": 10950,
+                "usage": 8.0
+              }
+            ],
+            "hold_reason": null
+          },
+          {
+            "utility_type": "ELECTRICITY",
+            "inclusion": "INCLUDED",
+            "billing_basis": "UNKNOWN",
+            "metering": "INDIVIDUAL",
+            "advertised_amount_krw": null,
+            "user_confirmed": true,
+            "estimate_status": "AVAILABLE",
+            "reference_low_krw": 23930,
+            "reference_high_krw": 36970,
+            "reference_groups": [
+              {
+                "group": "주택종류 평균",
+                "category": "다세대/연립/기타",
+                "bill_krw": 36970,
+                "usage": 219.3
+              },
+              {
+                "group": "가구원 수 평균",
+                "category": "1명",
+                "bill_krw": 28100,
+                "usage": 179.3
+              },
+              {
+                "group": "면적 평균",
+                "category": "33㎡미만",
+                "bill_krw": 23930,
+                "usage": 151.7
+              }
+            ],
+            "hold_reason": null
+          },
+          {
+            "utility_type": "GAS",
+            "inclusion": "INCLUDED",
+            "billing_basis": "UNKNOWN",
+            "metering": "INDIVIDUAL",
+            "advertised_amount_krw": null,
+            "user_confirmed": true,
+            "estimate_status": "AVAILABLE",
+            "reference_low_krw": 19500,
+            "reference_high_krw": 38310,
+            "reference_groups": [
+              {
+                "group": "주택종류 평균",
+                "category": "다세대/연립/기타",
+                "bill_krw": 33740,
+                "usage": 30.4
+              },
+              {
+                "group": "가구원 수 평균",
+                "category": "1명",
+                "bill_krw": 22870,
+                "usage": 20.2
+              },
+              {
+                "group": "면적 평균",
+                "category": "33㎡미만",
+                "bill_krw": 19500,
+                "usage": 17.0
+              },
+              {
+                "group": "도시가스 난방 가구 평균",
+                "category": "도시가스",
+                "bill_krw": 38310,
+                "usage": 34.7
+              }
+            ],
+            "hold_reason": null
+          },
+          {
+            "utility_type": "INTERNET",
+            "inclusion": "INCLUDED",
+            "billing_basis": "UNKNOWN",
+            "metering": "INDIVIDUAL",
+            "advertised_amount_krw": null,
+            "user_confirmed": true,
+            "estimate_status": "AVAILABLE",
+            "reference_low_krw": 17600,
+            "reference_high_krw": 30000,
+            "reference_groups": [
+              {
+                "group": "KT 공개 요금제 예시(약정·결합에 따라 다름)",
+                "category": "월 요금",
+                "bill_krw": 17600,
+                "usage": null
+              },
+              {
+                "group": "KT 공개 요금제 예시",
+                "category": "상위 속도",
+                "bill_krw": 30000,
+                "usage": null
+              }
+            ],
+            "hold_reason": null
+          }
+        ],
+        "separate_items": [],
+        "reference_comparison": [],
+        "decomposition": {
+          "enabled": false,
+          "status": "DISABLED",
+          "remainder_low_krw": null,
+          "remainder_high_krw": null,
+          "note": "총액에서 알려진 항목을 빼서 기타 금액을 만들지 않습니다. 실험용 계산은 experimental_remainder=true 일 때만 내부 확인용으로 제공합니다."
+        },
+        "missing_fields": [],
+        "reason_codes": [],
+        "warnings": [],
+        "input_warnings": [],
+        "confirmation_questions": [
+          "수도는 세대별 검침인가요, 건물 공동 계량을 나누는 방식인가요? 나누는 기준(인원·균등)이 무엇인가요?",
+          "전기는 사용량만큼 실비로 정산되나요, 정액인가요? 정액이면 월 몇 kWh 기준이고 초과분은 어떻게 하나요? 세대별 계량기가 있나요?",
+          "난방·온수가 개별 도시가스인가요, 중앙난방·지역난방인가요? 가스는 사용량대로 별도 청구인가요, 정액에 포함인가요?",
+          "인터넷은 어떤 통신사·속도 상품인가요? 건물 단체계약이고 별도 가입이 필요 없나요?"
+        ],
+        "assumptions": {
+          "usage_source": "KESIS 가구에너지패널조사 14차(2023) 서울 결과표",
+          "tariff_version": "2026-10-20 확인(한전 주택용 저압, 서울가스 2026.10.01, 아리수 가정용)",
+          "unverified_parameters": [
+            "CLIMATE_CHARGE",
+            "POWER_FUND_RATE",
+            "GAS_CALORIFIC_VALUE"
+          ],
+          "note": "2023년 사용량을 2026년 요율로 환산한 참고 금액이며 실제 청구액이 아닙니다. 표시한 폭은 서로 다른 집단 평균을 각각 환산한 값들의 최소~최대이며 정상 범위가 아닙니다."
+        },
+        "recent_reference": {
+          "month": 10,
+          "electricity": {
+            "source_id": "15119479",
+            "reference_period": "2025-10",
+            "group": "서울 주택용 계약전력 1~3kW",
+            "kwh_per_customer": 171.2,
+            "reported_won_per_customer": 25302,
+            "bill_at_tariff_2026_10": 26880,
+            "customers": 2862471,
+            "adjustment_applied": false,
+            "caveats": [
+              "고객(계량 단위) 평균이며 가구 분포 아님",
+              "판매수입은 부가세·기금 포함 여부 미확인이라 환산 요금과 직접 비교하지 않음",
+              "빈 집·공용 계량 포함 가능",
+              "단위는 데이터 페이지에 표시 없음(값 크기로 kWh·원으로 해석)"
+            ]
+          },
+          "gas": {
+            "source_id": "15156658",
+            "reference_period": "2024-10",
+            "group": "서울 도시가스 수요가 평균",
+            "m3_per_household": 14.2,
+            "bill_at_tariff_2026_10": 16510,
+            "yoy_annual_change": -0.0603,
+            "annual_m3": {
+              "prev": 503.8,
+              "last": 473.4
+            },
+            "adjustment_applied": false,
+            "caveats": [
+              "2023 가구에너지패널 서울 평균(연 651N㎥)과 절대 수준이 달라 수준 비교·대체에 쓰지 않음(변화율·월별 모양만 참고)",
+              "취사 위주·대형 가구가 섞인 평균이라 소형 가구 값이 아님",
+              "열량 43MJ/N㎥ 가정으로 환산"
+            ]
+          },
+          "water": null,
+          "internet": null,
+          "notes": [
+            "판정이 아니라 참고 정보입니다. 기본 추정값은 2023 조사 기준이며 최근 값으로 보정하지 않았습니다.",
+            "수도·인터넷은 최근 가구 단위 집계가 없어 기존 근거를 유지합니다."
+          ]
+        },
+        "errors": [],
+        "never": [
+          "총액-추정합계를 부당 청구액으로 해석하지 않음",
+          "참고 범위를 정상 범위로 해석하지 않음",
+          "개별 가구 실제 청구액 예측이 아님"
+        ]
+      },
+      "notice": "서울 비슷한 가구의 참고 추정값입니다. 실제 청구액·평균 청구액·정상 관리비가 아니며 기타 금액은 총액에서 역산하지 않습니다."
+    }
+  },
+  {
+    "scenario": "B. 겨울(1월) 같은 조건",
+    "request": {
+      "target_month": 1,
+      "household_size": 1,
+      "area_m2": 20.0,
+      "heating_type": "개별 도시가스",
+      "gas_user": "예",
+      "metering": "INDIVIDUAL",
+      "acknowledge_reference_limits": true
+    },
+    "response": {
+      "version": "machine-preview-1",
+      "state": "CALCULATED",
+      "reasons": [],
+      "result": {
+        "schema_version": "maintenance.v1",
+        "request_id": "1511ce45-bab4-489b-b128-0c9870070861",
+        "calculation_version": "utility-v0.2",
+        "source_contract_version": "FIVE_ITEMS_V1",
+        "tariff_version": "2026-10-20 확인(한전 주택용 저압, 서울가스 2026.10.01, 아리수 가정용)",
+        "status": "REFERENCE_ONLY",
+        "status_reason": [],
+        "advertised": {
+          "maintenance_total_krw": 90000,
+          "total_source": "AD",
+          "mode": "불명",
+          "undisclosed": false,
+          "parse_incomplete": false,
+          "incomplete_reasons": [],
+          "parse_incomplete_unresolved": false,
+          "user_confirmed": true,
+          "conflicts": [],
+          "other_included": []
+        },
+        "items": {
+          "OTHER": {
+            "inclusion": "INCLUDED",
+            "advertised_amount_krw": null,
+            "amount_source": "NOT_PROVIDED",
+            "descriptions": [
+              "청소·공용관리 포함, 상세 금액 미기재"
+            ],
+            "legacy_components": [],
+            "note": "기타는 광고에 명시된 금액만 표시하며 총액에서 다른 항목을 빼서 만들지 않습니다."
+          },
+          "internet_availability": null
+        },
+        "conditions_used": {
+          "target_month": 1,
+          "household_size": 1,
+          "housing_type": "다세대·연립",
+          "area_band": "~33㎡",
+          "heating_type": "개별 도시가스",
+          "gas_user": "예"
+        },
+        "utility_estimates": [
+          {
+            "utility_type": "WATER",
+            "inclusion": "INCLUDED",
+            "billing_basis": "UNKNOWN",
+            "metering": "INDIVIDUAL",
+            "advertised_amount_krw": null,
+            "user_confirmed": true,
+            "estimate_status": "AVAILABLE",
+            "reference_low_krw": 10950,
+            "reference_high_krw": 10950,
+            "reference_groups": [
+              {
+                "group": "서울 세대원 수별 평균 사용량",
+                "category": "1명",
+                "bill_krw": 10950,
+                "usage": 8.0
+              }
+            ],
+            "hold_reason": null
+          },
+          {
+            "utility_type": "ELECTRICITY",
+            "inclusion": "INCLUDED",
+            "billing_basis": "UNKNOWN",
+            "metering": "INDIVIDUAL",
+            "advertised_amount_krw": null,
+            "user_confirmed": true,
+            "estimate_status": "AVAILABLE",
+            "reference_low_krw": 24080,
+            "reference_high_krw": 37340,
+            "reference_groups": [
+              {
+                "group": "주택종류 평균",
+                "category": "다세대/연립/기타",
+                "bill_krw": 37340,
+                "usage": 220.7
+              },
+              {
+                "group": "가구원 수 평균",
+                "category": "1명",
+                "bill_krw": 28270,
+                "usage": 180.5
+              },
+              {
+                "group": "면적 평균",
+                "category": "33㎡미만",
+                "bill_krw": 24080,
+                "usage": 152.7
+              }
+            ],
+            "hold_reason": null
+          },
+          {
+            "utility_type": "GAS",
+            "inclusion": "INCLUDED",
+            "billing_basis": "UNKNOWN",
+            "metering": "INDIVIDUAL",
+            "advertised_amount_krw": null,
+            "user_confirmed": true,
+            "estimate_status": "AVAILABLE",
+            "reference_low_krw": 60040,
+            "reference_high_krw": 120940,
+            "reference_groups": [
+              {
+                "group": "주택종류 평균",
+                "category": "다세대/연립/기타",
+                "bill_krw": 106130,
+                "usage": 98.3
+              },
+              {
+                "group": "가구원 수 평균",
+                "category": "1명",
+                "bill_krw": 70960,
+                "usage": 65.3
+              },
+              {
+                "group": "면적 평균",
+                "category": "33㎡미만",
+                "bill_krw": 60040,
+                "usage": 55.1
+              },
+              {
+                "group": "도시가스 난방 가구 평균",
+                "category": "도시가스",
+                "bill_krw": 120940,
+                "usage": 112.2
+              }
+            ],
+            "hold_reason": null
+          },
+          {
+            "utility_type": "INTERNET",
+            "inclusion": "INCLUDED",
+            "billing_basis": "UNKNOWN",
+            "metering": "INDIVIDUAL",
+            "advertised_amount_krw": null,
+            "user_confirmed": true,
+            "estimate_status": "AVAILABLE",
+            "reference_low_krw": 17600,
+            "reference_high_krw": 30000,
+            "reference_groups": [
+              {
+                "group": "KT 공개 요금제 예시(약정·결합에 따라 다름)",
+                "category": "월 요금",
+                "bill_krw": 17600,
+                "usage": null
+              },
+              {
+                "group": "KT 공개 요금제 예시",
+                "category": "상위 속도",
+                "bill_krw": 30000,
+                "usage": null
+              }
+            ],
+            "hold_reason": null
+          }
+        ],
+        "separate_items": [],
+        "reference_comparison": [],
+        "decomposition": {
+          "enabled": false,
+          "status": "DISABLED",
+          "remainder_low_krw": null,
+          "remainder_high_krw": null,
+          "note": "총액에서 알려진 항목을 빼서 기타 금액을 만들지 않습니다. 실험용 계산은 experimental_remainder=true 일 때만 내부 확인용으로 제공합니다."
+        },
+        "missing_fields": [],
+        "reason_codes": [],
+        "warnings": [],
+        "input_warnings": [],
+        "confirmation_questions": [
+          "수도는 세대별 검침인가요, 건물 공동 계량을 나누는 방식인가요? 나누는 기준(인원·균등)이 무엇인가요?",
+          "전기는 사용량만큼 실비로 정산되나요, 정액인가요? 정액이면 월 몇 kWh 기준이고 초과분은 어떻게 하나요? 세대별 계량기가 있나요?",
+          "난방·온수가 개별 도시가스인가요, 중앙난방·지역난방인가요? 가스는 사용량대로 별도 청구인가요, 정액에 포함인가요?",
+          "인터넷은 어떤 통신사·속도 상품인가요? 건물 단체계약이고 별도 가입이 필요 없나요?"
+        ],
+        "assumptions": {
+          "usage_source": "KESIS 가구에너지패널조사 14차(2023) 서울 결과표",
+          "tariff_version": "2026-10-20 확인(한전 주택용 저압, 서울가스 2026.10.01, 아리수 가정용)",
+          "unverified_parameters": [
+            "CLIMATE_CHARGE",
+            "POWER_FUND_RATE",
+            "GAS_CALORIFIC_VALUE"
+          ],
+          "note": "2023년 사용량을 2026년 요율로 환산한 참고 금액이며 실제 청구액이 아닙니다. 표시한 폭은 서로 다른 집단 평균을 각각 환산한 값들의 최소~최대이며 정상 범위가 아닙니다."
+        },
+        "recent_reference": {
+          "month": 1,
+          "electricity": {
+            "source_id": "15119479",
+            "reference_period": "2025-01",
+            "group": "서울 주택용 계약전력 1~3kW",
+            "kwh_per_customer": 187.3,
+            "reported_won_per_customer": 28925,
+            "bill_at_tariff_2026_10": 29310,
+            "customers": 2866131,
+            "adjustment_applied": false,
+            "caveats": [
+              "고객(계량 단위) 평균이며 가구 분포 아님",
+              "판매수입은 부가세·기금 포함 여부 미확인이라 환산 요금과 직접 비교하지 않음",
+              "빈 집·공용 계량 포함 가능",
+              "단위는 데이터 페이지에 표시 없음(값 크기로 kWh·원으로 해석)"
+            ]
+          },
+          "gas": {
+            "source_id": "15156658",
+            "reference_period": "2024-01",
+            "group": "서울 도시가스 수요가 평균",
+            "m3_per_household": 95.9,
+            "bill_at_tariff_2026_10": 103560,
+            "yoy_annual_change": -0.0603,
+            "annual_m3": {
+              "prev": 503.8,
+              "last": 473.4
+            },
+            "adjustment_applied": false,
+            "caveats": [
+              "2023 가구에너지패널 서울 평균(연 651N㎥)과 절대 수준이 달라 수준 비교·대체에 쓰지 않음(변화율·월별 모양만 참고)",
+              "취사 위주·대형 가구가 섞인 평균이라 소형 가구 값이 아님",
+              "열량 43MJ/N㎥ 가정으로 환산"
+            ]
+          },
+          "water": null,
+          "internet": null,
+          "notes": [
+            "판정이 아니라 참고 정보입니다. 기본 추정값은 2023 조사 기준이며 최근 값으로 보정하지 않았습니다.",
+            "수도·인터넷은 최근 가구 단위 집계가 없어 기존 근거를 유지합니다."
+          ]
+        },
+        "errors": [],
+        "never": [
+          "총액-추정합계를 부당 청구액으로 해석하지 않음",
+          "참고 범위를 정상 범위로 해석하지 않음",
+          "개별 가구 실제 청구액 예측이 아님"
+        ]
+      },
+      "notice": "서울 비슷한 가구의 참고 추정값입니다. 실제 청구액·평균 청구액·정상 관리비가 아니며 기타 금액은 총액에서 역산하지 않습니다."
+    }
+  },
+  {
+    "scenario": "C. 여름(8월) 같은 조건",
+    "request": {
+      "target_month": 8,
+      "household_size": 1,
+      "area_m2": 20.0,
+      "heating_type": "개별 도시가스",
+      "gas_user": "예",
+      "metering": "INDIVIDUAL",
+      "acknowledge_reference_limits": true
+    },
+    "response": {
+      "version": "machine-preview-1",
+      "state": "CALCULATED",
+      "reasons": [],
+      "result": {
+        "schema_version": "maintenance.v1",
+        "request_id": "1511ce45-bab4-489b-b128-0c9870070861",
+        "calculation_version": "utility-v0.2",
+        "source_contract_version": "FIVE_ITEMS_V1",
+        "tariff_version": "2026-10-20 확인(한전 주택용 저압, 서울가스 2026.10.01, 아리수 가정용)",
+        "status": "REFERENCE_ONLY",
+        "status_reason": [],
+        "advertised": {
+          "maintenance_total_krw": 90000,
+          "total_source": "AD",
+          "mode": "불명",
+          "undisclosed": false,
+          "parse_incomplete": false,
+          "incomplete_reasons": [],
+          "parse_incomplete_unresolved": false,
+          "user_confirmed": true,
+          "conflicts": [],
+          "other_included": []
+        },
+        "items": {
+          "OTHER": {
+            "inclusion": "INCLUDED",
+            "advertised_amount_krw": null,
+            "amount_source": "NOT_PROVIDED",
+            "descriptions": [
+              "청소·공용관리 포함, 상세 금액 미기재"
+            ],
+            "legacy_components": [],
+            "note": "기타는 광고에 명시된 금액만 표시하며 총액에서 다른 항목을 빼서 만들지 않습니다."
+          },
+          "internet_availability": null
+        },
+        "conditions_used": {
+          "target_month": 8,
+          "household_size": 1,
+          "housing_type": "다세대·연립",
+          "area_band": "~33㎡",
+          "heating_type": "개별 도시가스",
+          "gas_user": "예"
+        },
+        "utility_estimates": [
+          {
+            "utility_type": "WATER",
+            "inclusion": "INCLUDED",
+            "billing_basis": "UNKNOWN",
+            "metering": "INDIVIDUAL",
+            "advertised_amount_krw": null,
+            "user_confirmed": true,
+            "estimate_status": "AVAILABLE",
+            "reference_low_krw": 10950,
+            "reference_high_krw": 10950,
+            "reference_groups": [
+              {
+                "group": "서울 세대원 수별 평균 사용량",
+                "category": "1명",
+                "bill_krw": 10950,
+                "usage": 8.0
+              }
+            ],
+            "hold_reason": null
+          },
+          {
+            "utility_type": "ELECTRICITY",
+            "inclusion": "INCLUDED",
+            "billing_basis": "UNKNOWN",
+            "metering": "INDIVIDUAL",
+            "advertised_amount_krw": null,
+            "user_confirmed": true,
+            "estimate_status": "AVAILABLE",
+            "reference_low_krw": 38020,
+            "reference_high_krw": 61020,
+            "reference_groups": [
+              {
+                "group": "주택종류 평균",
+                "category": "다세대/연립/기타",
+                "bill_krw": 61020,
+                "usage": 354.0
+              },
+              {
+                "group": "가구원 수 평균",
+                "category": "1명",
+                "bill_krw": 44740,
+                "usage": 289.5
+              },
+              {
+                "group": "면적 평균",
+                "category": "33㎡미만",
+                "bill_krw": 38020,
+                "usage": 244.9
+              }
+            ],
+            "hold_reason": null
+          },
+          {
+            "utility_type": "GAS",
+            "inclusion": "INCLUDED",
+            "billing_basis": "UNKNOWN",
+            "metering": "INDIVIDUAL",
+            "advertised_amount_krw": null,
+            "user_confirmed": true,
+            "estimate_status": "AVAILABLE",
+            "reference_low_krw": 13750,
+            "reference_high_krw": 26590,
+            "reference_groups": [
+              {
+                "group": "주택종류 평균",
+                "category": "다세대/연립/기타",
+                "bill_krw": 23470,
+                "usage": 20.7
+              },
+              {
+                "group": "가구원 수 평균",
+                "category": "1명",
+                "bill_krw": 16050,
+                "usage": 13.8
+              },
+              {
+                "group": "면적 평균",
+                "category": "33㎡미만",
+                "bill_krw": 13750,
+                "usage": 11.6
+              },
+              {
+                "group": "도시가스 난방 가구 평균",
+                "category": "도시가스",
+                "bill_krw": 26590,
+                "usage": 23.7
+              }
+            ],
+            "hold_reason": null
+          },
+          {
+            "utility_type": "INTERNET",
+            "inclusion": "INCLUDED",
+            "billing_basis": "UNKNOWN",
+            "metering": "INDIVIDUAL",
+            "advertised_amount_krw": null,
+            "user_confirmed": true,
+            "estimate_status": "AVAILABLE",
+            "reference_low_krw": 17600,
+            "reference_high_krw": 30000,
+            "reference_groups": [
+              {
+                "group": "KT 공개 요금제 예시(약정·결합에 따라 다름)",
+                "category": "월 요금",
+                "bill_krw": 17600,
+                "usage": null
+              },
+              {
+                "group": "KT 공개 요금제 예시",
+                "category": "상위 속도",
+                "bill_krw": 30000,
+                "usage": null
+              }
+            ],
+            "hold_reason": null
+          }
+        ],
+        "separate_items": [],
+        "reference_comparison": [],
+        "decomposition": {
+          "enabled": false,
+          "status": "DISABLED",
+          "remainder_low_krw": null,
+          "remainder_high_krw": null,
+          "note": "총액에서 알려진 항목을 빼서 기타 금액을 만들지 않습니다. 실험용 계산은 experimental_remainder=true 일 때만 내부 확인용으로 제공합니다."
+        },
+        "missing_fields": [],
+        "reason_codes": [],
+        "warnings": [],
+        "input_warnings": [],
+        "confirmation_questions": [
+          "수도는 세대별 검침인가요, 건물 공동 계량을 나누는 방식인가요? 나누는 기준(인원·균등)이 무엇인가요?",
+          "전기는 사용량만큼 실비로 정산되나요, 정액인가요? 정액이면 월 몇 kWh 기준이고 초과분은 어떻게 하나요? 세대별 계량기가 있나요?",
+          "난방·온수가 개별 도시가스인가요, 중앙난방·지역난방인가요? 가스는 사용량대로 별도 청구인가요, 정액에 포함인가요?",
+          "인터넷은 어떤 통신사·속도 상품인가요? 건물 단체계약이고 별도 가입이 필요 없나요?"
+        ],
+        "assumptions": {
+          "usage_source": "KESIS 가구에너지패널조사 14차(2023) 서울 결과표",
+          "tariff_version": "2026-10-20 확인(한전 주택용 저압, 서울가스 2026.10.01, 아리수 가정용)",
+          "unverified_parameters": [
+            "CLIMATE_CHARGE",
+            "POWER_FUND_RATE",
+            "GAS_CALORIFIC_VALUE"
+          ],
+          "note": "2023년 사용량을 2026년 요율로 환산한 참고 금액이며 실제 청구액이 아닙니다. 표시한 폭은 서로 다른 집단 평균을 각각 환산한 값들의 최소~최대이며 정상 범위가 아닙니다."
+        },
+        "recent_reference": {
+          "month": 8,
+          "electricity": {
+            "source_id": "15119479",
+            "reference_period": "2025-08",
+            "group": "서울 주택용 계약전력 1~3kW",
+            "kwh_per_customer": 289.3,
+            "reported_won_per_customer": 46980,
+            "bill_at_tariff_2026_10": 44710,
+            "customers": 2862896,
+            "adjustment_applied": false,
+            "caveats": [
+              "고객(계량 단위) 평균이며 가구 분포 아님",
+              "판매수입은 부가세·기금 포함 여부 미확인이라 환산 요금과 직접 비교하지 않음",
+              "빈 집·공용 계량 포함 가능",
+              "단위는 데이터 페이지에 표시 없음(값 크기로 kWh·원으로 해석)"
+            ]
+          },
+          "gas": {
+            "source_id": "15156658",
+            "reference_period": "2024-08",
+            "group": "서울 도시가스 수요가 평균",
+            "m3_per_household": 9.1,
+            "bill_at_tariff_2026_10": 11070,
+            "yoy_annual_change": -0.0603,
+            "annual_m3": {
+              "prev": 503.8,
+              "last": 473.4
+            },
+            "adjustment_applied": false,
+            "caveats": [
+              "2023 가구에너지패널 서울 평균(연 651N㎥)과 절대 수준이 달라 수준 비교·대체에 쓰지 않음(변화율·월별 모양만 참고)",
+              "취사 위주·대형 가구가 섞인 평균이라 소형 가구 값이 아님",
+              "열량 43MJ/N㎥ 가정으로 환산"
+            ]
+          },
+          "water": null,
+          "internet": null,
+          "notes": [
+            "판정이 아니라 참고 정보입니다. 기본 추정값은 2023 조사 기준이며 최근 값으로 보정하지 않았습니다.",
+            "수도·인터넷은 최근 가구 단위 집계가 없어 기존 근거를 유지합니다."
+          ]
+        },
+        "errors": [],
+        "never": [
+          "총액-추정합계를 부당 청구액으로 해석하지 않음",
+          "참고 범위를 정상 범위로 해석하지 않음",
+          "개별 가구 실제 청구액 예측이 아님"
+        ]
+      },
+      "notice": "서울 비슷한 가구의 참고 추정값입니다. 실제 청구액·평균 청구액·정상 관리비가 아니며 기타 금액은 총액에서 역산하지 않습니다."
+    }
+  },
+  {
+    "scenario": "D. 10월 · 난방 방식 모름 (가스는 보류)",
+    "request": {
+      "target_month": 10,
+      "household_size": 1,
+      "area_m2": 20.0,
+      "heating_type": "모름",
+      "gas_user": "모름",
+      "metering": "INDIVIDUAL",
+      "acknowledge_reference_limits": true
+    },
+    "response": {
+      "version": "machine-preview-1",
+      "state": "CALCULATED",
+      "reasons": [],
+      "result": {
+        "schema_version": "maintenance.v1",
+        "request_id": "1511ce45-bab4-489b-b128-0c9870070861",
+        "calculation_version": "utility-v0.2",
+        "source_contract_version": "FIVE_ITEMS_V1",
+        "tariff_version": "2026-10-20 확인(한전 주택용 저압, 서울가스 2026.10.01, 아리수 가정용)",
+        "status": "REFERENCE_ONLY",
+        "status_reason": [],
+        "advertised": {
+          "maintenance_total_krw": 90000,
+          "total_source": "AD",
+          "mode": "불명",
+          "undisclosed": false,
+          "parse_incomplete": false,
+          "incomplete_reasons": [],
+          "parse_incomplete_unresolved": false,
+          "user_confirmed": true,
+          "conflicts": [],
+          "other_included": []
+        },
+        "items": {
+          "OTHER": {
+            "inclusion": "INCLUDED",
+            "advertised_amount_krw": null,
+            "amount_source": "NOT_PROVIDED",
+            "descriptions": [
+              "청소·공용관리 포함, 상세 금액 미기재"
+            ],
+            "legacy_components": [],
+            "note": "기타는 광고에 명시된 금액만 표시하며 총액에서 다른 항목을 빼서 만들지 않습니다."
+          },
+          "internet_availability": null
+        },
+        "conditions_used": {
+          "target_month": 10,
+          "household_size": 1,
+          "housing_type": "다세대·연립",
+          "area_band": "~33㎡",
+          "heating_type": "모름",
+          "gas_user": "모름"
+        },
+        "utility_estimates": [
+          {
+            "utility_type": "WATER",
+            "inclusion": "INCLUDED",
+            "billing_basis": "UNKNOWN",
+            "metering": "INDIVIDUAL",
+            "advertised_amount_krw": null,
+            "user_confirmed": true,
+            "estimate_status": "AVAILABLE",
+            "reference_low_krw": 10950,
+            "reference_high_krw": 10950,
+            "reference_groups": [
+              {
+                "group": "서울 세대원 수별 평균 사용량",
+                "category": "1명",
+                "bill_krw": 10950,
+                "usage": 8.0
+              }
+            ],
+            "hold_reason": null
+          },
+          {
+            "utility_type": "ELECTRICITY",
+            "inclusion": "INCLUDED",
+            "billing_basis": "UNKNOWN",
+            "metering": "INDIVIDUAL",
+            "advertised_amount_krw": null,
+            "user_confirmed": true,
+            "estimate_status": "AVAILABLE",
+            "reference_low_krw": 23930,
+            "reference_high_krw": 36970,
+            "reference_groups": [
+              {
+                "group": "주택종류 평균",
+                "category": "다세대/연립/기타",
+                "bill_krw": 36970,
+                "usage": 219.3
+              },
+              {
+                "group": "가구원 수 평균",
+                "category": "1명",
+                "bill_krw": 28100,
+                "usage": 179.3
+              },
+              {
+                "group": "면적 평균",
+                "category": "33㎡미만",
+                "bill_krw": 23930,
+                "usage": 151.7
+              }
+            ],
+            "hold_reason": null
+          },
+          {
+            "utility_type": "GAS",
+            "inclusion": "INCLUDED",
+            "billing_basis": "UNKNOWN",
+            "metering": "INDIVIDUAL",
+            "advertised_amount_krw": null,
+            "user_confirmed": true,
+            "estimate_status": "HOLD",
+            "reference_low_krw": null,
+            "reference_high_krw": null,
+            "reference_groups": [],
+            "hold_reason": "가스 사용 여부·난방 방식(개별 도시가스)이 확인되지 않아 참고 비용을 내지 않습니다."
+          },
+          {
+            "utility_type": "INTERNET",
+            "inclusion": "INCLUDED",
+            "billing_basis": "UNKNOWN",
+            "metering": "INDIVIDUAL",
+            "advertised_amount_krw": null,
+            "user_confirmed": true,
+            "estimate_status": "AVAILABLE",
+            "reference_low_krw": 17600,
+            "reference_high_krw": 30000,
+            "reference_groups": [
+              {
+                "group": "KT 공개 요금제 예시(약정·결합에 따라 다름)",
+                "category": "월 요금",
+                "bill_krw": 17600,
+                "usage": null
+              },
+              {
+                "group": "KT 공개 요금제 예시",
+                "category": "상위 속도",
+                "bill_krw": 30000,
+                "usage": null
+              }
+            ],
+            "hold_reason": null
+          }
+        ],
+        "separate_items": [],
+        "reference_comparison": [],
+        "decomposition": {
+          "enabled": false,
+          "status": "DISABLED",
+          "remainder_low_krw": null,
+          "remainder_high_krw": null,
+          "note": "총액에서 알려진 항목을 빼서 기타 금액을 만들지 않습니다. 실험용 계산은 experimental_remainder=true 일 때만 내부 확인용으로 제공합니다."
+        },
+        "missing_fields": [
+          "heating_type"
+        ],
+        "reason_codes": [],
+        "warnings": [],
+        "input_warnings": [],
+        "confirmation_questions": [
+          "난방·온수가 개별 도시가스인가요, 중앙·지역난방인가요? 가스를 실제로 사용하나요?",
+          "수도는 세대별 검침인가요, 건물 공동 계량을 나누는 방식인가요? 나누는 기준(인원·균등)이 무엇인가요?",
+          "전기는 사용량만큼 실비로 정산되나요, 정액인가요? 정액이면 월 몇 kWh 기준이고 초과분은 어떻게 하나요? 세대별 계량기가 있나요?",
+          "난방·온수가 개별 도시가스인가요, 중앙난방·지역난방인가요? 가스는 사용량대로 별도 청구인가요, 정액에 포함인가요?",
+          "인터넷은 어떤 통신사·속도 상품인가요? 건물 단체계약이고 별도 가입이 필요 없나요?"
+        ],
+        "assumptions": {
+          "usage_source": "KESIS 가구에너지패널조사 14차(2023) 서울 결과표",
+          "tariff_version": "2026-10-20 확인(한전 주택용 저압, 서울가스 2026.10.01, 아리수 가정용)",
+          "unverified_parameters": [
+            "CLIMATE_CHARGE",
+            "POWER_FUND_RATE",
+            "GAS_CALORIFIC_VALUE"
+          ],
+          "note": "2023년 사용량을 2026년 요율로 환산한 참고 금액이며 실제 청구액이 아닙니다. 표시한 폭은 서로 다른 집단 평균을 각각 환산한 값들의 최소~최대이며 정상 범위가 아닙니다."
+        },
+        "recent_reference": {
+          "month": 10,
+          "electricity": {
+            "source_id": "15119479",
+            "reference_period": "2025-10",
+            "group": "서울 주택용 계약전력 1~3kW",
+            "kwh_per_customer": 171.2,
+            "reported_won_per_customer": 25302,
+            "bill_at_tariff_2026_10": 26880,
+            "customers": 2862471,
+            "adjustment_applied": false,
+            "caveats": [
+              "고객(계량 단위) 평균이며 가구 분포 아님",
+              "판매수입은 부가세·기금 포함 여부 미확인이라 환산 요금과 직접 비교하지 않음",
+              "빈 집·공용 계량 포함 가능",
+              "단위는 데이터 페이지에 표시 없음(값 크기로 kWh·원으로 해석)"
+            ]
+          },
+          "gas": {
+            "source_id": "15156658",
+            "reference_period": "2024-10",
+            "group": "서울 도시가스 수요가 평균",
+            "m3_per_household": 14.2,
+            "bill_at_tariff_2026_10": 16510,
+            "yoy_annual_change": -0.0603,
+            "annual_m3": {
+              "prev": 503.8,
+              "last": 473.4
+            },
+            "adjustment_applied": false,
+            "caveats": [
+              "2023 가구에너지패널 서울 평균(연 651N㎥)과 절대 수준이 달라 수준 비교·대체에 쓰지 않음(변화율·월별 모양만 참고)",
+              "취사 위주·대형 가구가 섞인 평균이라 소형 가구 값이 아님",
+              "열량 43MJ/N㎥ 가정으로 환산"
+            ]
+          },
+          "water": null,
+          "internet": null,
+          "notes": [
+            "판정이 아니라 참고 정보입니다. 기본 추정값은 2023 조사 기준이며 최근 값으로 보정하지 않았습니다.",
+            "수도·인터넷은 최근 가구 단위 집계가 없어 기존 근거를 유지합니다."
+          ]
+        },
+        "errors": [],
+        "never": [
+          "총액-추정합계를 부당 청구액으로 해석하지 않음",
+          "참고 범위를 정상 범위로 해석하지 않음",
+          "개별 가구 실제 청구액 예측이 아님"
+        ]
+      },
+      "notice": "서울 비슷한 가구의 참고 추정값입니다. 실제 청구액·평균 청구액·정상 관리비가 아니며 기타 금액은 총액에서 역산하지 않습니다."
+    }
+  },
+  {
+    "scenario": "E. 10월 · 2인 가구",
+    "request": {
+      "target_month": 10,
+      "household_size": 2,
+      "area_m2": 20.0,
+      "heating_type": "개별 도시가스",
+      "gas_user": "예",
+      "metering": "INDIVIDUAL",
+      "acknowledge_reference_limits": true
+    },
+    "response": {
+      "version": "machine-preview-1",
+      "state": "CALCULATED",
+      "reasons": [],
+      "result": {
+        "schema_version": "maintenance.v1",
+        "request_id": "1511ce45-bab4-489b-b128-0c9870070861",
+        "calculation_version": "utility-v0.2",
+        "source_contract_version": "FIVE_ITEMS_V1",
+        "tariff_version": "2026-10-20 확인(한전 주택용 저압, 서울가스 2026.10.01, 아리수 가정용)",
+        "status": "REFERENCE_ONLY",
+        "status_reason": [],
+        "advertised": {
+          "maintenance_total_krw": 90000,
+          "total_source": "AD",
+          "mode": "불명",
+          "undisclosed": false,
+          "parse_incomplete": false,
+          "incomplete_reasons": [],
+          "parse_incomplete_unresolved": false,
+          "user_confirmed": true,
+          "conflicts": [],
+          "other_included": []
+        },
+        "items": {
+          "OTHER": {
+            "inclusion": "INCLUDED",
+            "advertised_amount_krw": null,
+            "amount_source": "NOT_PROVIDED",
+            "descriptions": [
+              "청소·공용관리 포함, 상세 금액 미기재"
+            ],
+            "legacy_components": [],
+            "note": "기타는 광고에 명시된 금액만 표시하며 총액에서 다른 항목을 빼서 만들지 않습니다."
+          },
+          "internet_availability": null
+        },
+        "conditions_used": {
+          "target_month": 10,
+          "household_size": 2,
+          "housing_type": "다세대·연립",
+          "area_band": "~33㎡",
+          "heating_type": "개별 도시가스",
+          "gas_user": "예"
+        },
+        "utility_estimates": [
+          {
+            "utility_type": "WATER",
+            "inclusion": "INCLUDED",
+            "billing_basis": "UNKNOWN",
+            "metering": "INDIVIDUAL",
+            "advertised_amount_krw": null,
+            "user_confirmed": true,
+            "estimate_status": "AVAILABLE",
+            "reference_low_krw": 17340,
+            "reference_high_krw": 17340,
+            "reference_groups": [
+              {
+                "group": "서울 세대원 수별 평균 사용량",
+                "category": "2명",
+                "bill_krw": 17340,
+                "usage": 13.2
+              }
+            ],
+            "hold_reason": null
+          },
+          {
+            "utility_type": "ELECTRICITY",
+            "inclusion": "INCLUDED",
+            "billing_basis": "UNKNOWN",
+            "metering": "INDIVIDUAL",
+            "advertised_amount_krw": null,
+            "user_confirmed": true,
+            "estimate_status": "AVAILABLE",
+            "reference_low_krw": 23930,
+            "reference_high_krw": 36970,
+            "reference_groups": [
+              {
+                "group": "주택종류 평균",
+                "category": "다세대/연립/기타",
+                "bill_krw": 36970,
+                "usage": 219.3
+              },
+              {
+                "group": "가구원 수 평균",
+                "category": "2명",
+                "bill_krw": 35160,
+                "usage": 212.2
+              },
+              {
+                "group": "면적 평균",
+                "category": "33㎡미만",
+                "bill_krw": 23930,
+                "usage": 151.7
+              }
+            ],
+            "hold_reason": null
+          },
+          {
+            "utility_type": "GAS",
+            "inclusion": "INCLUDED",
+            "billing_basis": "UNKNOWN",
+            "metering": "INDIVIDUAL",
+            "advertised_amount_krw": null,
+            "user_confirmed": true,
+            "estimate_status": "AVAILABLE",
+            "reference_low_krw": 19500,
+            "reference_high_krw": 38310,
+            "reference_groups": [
+              {
+                "group": "주택종류 평균",
+                "category": "다세대/연립/기타",
+                "bill_krw": 33740,
+                "usage": 30.4
+              },
+              {
+                "group": "가구원 수 평균",
+                "category": "2명",
+                "bill_krw": 33030,
+                "usage": 29.7
+              },
+              {
+                "group": "면적 평균",
+                "category": "33㎡미만",
+                "bill_krw": 19500,
+                "usage": 17.0
+              },
+              {
+                "group": "도시가스 난방 가구 평균",
+                "category": "도시가스",
+                "bill_krw": 38310,
+                "usage": 34.7
+              }
+            ],
+            "hold_reason": null
+          },
+          {
+            "utility_type": "INTERNET",
+            "inclusion": "INCLUDED",
+            "billing_basis": "UNKNOWN",
+            "metering": "INDIVIDUAL",
+            "advertised_amount_krw": null,
+            "user_confirmed": true,
+            "estimate_status": "AVAILABLE",
+            "reference_low_krw": 17600,
+            "reference_high_krw": 30000,
+            "reference_groups": [
+              {
+                "group": "KT 공개 요금제 예시(약정·결합에 따라 다름)",
+                "category": "월 요금",
+                "bill_krw": 17600,
+                "usage": null
+              },
+              {
+                "group": "KT 공개 요금제 예시",
+                "category": "상위 속도",
+                "bill_krw": 30000,
+                "usage": null
+              }
+            ],
+            "hold_reason": null
+          }
+        ],
+        "separate_items": [],
+        "reference_comparison": [],
+        "decomposition": {
+          "enabled": false,
+          "status": "DISABLED",
+          "remainder_low_krw": null,
+          "remainder_high_krw": null,
+          "note": "총액에서 알려진 항목을 빼서 기타 금액을 만들지 않습니다. 실험용 계산은 experimental_remainder=true 일 때만 내부 확인용으로 제공합니다."
+        },
+        "missing_fields": [],
+        "reason_codes": [],
+        "warnings": [],
+        "input_warnings": [],
+        "confirmation_questions": [
+          "수도는 세대별 검침인가요, 건물 공동 계량을 나누는 방식인가요? 나누는 기준(인원·균등)이 무엇인가요?",
+          "전기는 사용량만큼 실비로 정산되나요, 정액인가요? 정액이면 월 몇 kWh 기준이고 초과분은 어떻게 하나요? 세대별 계량기가 있나요?",
+          "난방·온수가 개별 도시가스인가요, 중앙난방·지역난방인가요? 가스는 사용량대로 별도 청구인가요, 정액에 포함인가요?",
+          "인터넷은 어떤 통신사·속도 상품인가요? 건물 단체계약이고 별도 가입이 필요 없나요?"
+        ],
+        "assumptions": {
+          "usage_source": "KESIS 가구에너지패널조사 14차(2023) 서울 결과표",
+          "tariff_version": "2026-10-20 확인(한전 주택용 저압, 서울가스 2026.10.01, 아리수 가정용)",
+          "unverified_parameters": [
+            "CLIMATE_CHARGE",
+            "POWER_FUND_RATE",
+            "GAS_CALORIFIC_VALUE"
+          ],
+          "note": "2023년 사용량을 2026년 요율로 환산한 참고 금액이며 실제 청구액이 아닙니다. 표시한 폭은 서로 다른 집단 평균을 각각 환산한 값들의 최소~최대이며 정상 범위가 아닙니다."
+        },
+        "recent_reference": {
+          "month": 10,
+          "electricity": {
+            "source_id": "15119479",
+            "reference_period": "2025-10",
+            "group": "서울 주택용 계약전력 1~3kW",
+            "kwh_per_customer": 171.2,
+            "reported_won_per_customer": 25302,
+            "bill_at_tariff_2026_10": 26880,
+            "customers": 2862471,
+            "adjustment_applied": false,
+            "caveats": [
+              "고객(계량 단위) 평균이며 가구 분포 아님",
+              "판매수입은 부가세·기금 포함 여부 미확인이라 환산 요금과 직접 비교하지 않음",
+              "빈 집·공용 계량 포함 가능",
+              "단위는 데이터 페이지에 표시 없음(값 크기로 kWh·원으로 해석)"
+            ]
+          },
+          "gas": {
+            "source_id": "15156658",
+            "reference_period": "2024-10",
+            "group": "서울 도시가스 수요가 평균",
+            "m3_per_household": 14.2,
+            "bill_at_tariff_2026_10": 16510,
+            "yoy_annual_change": -0.0603,
+            "annual_m3": {
+              "prev": 503.8,
+              "last": 473.4
+            },
+            "adjustment_applied": false,
+            "caveats": [
+              "2023 가구에너지패널 서울 평균(연 651N㎥)과 절대 수준이 달라 수준 비교·대체에 쓰지 않음(변화율·월별 모양만 참고)",
+              "취사 위주·대형 가구가 섞인 평균이라 소형 가구 값이 아님",
+              "열량 43MJ/N㎥ 가정으로 환산"
+            ]
+          },
+          "water": null,
+          "internet": null,
+          "notes": [
+            "판정이 아니라 참고 정보입니다. 기본 추정값은 2023 조사 기준이며 최근 값으로 보정하지 않았습니다.",
+            "수도·인터넷은 최근 가구 단위 집계가 없어 기존 근거를 유지합니다."
+          ]
+        },
+        "errors": [],
+        "never": [
+          "총액-추정합계를 부당 청구액으로 해석하지 않음",
+          "참고 범위를 정상 범위로 해석하지 않음",
+          "개별 가구 실제 청구액 예측이 아님"
+        ]
+      },
+      "notice": "서울 비슷한 가구의 참고 추정값입니다. 실제 청구액·평균 청구액·정상 관리비가 아니며 기타 금액은 총액에서 역산하지 않습니다."
+    }
+  }
+]

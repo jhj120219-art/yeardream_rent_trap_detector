@@ -29,3 +29,19 @@
 !machine/integration_kit_v1.1/
 !machine/integration_kit_v1.1/image_extraction_example.json
 !machine/integration_kit_v1.1/image_prompt_ko.md
+
+# 머신 관리비 참고 비용 미리보기(MACHINE_MAINTENANCE_PREVIEW=true)에 필요한 실행 코드, 공개 요금표·요약 자료, 서울 집계표(energy_reference_2023.csv).
+# 다른 파일을 쓰려면 ENERGY_REFERENCE_CSV 환경변수로 마운트한 경로를 가리킨다.
+!machine/analysis_internal/utility/
+!machine/analysis_internal/utility/*.py
+!machine/analysis_internal/utility/tariff_data/
+!machine/analysis_internal/utility/tariff_data/*.json
+!machine/analysis_internal/utility/recent_data/
+!machine/analysis_internal/utility/recent_data/*.json
+!machine/analysis_internal/utility/reference_data/
+!machine/analysis_internal/utility/reference_data/energy_reference_2023.csv
+!machine/analysis_internal/utility/demo/
+!machine/analysis_internal/utility/demo/app.py
+!machine/analysis_internal/extraction/
+!machine/analysis_internal/extraction/parse_ad_text.py
+!machine/analysis_internal/extraction/parse_detail.py

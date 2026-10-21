@@ -20,6 +20,8 @@ from .input_review import listing_draft
 from .request_diagnostics import RequestDiagnostics
 from .utility_estimate import UtilityScenario, estimate as estimate_utilities, catalog as utility_catalog
 from .service_identity import SERVICE_NAME, public_identity
+from .machine_reference import ReferenceScenario, ReferenceUnavailable, calculate as calculate_reference
+from .machine_maintenance import MachineScenario, MachineUnavailable, preview as machine_preview, report_references
 
 
 def create_app(settings=None, pool=None, extractor=None):
@@ -80,7 +82,7 @@ def create_app(settings=None, pool=None, extractor=None):
                 request.headers.get('X-Team-Key', '').encode('utf-8'), team_key.encode('ascii')):
             return JSONResponse(status_code=401, content={'detail':'팀 접속키가 필요합니다.'}, headers={'Cache-Control':'no-store'})
         if not settings.maintenance_enabled and any(part in request.url.path.split('/') for part in
-                ('maintenance', 'maintenance-evidence', 'utilities', 'utility-estimates')):
+                ('maintenance', 'maintenance-evidence', 'utilities', 'utility-estimates', 'maintenance-reference', 'maintenance-references')):
             return JSONResponse(status_code=503, content={'detail':'관리비·공과금 기능은 자료 검증 중으로 보류합니다.'})
         # chunked 업로드도 제한한다. 내부 상세 예외나 API 키를 응답으로 보내지 않는다.
         size=0
@@ -125,6 +127,8 @@ def create_app(settings=None, pool=None, extractor=None):
             "comparable_transactions_available": False,
             "search_scope": "DONG_THEN_RELAXED_THEN_DISTRICT",
             "maintenance_enabled": settings.maintenance_enabled,
+            "machine_maintenance_enabled": settings.machine_maintenance_enabled,
+            "machine_maintenance_preview": settings.machine_preview_enabled,
             "advertised_costs_input_supported": True,
             "advertised_cost_categories": ["ELECTRICITY","WATER","GAS","INTERNET","OTHER"],
             "advertised_cost_category_version": "FIVE_ITEMS_V1",
@@ -213,17 +217,59 @@ def create_app(settings=None, pool=None, extractor=None):
         analyses=app.state.store.children(listing_id,sid,'analysis',limit=1)['items']
         evidence=app.state.store.children(listing_id,sid,'maintenance_evidence',evidence_limit,evidence_offset)
         estimates=app.state.store.children(listing_id,sid,'utility_estimate',limit=1)['items']
-        report=build_report(obj,analyses[0] if analyses else None,evidence,app.state.data_status)
+        refs=report_references(obj,listing_id) if settings.machine_preview_enabled and settings.maintenance_enabled else None
+        report=build_report(obj,analyses[0] if analyses else None,evidence,app.state.data_status,refs)
         stored_maintenance=app.state.store.maintenance(listing_id,sid)
         if stored_maintenance is not None:
             report['advertised_costs']=stored_maintenance
         report['utility_estimate']=estimates[0] if estimates else None
+        reference_rows=app.state.store.children(listing_id,sid,'machine_reference',limit=1)['items']
+        report['machine_maintenance_reference']=reference_rows[0] if reference_rows else None
+        if reference_rows and settings.maintenance_enabled and settings.machine_maintenance_enabled:
+            report['maintenance_reference_groups']=reference_rows[0]['groups']
         if not settings.maintenance_enabled:
-            for field in ('maintenance', 'utility_costs', 'monthly_cost', 'utility_estimate'):
+            for field in ('maintenance', 'utility_costs', 'monthly_cost', 'utility_estimate', 'machine_maintenance_reference'):
                 report[field]={'state':'ON_HOLD'}
             report['workflow']['next_actions']=[action for action in report['workflow']['next_actions'] if 'MAINTENANCE' not in action]
             report['workflow']['notice']='광고 관리비·포함 항목은 advertised_costs에서 확인할 수 있습니다. 관리비·공과금 비교와 예상 비용 계산은 자료 검증 중으로 보류합니다.'
         return report
+
+    @app.post('/listings/{listing_id}/maintenance-references',status_code=201)
+    def create_machine_reference(listing_id: str, body: ReferenceScenario, sid=Depends(owner),key=Depends(retry_key)):
+        obj=find(listing_id,sid,'listing')
+        if not settings.machine_maintenance_enabled:
+            raise HTTPException(503,'분석가 관리비 참고값 연결이 활성화되지 않았습니다.')
+        raw=obj['input']
+        if not raw['confirmation']['user_confirmed'] or not obj['validation']['ok'] or not body.acknowledge_reference_limits:
+            raise HTTPException(422,'매물 입력 확인과 참고값의 한계 확인이 필요합니다.')
+        if raw.get('options',{}).get('maintenance_input_mode') != 'CHECKBOX_TOTAL_V1':
+            raise HTTPException(422,'5항목 체크박스와 총액 입력을 확인해 주세요.')
+        if not str(raw['listing'].get('district_code','')).startswith('11'):
+            raise HTTPException(422,'서울 지역의 참고값만 지원합니다.')
+        request=request_identity('POST /listings/'+listing_id+'/maintenance-references',key,body.model_dump(mode='json'))
+        replayed=app.state.store.replay(sid,'machine_reference',request)
+        if replayed is not None:
+            return replayed
+        try:
+            value=calculate_reference(obj,body,settings.maintenance_machine_root)
+        except ReferenceUnavailable:
+            raise HTTPException(503,'관리비 분석 코드·기준자료·입출력 계약을 확인해야 합니다.') from None
+        return app.state.store.create(sid,'machine_reference',value,parent=listing_id,request=request)
+
+    @app.get('/maintenance-references/{reference_id}')
+    def get_machine_reference(reference_id: str,sid=Depends(owner)):
+        return find(reference_id,sid,'machine_reference')
+
+    @app.post('/listings/{listing_id}/maintenance-reference')
+    def maintenance_reference(listing_id: str, body: MachineScenario, sid=Depends(owner)):
+        """Team preview endpoint, distinct from persisted maintenance-references."""
+        if not settings.machine_preview_enabled:
+            raise HTTPException(404,'머신 관리비 미리보기는 꺼져 있습니다.')
+        obj=find(listing_id,sid,'listing')
+        try:
+            return machine_preview(obj,body,listing_id)
+        except MachineUnavailable:
+            raise HTTPException(503,'관리비 분석 코드·기준자료를 확인해야 합니다.') from None
 
     @app.delete('/listings/{listing_id}',status_code=204)
     def delete_listing(listing_id: str,sid=Depends(owner)):
