@@ -1,0 +1,69 @@
+{
+  "synthetic_contract_check_only": true,
+  "actual_bill_accuracy_not_tested": true,
+  "selected": {
+    "items": [
+      {
+        "item": "WATER",
+        "selected": true,
+        "reference_state": "AVAILABLE",
+        "reference_low_krw": 10950,
+        "reference_high_krw": 10950,
+        "source": "분석가 utility 참고값: 에너지패널·수도요금·인터넷 참고범위 등 항목별 조건은 저장 result 확인, 개별 청구액 예측 아님"
+      },
+      {
+        "item": "INTERNET",
+        "selected": true,
+        "reference_state": "AVAILABLE",
+        "reference_low_krw": 17600,
+        "reference_high_krw": 30000,
+        "source": "분석가 utility 참고값: 에너지패널·수도요금·인터넷 참고범위 등 항목별 조건은 저장 result 확인, 개별 청구액 예측 아님"
+      },
+      {
+        "item": "OTHER",
+        "selected": true,
+        "reference_state": "NO_REFERENCE",
+        "reference_low_krw": null,
+        "reference_high_krw": null,
+        "source": null
+      }
+    ],
+    "state": "INCOMPLETE",
+    "missing_items": [
+      "OTHER"
+    ],
+    "reference_low_total_krw": null,
+    "reference_high_total_krw": null
+  },
+  "unselected": {
+    "items": [
+      {
+        "item": "ELECTRICITY",
+        "selected": false,
+        "reference_state": "NO_REFERENCE",
+        "reference_low_krw": null,
+        "reference_high_krw": null,
+        "source": null
+      },
+      {
+        "item": "GAS",
+        "selected": false,
+        "reference_state": "NO_REFERENCE",
+        "reference_low_krw": null,
+        "reference_high_krw": null,
+        "source": null
+      }
+    ],
+    "state": "INCOMPLETE",
+    "missing_items": [
+      "ELECTRICITY",
+      "GAS"
+    ],
+    "reference_low_total_krw": null,
+    "reference_high_total_krw": null
+  },
+  "analyst_returned_types": [
+    "WATER",
+    "INTERNET"
+  ]
+}
