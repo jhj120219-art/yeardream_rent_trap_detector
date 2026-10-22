@@ -1,5 +1,7 @@
 # 프론트 OCR 연결 검토·집 적용 — 2026-10-22
 
+> **10/23 실제 화면 후속 검증:** 프론트 검토본을 실제 Edge와 집 공개 API에 연결해 직접 입력 COMPARED·실제 두 엔진 OCR 입력 REFERENCE_ONLY·0원·원본 연결·확인·저장·표시를 확인했습니다. 전체 backend 274개·프론트 단위 28개·브라우저 5종 통과. [오늘 기능 체크리스트와 미완료 범위](DEBUG_CHECKLIST_20261023.md).
+
 ## 검토 대상과 범위
 
 팀 main ec2811f, 프론트 브랜치 feat/frontend-prototype-ocr의 e73ccf6을 비교했다. 프론트 담당의 config.py / main.py / local_ocr.py와 테스트를 검토해 backend만 통합·보완했다. 프론트·machine·최상위 파일과 샘플 clean_rent_data.csv는 수정·반영하지 않았다. 특히 브랜치의 3행짜리 샘플 CSV로 실제 집 데이터를 교체하지 않았다.
