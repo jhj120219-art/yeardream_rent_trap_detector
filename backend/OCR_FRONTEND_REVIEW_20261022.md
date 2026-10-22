@@ -35,3 +35,13 @@
 - 관리비 계산 활성화 정책은 이번 OCR 작업과 별개로 유지한다. 실제 3건 비교·방식 선택 완료로 보고하지 않는다.
 
 프론트 전달 초안: “OCR backend 변경을 검토하고 집 실행 환경·카드 선택·누락값 초안 처리를 보완했습니다. 현재 분석 main은 다방 목록을 지원합니다. 실제 두 엔진의 합성 이미지 검증과 API 경계 시험 결과를 확인했습니다. 새 서버 주소와 별도 접속키로 실제 캡처→선택→보완→저장→월세 결과를 확인해 주세요. 이미지에 면적/관리비 등이 없어 0개가 나오는 문제는 분석 파서 보완이 필요하며, backend가 값을 추측해 채우지는 않습니다.”
+
+## 최종 실행 결과
+
+- 최신 팀 main과 backend 전용 검토 브랜치: 전체 **274 passed**, 경고 1개. 실제 기준 CSV·SQLite·격리 MySQL 사용. 부분 초안 저장·소유자 격리·확인 전 차단·선택 재시도·DB 재조회 포함.
+- 프론트 브랜치 단위 시험: **28 passed**. 실제 사용자 화면 전체 검증과 구분.
+- 집 실제 HTTPS: vision_configured=true, image_provider=LOCAL_OCR, local_ocr_runtime=CONFIGURED, local_ocr_sites=[dabang].
+- 실제 공개 /extractions에서 합성 이미지 처리→EXTRACTED_NEEDS_REVIEW 1건→카드 선택→확인 후 매물 저장→분석 호출→보고서 조회 통과(총 약 9.3초). 이 합성 입력의 월세 결과는 INPUT_REVIEW_REQUIRED였으며 가격 판정 성공이라고 과장하지 않는다.
+- 별도의 기존 공개 월세 스모크는 COMPARED·보고서·재시도·정상/차단 CORS 확인을 통과했다.
+- API·MySQL 환경 백업 후 기존 시작 방식으로 집에 적용했다. 모델·가상환경·비공개 설정은 Git 제외. LOCAL_OCR_PYTHON과 LOCAL_OCR_MACHINE_ROOT는 집 설정에만 지정했다. 현재 새 주소는 실행 정보 connection.json을 기준으로 공유한다.
+- 본인 시험 세션·하위 자료만 정리 후 sessions 4 / listing 4 / analysis 4 / request_receipt 8 / 관리비 총액 4행 / 기존 항목 28행 유지. 관리비 계산 보류·기존 키·SSH 설정은 유지했다.
