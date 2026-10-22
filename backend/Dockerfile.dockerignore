@@ -45,3 +45,4 @@
 !machine/analysis_internal/extraction/
 !machine/analysis_internal/extraction/parse_ad_text.py
 !machine/analysis_internal/extraction/parse_detail.py
+!machine/analysis_internal/extraction/consensus.py

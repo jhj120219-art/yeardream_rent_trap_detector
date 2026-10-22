@@ -20,6 +20,7 @@ from .input_review import listing_draft
 from .request_diagnostics import RequestDiagnostics
 from .utility_estimate import UtilityScenario, estimate as estimate_utilities, catalog as utility_catalog
 from .service_identity import SERVICE_NAME, public_identity
+from .card_consensus import CardConsensusSaveRequest, extraction_result as consensus_extraction_result, CardConsensusRequest, ConsensusUnavailable, run as run_card_consensus
 from .machine_reference import ReferenceScenario, ReferenceUnavailable, calculate as calculate_reference
 from .machine_maintenance import MachineScenario, MachineUnavailable, preview as machine_preview, report_references
 
@@ -270,6 +271,29 @@ def create_app(settings=None, pool=None, extractor=None):
             return machine_preview(obj,body,listing_id)
         except MachineUnavailable:
             raise HTTPException(503,'관리비 분석 코드·기준자료를 확인해야 합니다.') from None
+
+    @app.post('/extraction/card-consensus')
+    def card_consensus(body: CardConsensusRequest, sid=Depends(owner)):
+        """Stateless: engine reads in, agreed values out. Single-engine values are never auto-filled."""
+        try:
+            return run_card_consensus(body)
+        except ConsensusUnavailable:
+            raise HTTPException(503,'이미지 추출 합의 모듈을 불러오지 못했습니다.') from None
+
+    @app.post('/extractions/card-consensus', status_code=201)
+    def save_card_consensus(body: CardConsensusSaveRequest, sid=Depends(owner)):
+        try:
+            result = run_card_consensus(body)
+        except ConsensusUnavailable:
+            raise HTTPException(503, '이미지 추출 합의 모듈을 불러오지 못했습니다.') from None
+        if body.card_index >= len(result['cards']):
+            raise HTTPException(422, '선택한 카드 번호가 결과 범위를 벗어났습니다.')
+        card = result['cards'][body.card_index]
+        if card['status'] != 'extracted':
+            raise HTTPException(409, '합의되지 않은 카드는 자동입력 후보로 저장할 수 없습니다. 직접 확인해 입력하세요.')
+        if card['fields']['contract_type']['value'] != '월세':
+            raise HTTPException(422, '현재 분석 연결은 월세 매물만 지원합니다.')
+        return app.state.store.create(sid, 'extraction', {'result': consensus_extraction_result(card)})
 
     @app.delete('/listings/{listing_id}',status_code=204)
     def delete_listing(listing_id: str,sid=Depends(owner)):
