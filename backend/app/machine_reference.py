@@ -62,14 +62,18 @@ def calculate(listing, scenario, root):
                               'area_m2': loc.get('area_m2') if loc.get('area_basis') == 'EXCLUSIVE' else None,
                               'heating_type': scenario.heating_type, 'gas_user': scenario.gas_user}}
     result = run_worker(payload, root)
+    extension = result.pop('_backend_reference_extension', None)
+    rows = extension['items'] if isinstance(extension, dict) and 'items' in extension else result.get('utility_estimates', [])
     references = {}
-    for row in result.get('utility_estimates', []):
+    for row in rows:
         if row.get('utility_type') in ('WATER', 'ELECTRICITY', 'GAS', 'INTERNET') and row.get('estimate_status') == 'AVAILABLE':
             references[row['utility_type']] = {'low_krw': row.get('reference_low_krw'),
                                               'high_krw': row.get('reference_high_krw'), 'source': SOURCE}
     return {'listing_id': listing['id'], 'scenario': scenario.model_dump(), 'result': result,
+            'reference_extension': extension,
             'groups': grouped_references(options, True, references),
             'provenance': {'geographic_scope': 'SEOUL_CITY', 'statistics_year': 2023,
+                           'representative_method': 'RANGE_MIDPOINT',
                            'calculation_version': result.get('calculation_version'),
                            'tariff_version': result.get('tariff_version'), 'money_unit': 'KRW',
                            'notice': '서울 유사 가구의 참고값입니다. 실제 3건 비교·방식 선택은 미검증이며 정상 관리비나 실제 고지서 예측이 아닙니다.'}}
@@ -83,6 +87,9 @@ def worker_main(root):
         with contextlib.redirect_stdout(io.StringIO()):
             from machine.analysis_internal.utility.integration import run_maintenance
             result = run_maintenance(payload)
+            if not result.get('errors'):
+                from backend.app.analyst_reference_bridge import all_utility_references
+                result['_backend_reference_extension'] = all_utility_references(result)
         print(json.dumps(result, ensure_ascii=True, allow_nan=False))
         return 0
     except Exception:

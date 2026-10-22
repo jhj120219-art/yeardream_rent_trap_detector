@@ -7,9 +7,9 @@ from .report_money import advertised_money
 def grouped_references(options, confirmed, references=None):
     """references is server-side analyst output, not client-supplied option values.
 
-    Its mapping contract is provisional until agreed with the analyst. Each row
-    needs low/high KRW and source; no midpoint, OTHER remainder or bills invented.
-    Current report calls this with no references until the analyst is connected.
+    Each row needs low/high KRW and source. The meeting-approved representative
+    is their arithmetic midpoint, not the median of an underlying distribution.
+    OTHER is never inferred from an advertised total.
     """
     if options.get('maintenance_input_mode') != 'CHECKBOX_TOTAL_V1':
         return {'state': 'LEGACY_INPUT_REVIEW_REQUIRED', 'selected': None,
@@ -19,7 +19,8 @@ def grouped_references(options, confirmed, references=None):
     for item, (field, _) in ITEMS.items():
         selected = options.get(field) == 'INCLUDED'
         row = {'item': item, 'selected': selected, 'reference_state': 'NO_REFERENCE',
-               'reference_low_krw': None, 'reference_high_krw': None, 'source': None}
+               'reference_low_krw': None, 'reference_high_krw': None,
+               'reference_midpoint_krw': None, 'source': None}
         ref = refs.get(item)
         if confirmed and isinstance(ref, dict) and ref.get('source'):
             try:
@@ -31,7 +32,8 @@ def grouped_references(options, confirmed, references=None):
                 if low != low.to_integral_value() or high != high.to_integral_value():
                     raise ValueError('KRW must be integer')
                 row.update(reference_state='AVAILABLE', reference_low_krw=int(low),
-                           reference_high_krw=int(high), source=ref['source'])
+                           reference_high_krw=int(high), reference_midpoint_krw=float((low+high)/2),
+                           source=ref['source'])
             except (KeyError, ValueError, InvalidOperation):
                 pass
         groups['selected' if selected else 'unselected'].append(row)
@@ -40,6 +42,8 @@ def grouped_references(options, confirmed, references=None):
               'state': 'REFERENCE_NOT_CONNECTED' if confirmed else 'NEEDS_USER_CONFIRMATION',
               'advertised_selected_total_10k_krw': advertised_money(options.get('maintenance_10k_krw')),
               'selection_meaning': 'CHECKED_INCLUDED_UNCHECKED_NOT_CONFIRMED',
+              'representative_method': 'RANGE_MIDPOINT',
+              'representative_formula': '(reference_low_krw + reference_high_krw) / 2',
               'notice': '선택한 항목과 선택하지 않은 항목의 참고 비용을 나눕니다. 미체크는 별도 청구 확정이 아닙니다. 자료 없는 항목은 null이며 기타를 차액으로 만들지 않습니다.'}
     for name, rows in groups.items():
         missing = [r['item'] for r in rows if r['reference_state'] != 'AVAILABLE']
@@ -48,7 +52,8 @@ def grouped_references(options, confirmed, references=None):
                         ('NO_ITEMS_SELECTED' if not rows else 'INCOMPLETE'),
                         'missing_items': missing,
                         'reference_low_total_krw': sum(r['reference_low_krw'] for r in rows) if ready else None,
-                        'reference_high_total_krw': sum(r['reference_high_krw'] for r in rows) if ready else None}
+                        'reference_high_total_krw': sum(r['reference_high_krw'] for r in rows) if ready else None,
+                        'reference_midpoint_total_krw': sum(r['reference_midpoint_krw'] for r in rows) if ready else None}
     if confirmed and references:
         result['state'] = 'AVAILABLE' if all(r['reference_state'] == 'AVAILABLE'
                     for rows in groups.values() for r in rows) else 'PARTIAL_REFERENCE'

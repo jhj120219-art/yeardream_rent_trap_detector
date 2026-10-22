@@ -1,9 +1,9 @@
-<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>월세구멍 매장 작업 결과 · 10/22</title><style>body{font:18px/1.85 "Malgun Gothic",sans-serif;color:#172d42;background:#f3f6fa;margin:0}main{max-width:1000px;padding:30px;margin:auto}pre{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;background:white;padding:30px;border-radius:18px}a{color:#195dc2}</style><main><h1>월세구멍 · 매장 작업 결과</h1><p>2026-10-22 / 실제 확인과 미완료를 구분했습니다.</p><p>집 설정 ZIP은 매장 deliverables/home_finish_20261022에 별도로 준비했습니다. 개인별 공개키가 포함된 전달 파일은 Git에 올리지 않았습니다.</p><pre># 매장 PC 실제 작업 결과 — 2026-10-22
+<!doctype html><html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>월세구멍 매장 작업 결과 · 10/22</title><style>body{font:18px/1.85 "Malgun Gothic",sans-serif;color:#172d42;background:#f3f6fa;margin:0}main{max-width:1000px;padding:30px;margin:auto}pre{white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;background:white;padding:30px;border-radius:18px}a{color:#195dc2}</style><main><aside style="padding:24px;background:#fff2cc;color:#222;font:18px/1.7 sans-serif"><b>10/22 최신 정정</b>: 기준 CSV 확보 완료. 미체크 참고값과 (최소+최대)÷2 표시는 백엔드 로컬 검증 완료(243개 통과). 기타·조건 부족은 null. 아래는 과거 검토 기록을 포함하며 집 운영 적용은 별도입니다.</aside><h1>월세구멍 · 매장 작업 결과</h1><p>2026-10-22 / 실제 확인과 미완료를 구분했습니다.</p><p>집 설정 ZIP은 매장 deliverables/home_finish_20261022에 별도로 준비했습니다. 개인별 공개키가 포함된 전달 파일은 Git에 올리지 않았습니다.</p><pre># 매장 PC 실제 작업 결과 — 2026-10-22
 
 ## 완료
 
 - 개인 main 5d25d76, 팀 main 81a4acb를 fetch·비교 후 fast-forward로 pull. 개인 미추적 output/ 보존. 팀 PR #1 병합 커밋 27e86ad가 main에 존재함을 확인. 분석·프론트·최상위 파일은 직접 수정하지 않음.
-- 팀 main의 실제 에너지 기준 CSV 1,012행·8열 확인. 이제 CSV 미확보 상태가 아님. 열: table, sheet, region, category, item, unit, estimate, rse_pct.
+- 팀 main의 실제 에너지 기준 CSV 1,012행·8열 확인. 이제 과거 CSV 미확보(현재 확보 완료) 상태가 아님. 열: table, sheet, region, category, item, unit, estimate, rse_pct.
 - 매장 로컬 테스트 MySQL이 꺼져 있어 첫 시험은 DB 연결 실패. 기존 도구로 로컬 MySQL을 시작한 뒤 정상 조건에서 재실행: **226 passed, 4 warnings, 49.18초**. SQLite·격리 MySQL·팀 main 실제 CSV 사용. 기존 결과 수 재사용 아님.
 - 사용자 확인·소유자 격리·입력/조건/결과 저장·재시도·충돌·HTTP 프로세스 재시작 후 유지 등 현재 회귀 시험 실행. 실제 고지서 예측 정확도·프론트 화면 검증과 다름.
 - 매장 Tailscale Running, 집 DESKTOP-QTP7F26 Online 확인. 매장 전용 Ed25519 키 기존 파일과 공개 지문 확인. 개인키는 출력·전송·커밋하지 않음.
