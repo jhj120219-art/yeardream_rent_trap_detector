@@ -42,3 +42,16 @@
 검증 후 sessions 4 / listing 4 / analysis 4 / request_receipt 8 / 관리비 총액 4행 / 항목 28행(기존 7항목 매물 4건), 관리비 행 누락 0. 기존 운영 자료를 보존했다.
 
 API 주소·키·비밀 설정은 실행 정보 파일 기준으로 별도 전달하며 이 문서에 저장하지 않는다. 이번 확인 범위에서 추가 제품 코드 오류는 발견되지 않아 불필요한 코드 변경·운영 재시작은 하지 않았다. 합성 이미지·화면 캡처·로그·테스트 스크립트는 backend/data/debug_20261023 및 기존 OCR 검토 경로에 Git 제외로 보관한다.
+
+## PR main 병합 후 재확인 — 2026-10-23
+
+- PR #4 https://github.com/djmun2678/ai-wolse-trap-detector/pull/4 를 검토한 head f141fcf로 병합했다. 팀 main 병합 커밋은 8ec54ea32ccbd66f35c1fecdd9d98d4c63db211e이다. 변경 11개 파일 모두 backend/ 내부이며 frontend·machine·최상위 파일 변경은 없다. 원래 프론트 feature 브랜치 전체는 병합하지 않았다.
+- 이번 요청에서 전체 backend 시험을 다시 실행해 274 passed, 경고 1개(Starlette httpx 사용 중단 예고)를 확인했다. SQLite·격리 MySQL과 최신 팀 분석 코드를 사용했다.
+- 실제 Edge 검토 화면과 공개 집 API를 다시 연결했다. 직접 입력 COMPARED, 실제 두 OCR 엔진 입력 REFERENCE_ONLY, 원본 추출 연결·확인 후 저장·0원 보존·결과 조회 통과. 미처리 화면 오류 0건. 합성 입력으로 연결을 검증했으며 실제 사용자 이미지 정확도 시험은 아니다.
+- 공개 smoke 재실행: 인증·사용자 격리·CORS·월세 분석·저장 보고서·본인 시험 자료 정리 통과. health/ready/capabilities HTTP 200, data READY, LOCAL_OCR CONFIGURED.
+- 정리 후 DB: sessions 4 / listing 4 / analysis 4 / request_receipt 8 / 관리비 총액 4 / 기존 항목 28, 관리비 행 누락 0. 기존 자료 보존.
+- 집 실행 checkout의 변경된 app·tests 6개 파일은 병합된 팀 main과 내용이 같다(줄바꿈 제외). 이미 같은 코드로 실행 중이므로 불필요한 서버 재시작은 하지 않았다. 팀 로컬 main도 fast-forward 완료했다.
+- 집 sshd·Tailscale Running/Automatic 확인. 이것만으로 매장 PC에서 실제 SSH 로그인이 성공했다고 보고하지 않는다.
+- 남은 제한은 유지한다: 실제 3건 관리비 비교·방식 선택 미전달로 운영 계산 비활성화; 직방·부분 카드 검출은 machine 담당 변경 필요; 외부 주소 API와 게시된 프론트의 최종 배포·CSS는 별도 검증 필요. 이 작업은 backend만 수정하라는 범위 안에서 진행했다.
+
+프론트 전달 초안: “backend OCR 검토 PR #4를 팀 main에 병합했고 집 서버에도 같은 코드가 실행 중입니다. 현재 실행 정보의 주소와 별도 접속키로 연결 테스트 가능합니다. 다방 캡처→확인·보완→저장→월세 결과를 실제 화면에서 재검증했습니다. 관리비 운영 계산은 보류 상태이며, 직방/일부 정보 누락 이미지의 카드 검출은 분석 담당 보완이 필요합니다.” 직접 발송하지 않았다.
