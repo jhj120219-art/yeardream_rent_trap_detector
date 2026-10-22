@@ -76,7 +76,7 @@ def calculate(listing, scenario, root):
                            'representative_method': 'RANGE_MIDPOINT',
                            'calculation_version': result.get('calculation_version'),
                            'tariff_version': result.get('tariff_version'), 'money_unit': 'KRW',
-                           'notice': '서울 유사 가구의 참고값입니다. 실제 3건 비교·방식 선택은 미검증이며 정상 관리비나 실제 고지서 예측이 아닙니다.'}}
+                           'notice': '서울 유사 가구의 참고값입니다. 실제 사용량·계약 조건에 따라 청구액과 다를 수 있습니다.'}}
 
 
 def worker_main(root):

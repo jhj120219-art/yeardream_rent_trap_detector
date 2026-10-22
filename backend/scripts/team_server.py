@@ -60,7 +60,7 @@ def run(runtime, port):
     origins = ','.join(x.strip() for x in origins_file.read_text(encoding='utf-8').splitlines() if x.strip())
     env = dict(os.environ, BACKEND_DB_PATH='' if mysql_mode else str(database), RENT_CLEAN_CSV=str(csv),
                TEAM_ACCESS_KEY_FILE=str(keyfile), TEAM_SHARED_MODE='true',
-               MAINTENANCE_ENABLED='false', CORS_ORIGINS=origins)
+               MAINTENANCE_ENABLED=os.getenv('MAINTENANCE_ENABLED', 'false'), CORS_ORIGINS=origins)
     flags = subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
     base = f'http://127.0.0.1:{port}'
     server = tunnel = None
