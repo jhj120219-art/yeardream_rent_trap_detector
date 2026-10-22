@@ -3,7 +3,7 @@ from pathlib import Path
 import secrets
 import json
 from typing import Literal
-from fastapi import Depends, FastAPI, File, Header, HTTPException, UploadFile, Query
+from fastapi import Depends, FastAPI, File, Header, HTTPException, UploadFile, Query, Form
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
@@ -12,6 +12,7 @@ from .db import Store, InvalidReference, RequestConflict, digest, now
 from .schemas import ListingInput
 from . import analysis_service as service
 from .vision import extract_image
+from .local_ocr import extract_local, choose_card, runtime_status
 from .address import search_address
 from .maintenance import Evidence, compare as compare_maintenance
 from .maintenance import load_public_cases
@@ -39,6 +40,7 @@ def create_app(settings=None, pool=None, extractor=None):
 
     @asynccontextmanager
     async def lifespan(app):
+        app.state.ocr_runtime = runtime_status(settings)
         app.state.store = Store(settings.db_path, database_url=settings.database_url, initialize=settings.db_auto_init)
         app.state.pool = pool
         app.state.data_status = "READY" if pool is not None else "MISSING"
@@ -114,7 +116,7 @@ def create_app(settings=None, pool=None, extractor=None):
 
     @app.get('/health')
     def health():
-        return {"status":"ok","schema_version":"1.1","data_status":app.state.data_status,"vision_configured":bool(settings.openai_key and settings.vision_model)}
+        return {"status":"ok","schema_version":"1.1","data_status":app.state.data_status,"vision_configured":app.state.ocr_runtime['state']=='CONFIGURED' if settings.local_ocr_enabled else bool(settings.openai_key and settings.vision_model)}
 
     @app.get('/capabilities')
     def capabilities():
@@ -123,7 +125,10 @@ def create_app(settings=None, pool=None, extractor=None):
             "schema_version": "1.1", "data_status": app.state.data_status,
             "loaded_coverage": service.coverage(app.state.pool),
             "address_configured": bool(settings.kakao_key),
-            "vision_configured": bool(settings.openai_key and settings.vision_model),
+            "image_provider": "LOCAL_OCR" if settings.local_ocr_enabled else "OPENAI",
+            "vision_configured": app.state.ocr_runtime['state']=='CONFIGURED' if settings.local_ocr_enabled else bool(settings.openai_key and settings.vision_model),
+            "local_ocr_runtime": app.state.ocr_runtime['state'],
+            "local_ocr_sites": app.state.ocr_runtime['sites'],
             "same_building_first": settings.analysis_engine=='v2' and app.state.v2 is not None and bool(app.state.v2.cache),
             "comparable_transactions_available": False,
             "search_scope": "DONG_THEN_RELAXED_THEN_DISTRICT",
@@ -328,11 +333,13 @@ def create_app(settings=None, pool=None, extractor=None):
         return await search_address(q,settings)
 
     @app.post('/extractions',status_code=201)
-    async def extraction(file: UploadFile=File(...),sid=Depends(owner)):
+    async def extraction(file: UploadFile=File(...), site: Literal["dabang", "zigbang"]=Form(default="dabang"), sid=Depends(owner)):
         data=await file.read(8*1024*1024+1)
         if len(data)>8*1024*1024:
             raise HTTPException(413,"이미지는 8MB 이하로 올려 주세요.")
-        result=await (extractor or extract_image)(data,settings)
+        if not extractor and settings.local_ocr_enabled and app.state.ocr_runtime['state'] != 'CONFIGURED':
+            raise HTTPException(503,'OCR 실행 환경이 준비되지 않았습니다. 직접 입력을 이용해 주세요.')
+        result=await extractor(data,settings) if extractor else (await extract_local(data,settings,site) if settings.local_ocr_enabled else await extract_image(data,settings))
         # 원본 이미지와 파일명은 DB에 저장하지 않는다.
         return app.state.store.create(sid,'extraction',{"result":result})
 
@@ -342,7 +349,20 @@ def create_app(settings=None, pool=None, extractor=None):
 
     @app.get('/extractions/{extraction_id}/listing-draft')
     def get_listing_draft(extraction_id: str,sid=Depends(owner)):
-        return listing_draft(find(extraction_id,sid,'extraction'))
+        source=find(extraction_id,sid,'extraction')
+        return {**listing_draft(source), 'ocr_cards': source['result'].get('ocr_cards', []), 'extraction_id': extraction_id}
+
+    @app.post('/extractions/{extraction_id}/cards/{card_index}', status_code=201)
+    def select_ocr_card(extraction_id: str, card_index: int, sid=Depends(owner), key=Depends(retry_key)):
+        source=find(extraction_id,sid,'extraction')
+        request=request_identity('POST /extractions/'+extraction_id+'/cards',key,{'card_index':card_index})
+        replayed=app.state.store.replay(sid,'extraction',request)
+        if replayed is not None:
+            return {**listing_draft(replayed), 'extraction_id':replayed['id']}
+        result=choose_card(source['result'], card_index)
+        saved=app.state.store.create(sid,'extraction', {'result': result,
+            'selected_from_extraction_id':extraction_id,'selected_card_index':card_index},request=request)
+        return {**listing_draft(saved),'extraction_id':saved['id']}
 
     @app.delete('/extractions/{extraction_id}',status_code=204)
     def delete_extraction(extraction_id: str,sid=Depends(owner)):

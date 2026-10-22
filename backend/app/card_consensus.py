@@ -49,7 +49,8 @@ def extraction_result(card):
     """Adapt agreed values to the existing review draft; no address/area basis guesses."""
     fields = {}
     for name in ('deposit_10k_krw', 'rent_10k_krw', 'area_m2', 'maintenance_10k_krw'):
-        value = card['fields'][name]['value']
+        field = card.get('fields', {}).get(name, {})
+        value = field.get('value') if field.get('status') == 'extracted' else None
         fields[name] = {'value': value, 'raw_text': 'ENGINE_CONSENSUS_CANDIDATE' if value is not None else None,
                         'review_required': True}
     return {'schema_version': '1.1', 'extraction_status': 'EXTRACTED_NEEDS_REVIEW',
