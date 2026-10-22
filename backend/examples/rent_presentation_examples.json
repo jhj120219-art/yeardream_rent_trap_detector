@@ -1,0 +1,137 @@
+{
+  "synthetic_only": true,
+  "notice": "화면 연결용 가상 예시이며 운영 데이터·정확도 근거가 아닙니다.",
+  "examples": {
+    "higher": {
+      "version": "RENT_DISPLAY_V1",
+      "analysis_state": "COMPARED",
+      "state": "COMPARED",
+      "status_label": "비교 완료",
+      "tone": "RED",
+      "direction": "HIGHER",
+      "headline": "비교 기준보다 월 10만원 · 16.67% 높아요",
+      "can_show_direction": true,
+      "input_rent_10k_krw": 70.0,
+      "reference_rent_10k_krw": 60.0,
+      "middle_50_percent_10k_krw": {
+        "low": 55.0,
+        "high": 65.0
+      },
+      "difference_10k_krw": 10.0,
+      "difference_percent": 16.666666666666664,
+      "percent_basis": "COMPARABLE_MEDIAN",
+      "amount_unit": "TEN_THOUSAND_KRW",
+      "reason_codes": [],
+      "notice": "월세만 비교한 차이입니다. 관리비·별도 공과금은 포함하지 않으며 사기·불법 판정이 아닙니다."
+    },
+    "lower": {
+      "version": "RENT_DISPLAY_V1",
+      "analysis_state": "COMPARED",
+      "state": "COMPARED",
+      "status_label": "비교 완료",
+      "tone": "BLUE",
+      "direction": "LOWER",
+      "headline": "비교 기준보다 월 10만원 · 16.67% 낮아요",
+      "can_show_direction": true,
+      "input_rent_10k_krw": 50.0,
+      "reference_rent_10k_krw": 60.0,
+      "middle_50_percent_10k_krw": {
+        "low": 55.0,
+        "high": 65.0
+      },
+      "difference_10k_krw": -10.0,
+      "difference_percent": -16.666666666666664,
+      "percent_basis": "COMPARABLE_MEDIAN",
+      "amount_unit": "TEN_THOUSAND_KRW",
+      "reason_codes": [],
+      "notice": "월세만 비교한 차이입니다. 관리비·별도 공과금은 포함하지 않으며 사기·불법 판정이 아닙니다."
+    },
+    "same": {
+      "version": "RENT_DISPLAY_V1",
+      "analysis_state": "COMPARED",
+      "state": "COMPARED",
+      "status_label": "비교 완료",
+      "tone": "NEUTRAL",
+      "direction": "SAME",
+      "headline": "입력한 월세가 비교 기준과 같아요.",
+      "can_show_direction": true,
+      "input_rent_10k_krw": 60.0,
+      "reference_rent_10k_krw": 60.0,
+      "middle_50_percent_10k_krw": {
+        "low": 55.0,
+        "high": 65.0
+      },
+      "difference_10k_krw": 0.0,
+      "difference_percent": 0.0,
+      "percent_basis": "COMPARABLE_MEDIAN",
+      "amount_unit": "TEN_THOUSAND_KRW",
+      "reason_codes": [],
+      "notice": "월세만 비교한 차이입니다. 관리비·별도 공과금은 포함하지 않으며 사기·불법 판정이 아닙니다."
+    },
+    "reference_only": {
+      "version": "RENT_DISPLAY_V1",
+      "analysis_state": "REFERENCE_ONLY",
+      "state": "REFERENCE_ONLY",
+      "status_label": "참고용 결과",
+      "tone": "NEUTRAL",
+      "direction": null,
+      "headline": "참고 수치예요. 높고 낮음의 판단은 보류해요.",
+      "can_show_direction": false,
+      "input_rent_10k_krw": 70.0,
+      "reference_rent_10k_krw": 60.0,
+      "middle_50_percent_10k_krw": {
+        "low": 55.0,
+        "high": 65.0
+      },
+      "difference_10k_krw": 10.0,
+      "difference_percent": 16.666666666666664,
+      "percent_basis": "COMPARABLE_MEDIAN",
+      "amount_unit": "TEN_THOUSAND_KRW",
+      "reason_codes": [],
+      "notice": "월세만 비교한 차이입니다. 관리비·별도 공과금은 포함하지 않으며 사기·불법 판정이 아닙니다."
+    },
+    "district_reference": {
+      "version": "RENT_DISPLAY_V1",
+      "analysis_state": "COMPARED",
+      "state": "REFERENCE_ONLY",
+      "status_label": "참고용 결과",
+      "tone": "NEUTRAL",
+      "direction": null,
+      "headline": "참고 수치예요. 높고 낮음의 판단은 보류해요.",
+      "can_show_direction": false,
+      "input_rent_10k_krw": 70.0,
+      "reference_rent_10k_krw": 60.0,
+      "middle_50_percent_10k_krw": {
+        "low": 55.0,
+        "high": 65.0
+      },
+      "difference_10k_krw": 10.0,
+      "difference_percent": 16.666666666666664,
+      "percent_basis": "COMPARABLE_MEDIAN",
+      "amount_unit": "TEN_THOUSAND_KRW",
+      "reason_codes": [
+        "DISTRICT_SCOPE_REFERENCE_ONLY"
+      ],
+      "notice": "월세만 비교한 차이입니다. 관리비·별도 공과금은 포함하지 않으며 사기·불법 판정이 아닙니다."
+    },
+    "insufficient": {
+      "version": "RENT_DISPLAY_V1",
+      "analysis_state": "INSUFFICIENT_DATA",
+      "state": "INSUFFICIENT_DATA",
+      "status_label": "비교자료 부족",
+      "tone": "NEUTRAL",
+      "direction": null,
+      "headline": "비교자료 부족",
+      "can_show_direction": false,
+      "input_rent_10k_krw": 60.0,
+      "reference_rent_10k_krw": null,
+      "middle_50_percent_10k_krw": null,
+      "difference_10k_krw": null,
+      "difference_percent": null,
+      "percent_basis": "COMPARABLE_MEDIAN",
+      "amount_unit": "TEN_THOUSAND_KRW",
+      "reason_codes": [],
+      "notice": "월세만 비교한 차이입니다. 관리비·별도 공과금은 포함하지 않으며 사기·불법 판정이 아닙니다."
+    }
+  }
+}

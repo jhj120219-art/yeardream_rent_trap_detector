@@ -4,6 +4,7 @@ from .report_money import advertised_money as money
 from .advertised_costs import advertised_costs
 from .maintenance_selection import grouped_references
 from .service_identity import public_identity
+from .rent_presentation import rent_presentation
 
 
 def build_report(listing, analysis, evidence, data_status, references=None):
@@ -42,6 +43,7 @@ def build_report(listing, analysis, evidence, data_status, references=None):
         'property':{'input':raw['listing'],'validation':listing['validation'],
                     'confirmation':raw['confirmation'],'links':listing['links']},
         'rent':{'state':result['status'] if result else 'NOT_ANALYZED',
+                'presentation': rent_presentation(result,rent,confirmed,valid),
                 'analysis_id':analysis['id'] if analysis else None,
                 'analyzed_at':analysis['created_at'] if analysis else None,'result':result,
                 'comparable_transactions':None,
