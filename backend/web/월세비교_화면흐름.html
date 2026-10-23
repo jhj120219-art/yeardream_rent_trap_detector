@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#fafafa">
+  <title>월세구멍</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<div class="app">
+  <header class="header"><h1><img class="brand-logo" src="./images/wolse-gumeong-logo.png" alt="월세구멍" width="2172" height="724"></h1></header>
+  <ol class="steps" aria-label="분석 진행 단계"><li aria-current="step">1. 방식 선택</li><li>2. 정보 확인</li><li>3. 상세 입력</li><li>4. 분석 결과</li></ol>
+  <p id="progress" class="progress" role="status" aria-live="polite" hidden></p>
+  <section id="image-loading" class="image-loading" role="status" aria-live="polite" tabindex="-1" hidden><div class="image-loading-card"><span class="image-spinner" aria-hidden="true"></span><h2>이미지를 분석하고 있어요</h2><p>매물 정보를 확인하고 있어요.<br>잠시만 기다려 주세요.</p><p class="helper">이미지 크기에 따라 수 분 정도 걸릴 수 있어요.</p></div></section>
+  <main id="content">
+    <section data-screen="start" aria-label="입력 방식 선택">
+      <h2 class="start-description">내 매물,<br>동네 시세와 비교해 보세요</h2>
+      <div class="tabs" role="tablist" aria-label="입력 방식">
+        <button id="choose-capture" role="tab" aria-selected="true" aria-controls="capture-panel"><img class="icon camera-icon" src="./images/icons/Icon2.png" alt="" aria-hidden="true" width="15" height="14">캡처로 입력</button>
+        <button id="choose-address" role="tab" aria-selected="false" aria-controls="address-panel" tabindex="-1"><img class="icon location-icon" src="./images/icons/Icon7.png" alt="" aria-hidden="true" width="12" height="15">주소로 입력</button>
+      </div>
+      <section id="capture-panel" role="tabpanel" aria-labelledby="choose-capture">
+        <div class="title-row"><h2 class="upload-title">매물 정보 이미지 분석</h2><span class="badge">AI 자동인식</span></div>
+        <div id="local-ocr-options" hidden><label class="field">캡처한 서비스<select id="ocr-site"><option value="dabang">다방</option><option value="zigbang">직방</option></select></label><p class="helper">지도·메뉴를 제외하고 매물 목록 영역만 잘라 올려 주세요. 읽힌 금액과 면적은 직접 확인해야 해요. 상세 페이지·일반 사진은 지원하지 않아요.</p></div>
+        <div class="upload-zone" id="drop-zone">
+          <div class="upload-symbol"><img class="icon upload-icon" src="./images/icons/Icon6.png" alt="" aria-hidden="true" width="20" height="20"></div>
+          <p id="upload-copy"><strong>보증금·월세·관리비</strong> 항목이 포함된<br>스크린샷을 추가해 주세요.</p>
+          <img id="image-preview" alt="첨부한 매물 이미지" hidden>
+          <input class="visually-hidden" id="capture-file" type="file" accept="image/png,image/jpeg,image/webp">
+          <label class="upload-button" for="capture-file"><img class="icon attachment-icon" src="./images/icons/Icon3.png" alt="" aria-hidden="true" width="15" height="10"><span id="upload-label">이미지 파일 첨부</span></label>
+          <p id="image-error" class="image-error" role="alert" tabindex="-1" hidden></p>
+        </div>
+        <section id="ocr-cards" class="panel" aria-live="polite" hidden></section>
+        <p id="capture-note" class="helper" hidden></p>
+        <button class="button primary" id="extract">이미지 분석하기 <img class="icon arrow-icon" src="./images/icons/Icon8.png" alt="" aria-hidden="true" width="14" height="14"></button>
+      </section>
+      <section id="address-panel" role="tabpanel" aria-labelledby="choose-address" hidden>
+        <h2>매물 주소 검색</h2><p class="intro">주소를 선택하면 비교할 지역을 확인할 수 있어요.</p>
+        <form id="address-search-form"><label class="field">도로명·지번·건물명<input id="query" type="search" maxlength="200" autocomplete="off" placeholder="찾으실 주소나 건물명을 입력해 주세요"></label><button class="button dark" id="search" aria-expanded="false" aria-controls="postcode-search"><img class="icon location-icon" src="./images/icons/Icon7.png" alt="" aria-hidden="true" width="12" height="15"><span>카카오 주소 검색하기</span></button></form>
+        <section id="postcode-search" class="postcode-search" aria-label="카카오 주소검색" hidden>
+          <div class="postcode-heading"><h3>주소 검색</h3><button id="postcode-close" type="button" class="text-button" aria-label="주소검색 닫기">닫기 <span aria-hidden="true">×</span></button></div>
+          <p id="postcode-loading" class="postcode-loading" role="status">주소검색을 불러오고 있어요.</p>
+          <div id="postcode-embed" class="postcode-embed"></div>
+        </section>
+        <p class="helper" id="search-note" role="status">카카오 주소검색에서 정확한 주소를 선택해 주세요.</p><div id="address-results" aria-live="polite"></div>
+        <button class="button primary" id="address-next" disabled>정보 가져오기 <img class="icon arrow-icon" src="./images/icons/Icon8.png" alt="" aria-hidden="true" width="14" height="14"></button>
+        <p class="helper" id="address-capability" hidden></p>
+      </section>
+      <div class="manual-entry"><p><img class="icon info-icon" src="./images/icons/Info5.png" alt="" aria-hidden="true" width="15" height="15"> 사진이나 주소가 없나요?</p><button class="button secondary" id="choose-manual">직접 조건 입력하기 <img class="icon arrow-icon" src="./images/icons/Icon8.png" alt="" aria-hidden="true" width="14" height="14"></button></div>
+      <aside class="support-card"><h3><img class="icon support-icon" src="./images/icons/Icon1.png" alt="" aria-hidden="true" width="13" height="17">진단기 지원 안내</h3><dl><dt>지원 지역</dt><dd id="coverage-region">서버 연결 후 지원 지역을 확인할 수 있어요.</dd><dt>주택 유형</dt><dd id="coverage-types">원룸·투룸, 주거용 오피스텔, 다세대·연립주택, 소형 아파트</dd></dl><p class="privacy"><img class="icon lock-icon" src="./images/icons/Icon4.png" alt="" aria-hidden="true" width="11" height="14">원본 이미지와 파일명은 저장하지 않아요.<br>추출한 정보는 매물 분석을 위해 사용해요.</p></aside>
+    </section>
+    <section data-screen="collect" hidden>
+      <h2 tabindex="-1">가져온 정보를 확인해 주세요</h2><p class="intro">부족하거나 다른 정보는 다음 단계에서 수정할 수 있어요.</p>
+      <div class="panel collected"><div class="title-row"><h3 id="collected-region"></h3><span class="badge">조회 완료</span></div><div id="collected"></div></div>
+      <div class="panel notice"><h3><img class="icon info-icon" src="./images/icons/Info5.png" alt="" aria-hidden="true" width="15" height="15"> 매물 정보가 맞는지 확인해 주세요</h3><p id="collect-note"></p></div>
+      <div class="actions"><button class="button primary" id="collect-next">상세 정보 입력하기 <img class="icon arrow-icon" src="./images/icons/Icon8.png" alt="" aria-hidden="true" width="14" height="14"></button><button class="button secondary" id="collect-back">다시 가져오기</button></div>
+    </section>
+    <section data-screen="fill" hidden>
+      <h2 tabindex="-1">매물 조건을 완성해 주세요</h2><p class="intro">가져온 정보도 수정할 수 있어요. <span>* 필수 입력</span></p>
+      <form id="listing-form" novalidate>
+        <h3 class="section-label">비교 지역</h3><div class="grid"><label class="field">시군구 *<select id="region-district" required><option value="">서버 연결 후 선택</option></select></label><label class="field">법정동 *<select id="region-dong" required disabled><option value="">시군구를 먼저 선택</option></select></label></div>
+        <p id="region-status" class="helper" role="status" hidden></p>
+        <div id="region-review" class="notice panel" hidden><label class="check"><input id="review" type="checkbox">변경한 지역의 매물 조건이 맞는지 확인했어요.</label></div>
+        <h3 class="section-label">매물 조건</h3>
+        <label class="field">주택 유형 *<select id="f-type" data-field="type" required><option value="">선택해 주세요</option><option value="MULTI_UNIT">다세대·연립</option><option value="OFFICETEL">오피스텔</option><option value="DETACHED_MULTI">단독·다가구</option><option value="APARTMENT">아파트</option></select></label>
+        <div class="grid"><label class="field">면적 *<span class="input-unit"><input id="f-area" data-field="area" type="number" min="5" max="200" step="any" inputmode="decimal" required><span>㎡</span></span></label><label class="field">면적 기준 *<select id="f-basis" data-field="basis" required><option value="">선택해 주세요</option><option value="EXCLUSIVE">전용 면적</option><option value="SUPPLY">공급 면적</option><option value="CONTRACT">계약 면적</option><option value="RENTAL_REPORTED">신고 계약면적</option><option value="UNKNOWN">미확인</option></select></label></div>
+        <div class="grid"><label class="field">보증금 *<span class="input-unit"><input id="f-deposit" data-field="deposit" type="number" min="0" step="any" inputmode="decimal" required><span>만 원</span></span></label><label class="field">월세 *<span class="input-unit"><input id="f-rent" data-field="rent" type="number" min="1" max="500" step="any" inputmode="decimal" required><span>만 원</span></span></label></div>
+        <fieldset class="maintenance-fields" aria-describedby="maintenance-help"><legend>관리비 포함 항목 · 선택</legend><p class="helper" id="maintenance-help">포함된 항목을 체크해 주세요. 결과에는 선택한 항목의 예상 금액만 표시해요.</p><div class="maintenance-checks">
+          <label><input type="checkbox" data-maintenance="WATER"><span>수도</span></label>
+          <label><input type="checkbox" data-maintenance="ELECTRICITY"><span>전기</span></label>
+          <label><input type="checkbox" data-maintenance="GAS"><span>가스</span></label>
+          <label><input type="checkbox" data-maintenance="INTERNET"><span>인터넷</span></label>
+          <label><input type="checkbox" data-maintenance="OTHER"><span>기타</span></label>
+        </div></fieldset>
+        <label class="field">선택 항목의 월 관리비 총액 · 선택<span class="input-unit"><input id="f-maintenance" data-field="maintenance" type="number" min="0" step="any" inputmode="decimal"><span>만 원</span></span></label><p class="helper">총액을 모르면 비워두세요. 관리비가 없으면 0을 입력해 주세요.</p>
+        <div id="extracted-options" class="panel" hidden><h3>사진에서 읽은 추가 옵션</h3><p class="helper">이용 가능 여부가 맞는지 확인하고 수정해 주세요.</p><div id="option-fields" class="grid"></div></div>
+        <details class="additional"><summary>추가 정보 · 건물 주소, 건축연도, 층수</summary><label class="field">건물 주소 · 선택<input id="f-address" data-field="address" type="text" maxlength="200" placeholder="주소 없이도 비교할 수 있어요" readonly></label><button type="button" class="text-button" id="change-address">주소 검색·변경</button><div class="grid"><label class="field">건축연도<input id="f-year" data-field="year" type="number" min="1950" step="1" inputmode="numeric"></label><label class="field">층수<input id="f-floor" data-field="floor" type="number" step="1" inputmode="numeric"></label></div><label class="field">지상·지하<select id="f-floorType" data-field="floorType"><option value="UNKNOWN">미확인</option><option value="GROUND">지상</option><option value="BASEMENT">지하</option></select></label><p class="helper">지하층은 음수로 입력해 주세요. 건축연도를 비우면 연도 조건 없이 비교해요.</p></details>
+        <p id="maintenance-reference-note" class="helper" hidden>예상 금액은 서울 유사 가구의 참고값으로 실제 청구액과 달라요. 자료가 부족한 항목은 ‘자료 없음’으로 표시해요.</p>
+        <label class="check final-check"><input id="confirmed" type="checkbox">입력한 지역·매물 조건과 예상 금액 안내를 확인했어요.</label>
+        <p id="validation" class="error" role="alert" hidden></p>
+        <button class="button primary" id="analyze">내 매물 비교하기 <img class="icon arrow-icon" src="./images/icons/Icon8.png" alt="" aria-hidden="true" width="14" height="14"></button>
+        <button class="text-button block" type="button" id="fill-back">이전으로</button>
+      </form>
+    </section>
+    <section data-screen="result" hidden><div id="result-content"></div><div class="actions"><button class="button primary" id="real-edit"><span id="real-edit-label">조건 수정하고 다시 비교하기</span> <img class="icon arrow-icon" src="./images/icons/Icon8.png" alt="" aria-hidden="true" width="14" height="14"></button><button class="text-button block" id="real-new">다른 매물 비교하기</button></div></section>
+    <p id="action-error" class="error" role="alert" hidden></p>
+  </main>
+  <footer class="footer"><details id="connection-settings"><summary><span id="connection-label">서버 연결 설정</span><span id="connection-dot" aria-label="연결되지 않음"></span></summary><form id="connection-form"><label class="field">서버 주소<input id="server-url" type="url" autocomplete="url" placeholder="HTTPS 서버 기본 주소" required></label><label class="field">접속키<input id="team-key" type="password" autocomplete="off"></label><p class="helper">접속키는 현재 화면의 메모리에서만 사용해요.</p><button class="button dark" id="connect-live">서버 연결하기</button><button type="button" class="text-button block" id="leave-live" hidden>연결 초기화</button></form><p id="connection-status" class="helper" role="status" aria-live="polite"></p></details></footer>
+</div>
+<script type="module" src="./app.mjs"></script>
+</body></html>
