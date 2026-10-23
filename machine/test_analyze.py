@@ -10,7 +10,8 @@ import analyze as an
 import compare_rent as cr
 
 HERE = Path(__file__).parent
-real = an.load_pool()
+(HERE / 'output').mkdir(exist_ok=True)      # 결과 저장 폴더가 없으면 만든다
+real = an.load_pool()                       # output/clean_rent_data.csv 가 없으면 어떤 파일이 없고 어떻게 만드는지 알려 준다(analyze.load_pool)
 
 
 def synth(n=40, usage='아파트', gu='관악구', dong='봉천동', basement=False, base_rent=50, spread=2,

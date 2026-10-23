@@ -1,0 +1,53 @@
+{
+  "advertised_total": 120000,
+  "decomposition": {
+    "enabled": false,
+    "status": "DISABLED"
+  },
+  "errors": [],
+  "input_warnings": [],
+  "internet_availability": null,
+  "missing_fields": [],
+  "other": {
+    "amount": 30000,
+    "descriptions": [
+      "청소·공용관리"
+    ],
+    "source": "ADVERTISED"
+  },
+  "reason_codes": [],
+  "reference_comparison": [
+    "WATER"
+  ],
+  "schema_version": "maintenance.v1",
+  "separate_items": [],
+  "source_contract_version": "FIVE_ITEMS_V1",
+  "status": "REFERENCE_ONLY",
+  "status_reason": [],
+  "utility_estimates": [
+    {
+      "ad": 10000,
+      "hi": 10950,
+      "inc": "INCLUDED",
+      "lo": 10950,
+      "st": "AVAILABLE",
+      "t": "WATER"
+    },
+    {
+      "ad": null,
+      "hi": 36970,
+      "inc": "INCLUDED",
+      "lo": 23930,
+      "st": "AVAILABLE",
+      "t": "ELECTRICITY"
+    },
+    {
+      "ad": null,
+      "hi": 30000,
+      "inc": "INCLUDED",
+      "lo": 17600,
+      "st": "AVAILABLE",
+      "t": "INTERNET"
+    }
+  ]
+}

@@ -77,8 +77,14 @@ WARNING_TEXT = {
 
 # ------------------------------------------------------------------ 풀 로딩
 def load_pool(clean_csv: str | Path | None = None):
-    """output/clean_rent_data.csv(run_validation.py 산출물)에서 비교 풀과 동 코드 사전을 만든다."""
+    """output/clean_rent_data.csv(prepare_clean_data.py 산출물)에서 비교 풀과 동 코드 사전을 만든다."""
     path = Path(clean_csv or Path(__file__).parent / 'output' / 'clean_rent_data.csv')
+    if not path.exists():
+        raise FileNotFoundError(
+            f'필요한 파일이 없습니다: {path}\n'
+            '만드는 방법: (1) python collect_rent.py --key-file KEY.txt --years 2025 2026 --gu 11620 --out data/rent_gwanak_2025_2026.csv  (구마다 반복)\n'
+            '            (2) python prepare_clean_data.py     -> output/clean_rent_data.csv (output 폴더는 자동 생성)\n'
+            '이미 정제된 파일을 받았다면 위 경로에 두거나 load_pool(clean_csv=경로)로 지정하세요. 점검: python check_data.py')
     rent = pd.read_csv(path, parse_dates=['date'], low_memory=False,
                        dtype={'CGG_CD': str, 'STDG_CD': str})
     for c in ('is_new', 'basement', 'dup_suspect'):

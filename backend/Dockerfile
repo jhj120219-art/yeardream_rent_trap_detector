@@ -10,6 +10,7 @@ COPY machine/integration_kit_v1.1/ ./machine/integration_kit_v1.1/
 COPY machine/analysis_internal/ ./machine/analysis_internal/
 COPY backend/app/ ./backend/app/
 COPY backend/scripts/ ./backend/scripts/
+COPY backend/web/ ./backend/web/
 RUN mkdir -p backend/data && chown -R appuser:appuser /app
 USER appuser
 EXPOSE 8000

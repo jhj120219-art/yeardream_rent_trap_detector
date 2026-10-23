@@ -1,32 +1,69 @@
 # -*- coding: utf-8 -*-
-"""공과금 단가 상수. 값마다 확인 상태(verified)와 출처를 함께 둔다. 확인 상태가 False 인 값은 계산 결과에 '가정'으로 표시한다.
-출처 확인일 2026-10-20. 원본 스냅샷은 data/utility_stats/web/, 정리본은 data/utility_stats/tariffs_20261020.json."""
+"""공과금 단가 상수. 단일 원본은 tariff_data/tariffs_2026-10.json (값마다 출처·확인 상태 status 를 함께 둠)이고, 이 모듈은 그 파일을 읽어
+기존 계산기(calc.py)가 쓰는 ELECTRIC / GAS / WATER 딕셔너리 형태로 돌려준다. 확인 상태가 VERIFIED 가 아닌 값은 verified=False 가 되어
+계산 결과에 '가정'으로 표시된다. 값을 바꿀 때는 이 파일이 아니라 JSON 을 고치고 test_tariff_data.py 를 실행한다."""
+import json
+from pathlib import Path
+
+DATA_PATH = Path(__file__).resolve().parent / 'tariff_data' / 'tariffs_2026-10.json'
+DATA = json.loads(DATA_PATH.read_text(encoding='utf-8'))
+TARIFF_SET_ID = DATA['tariff_set_id']
+
+
+def _ok(item):
+    return item.get('status') == 'VERIFIED'
+
+
+def _tiers(rows):
+    return [(r['up_to_kwh'], r['base_won'], r['won_per_kwh']) for r in rows]
+
+
+_E, _G, _W = DATA['electricity'], DATA['gas'], DATA['water']
+_EC = _E['components']
 
 ELECTRIC = dict(
-    summer_months=(7, 8),
-    tiers_summer=[(300, 910, 120.0), (450, 1600, 214.6), (None, 7300, 307.3)],     # (구간 상한 kWh, 기본요금 원/호, 전력량요금 원/kWh)
-    tiers_other=[(200, 910, 120.0), (400, 1600, 214.6), (None, 7300, 307.3)],
-    fuel_adjust_won_per_kwh=5.0,     # 2026년 4분기 연료비조정단가, 한전 공지 2026-09-21 (verified)
-    climate_won_per_kwh=9.0,         # 기후환경요금: 비공식 계산기 기준 값, 공식 확인 필요 (unverified)
-    fund_rate=0.027,                 # 전력산업기반기금율 2.7%: 2025.7.1부터(한전 요금표 공개 사본·정부 인하 발표). 이전 3.7%는 사용 안 함. 한전 원문 확인 전까지 잠정
-    vat_rate=0.10,
-    verified=dict(tiers=True, fuel_adjust=True, climate=False, fund=False, vat=True),
-    source='https://cyber.kepco.co.kr/ckepco/front/jsp/CY/E/E/CYEEHP00101.jsp (주택용 저압, 적용일자 2023-05-16 표기)')
+    summer_months=tuple(_E['summer_months']),
+    tiers_summer=_tiers(_E['tiers']['summer']),      # (구간 상한 kWh, 기본요금 원/호, 전력량요금 원/kWh)
+    tiers_other=_tiers(_E['tiers']['other']),
+    fuel_adjust_won_per_kwh=_EC['fuel_adjust_won_per_kwh']['value'],
+    climate_won_per_kwh=_EC['climate_won_per_kwh']['value'],
+    fund_rate=_EC['fund_rate']['value'],
+    vat_rate=_EC['vat_rate']['value'],
+    verified=dict(tiers=_ok(_E['tiers']), fuel_adjust=_ok(_EC['fuel_adjust_won_per_kwh']), climate=_ok(_EC['climate_won_per_kwh']),
+                  fund=_ok(_EC['fund_rate']), vat=_ok(_EC['vat_rate'])),
+    source=_E['tiers']['source'])
 
 GAS = dict(
-    won_per_mj=22.5268,              # 서울도시가스 주택용 취사·난방, 2026.10.01 (verified)
-    base_won_per_month=1250,         # 서울도시가스 요금표 안내(검색 결과로 확인, 화면 재확인 권장)
-    mj_per_nm3=43.0,                 # 월별 평균열량: 고지서 값으로 대체해야 함, 근사값 (unverified)
-    correction=1.0,                  # 보정계수 (unverified)
-    vat_rate=0.10,
-    verified=dict(unit_price=True, base=True, heat=False),
-    source='https://www.seoulgas.co.kr/mobile/payment/gasPayTable')
+    won_per_mj=_G['won_per_mj']['value'],
+    base_won_per_month=_G['base_won_per_month']['value'],
+    mj_per_nm3=_G['mj_per_nm3']['value'],
+    correction=_G['correction']['value'],
+    vat_rate=_G['vat_rate']['value'],
+    verified=dict(unit_price=_ok(_G['won_per_mj']), base=_ok(_G['base_won_per_month']), heat=_ok(_G['mj_per_nm3'])),
+    source=_G['won_per_mj']['source'])
 
 WATER = dict(
-    base_won_per_month_15mm=1080,    # 아리수 요금계산 시뮬레이션 결과로 확인 (verified)
-    waterworks_won_per_m3=580, sewerage_won_per_m3=480, water_use_charge_won_per_m3=170,
-    verified=dict(all=True),
-    source='https://i121.seoul.go.kr/cs/cyber/front/cgcalc/NR_cgCalcGeneralPurpose.do (가정용 1세대 15mm 10㎥ = 13,380원)')
+    base_won_per_month_15mm=_W['base_won_per_month']['value'],
+    waterworks_won_per_m3=_W['waterworks_won_per_m3']['value'],
+    sewerage_won_per_m3=_W['sewerage_won_per_m3']['value'],
+    water_use_charge_won_per_m3=_W['water_use_charge_won_per_m3']['value'],
+    verified=dict(all=all(_ok(_W[k]) for k in ('base_won_per_month', 'waterworks_won_per_m3', 'sewerage_won_per_m3', 'water_use_charge_won_per_m3'))),
+    source=_W['base_won_per_month']['source'] + f" (가정용 1세대 15mm {_W['anchor']['input_m3']}㎥ = {_W['anchor']['expected_total_won']:,}원)")
 
-# 서울시 세대원 수별 1일 평균 수돗물 사용량(L, 세대 합계, 2021년, 서울아리수본부 2023-09-14 보도자료)
-SEOUL_WATER_L_PER_DAY = {1: 264, 2: 435, 3: 576, 4: 679, 5: 777, 6: 813}
+# 서울시 세대원 수별 1일 평균 수돗물 사용량(L, 세대 합계)
+SEOUL_WATER_L_PER_DAY = {int(k): v for k, v in _W['seoul_l_per_day_by_household_size'].items()}
+INTERNET_RANGE = tuple(DATA['internet']['range_won_per_month'])
+
+
+def status_table():
+    """값별 확인 상태 목록(문서·화면 점검용): [(항목, 값, status, 출처)]."""
+    rows = []
+    for k, v in _EC.items():
+        rows.append(('전기 ' + k, v['value'], v['status'], v.get('source', '')))
+    rows.append(('전기 누진 구간표', '3구간', _E['tiers']['status'], _E['tiers']['source']))
+    for k in ('won_per_mj', 'base_won_per_month', 'mj_per_nm3', 'correction', 'vat_rate'):
+        rows.append(('가스 ' + k, _G[k]['value'], _G[k]['status'], _G[k].get('source', '')))
+    for k in ('base_won_per_month', 'waterworks_won_per_m3', 'sewerage_won_per_m3', 'water_use_charge_won_per_m3'):
+        rows.append(('수도 ' + k, _W[k]['value'], _W[k]['status'], _W[k].get('source', '')))
+    rows.append(('인터넷 범위(원/월)', DATA['internet']['range_won_per_month'], DATA['internet']['status'], DATA['internet']['source']))
+    return rows

@@ -77,6 +77,21 @@ def main():
     cards = partial_cards('월세 3.000 2층, 20m², 관리비 5만 전세 15000 3층, 30m²')
     if cards != [('전세', 15000.0, None, 30.0, None)]:
         bad.append(('금액이 깨진 월세 머리줄', cards))
+    # 13) 조각 경계에서 잘려 머리줄만 읽힌 카드(그 조각의 마지막 카드)는 다른 조각의 더 완전한 같은 머리줄 카드가 있으면 중복으로 버린다
+    cards = partial_cards('월세 1000/55 2층' + chr(10) + TILE_MARK + chr(10) + '월세 1000/55 2층, 18.18m², 관리비 8만' + chr(10) + TILE_MARK + chr(10) + '월세 300/40 3층')
+    if cards != [('월세', 1000.0, 55.0, 18.18, 8.0), ('월세', 300.0, 40.0, None, None)]:
+        bad.append(('잘린 카드 중복', cards))
+    # 14) 같은 조각 안의 같은 머리줄 카드, 조각 중간의 카드는 서로 다른 매물일 수 있으므로 지우지 않는다
+    cards = partial_cards('월세 1000/55 2층, 20m², 관리비 5만 월세 1000/55 3층, 30m², 관리비 8만')
+    if len(cards) != 2:
+        bad.append(('같은 조각의 서로 다른 카드는 둘 다 남아야 함', cards))
+    cards = partial_cards('월세 1000/55 2층' + chr(10) + '월세 200/30 2층, 19m², 관리비 5만' + chr(10) + TILE_MARK + chr(10) + '월세 1000/55 2층, 18.18m², 관리비 8만')
+    if len(cards) != 3:
+        bad.append(('조각 중간(마지막이 아닌) 카드는 남아야 함', cards))
+    # 15) 값이 모순되면(같은 머리줄이어도 면적이 다름) 같은 매물의 복사본이 아니다
+    cards = partial_cards('월세 1000/55 2층, 20m²' + chr(10) + TILE_MARK + chr(10) + '월세 1000/55 2층, 18.18m², 관리비 8만')
+    if len(cards) != 2:
+        bad.append(('모순되는 값은 버리지 않아야 함', cards))
     print('실패 %d 건' % len(bad), *bad, sep='\n' if bad else ' ')
     return 1 if bad else 0
 

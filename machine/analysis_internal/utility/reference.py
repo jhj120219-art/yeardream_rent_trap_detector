@@ -2,18 +2,19 @@
 """가구에너지패널 14차(2023) 서울 결과표 -> 참고 사용량·요금. 표마다 조건이 달라 서로 곱하지 않고 '관점별'로 따로 보여준다.
 월별 사용량 = 서울 가구 평균 월별 프로파일 x (선택 조건 연간 평균 / 서울 전체 연간 평균)  <- 이 월 배분은 가정이며 조사된 값이 아니다."""
 import csv
-from pathlib import Path
 from .calc import electricity_bill, gas_bill, water_bill
+from .data_files import energy_reference_csv, require_energy_reference
 from .tariffs import SEOUL_WATER_L_PER_DAY
 
-CSV = Path(__file__).resolve().parents[2] / 'data' / 'utility_stats' / 'energy_reference_2023.csv'
+CSV = energy_reference_csv()      # 호환용(참고 경로). 실제로 열 때는 require_energy_reference() 가 없으면 어떤 파일이 없는지 알려 준다
 _cache = None
 
 
 def _load():
     global _cache
     if _cache is None:
-        _cache = [r for r in csv.DictReader(open(CSV, encoding='utf-8-sig')) if r['region'] == '서울' and r['table'].startswith('3_')]
+        path = require_energy_reference()
+        _cache = [r for r in csv.DictReader(open(path, encoding='utf-8-sig')) if r['region'] == '서울' and r['table'].startswith('3_')]
     return _cache
 
 

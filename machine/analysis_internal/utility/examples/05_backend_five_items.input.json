@@ -1,0 +1,29 @@
+{
+  "contract_version": "FIVE_ITEMS_V1",
+  "request_id": "example-05",
+  "backend_options": {
+    "maintenance_10k_krw": 8,
+    "electricity_in_maintenance": "SEPARATE_CHARGE",
+    "electricity_10k_krw": null,
+    "water_in_maintenance": "INCLUDED",
+    "water_10k_krw": 1,
+    "gas_in_maintenance": "UNKNOWN",
+    "gas_10k_krw": null,
+    "internet_status": "INCLUDED",
+    "internet_10k_krw": null,
+    "other_in_maintenance": "INCLUDED",
+    "other_10k_krw": null,
+    "other_cost_label": "청소·공용관리 포함, 상세 금액 미기재",
+    "maintenance_note": "광고에 적힌 내용만 입력한 가상 예시"
+  },
+  "user": {
+    "confirmed": true,
+    "metering": "INDIVIDUAL"
+  },
+  "conditions": {
+    "target_month": 10,
+    "household_size": 1,
+    "housing_type": "다세대·연립",
+    "area_m2": 20
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "contract_version": "FIVE_ITEMS_V1",
+  "request_id": "c06",
+  "backend_options": {
+    "maintenance_10k_krw": 3,
+    "electricity_in_maintenance": "INCLUDED",
+    "electricity_10k_krw": 2,
+    "water_in_maintenance": "INCLUDED",
+    "water_10k_krw": 2,
+    "gas_in_maintenance": "UNKNOWN",
+    "gas_10k_krw": null,
+    "internet_status": "INCLUDED",
+    "internet_10k_krw": null,
+    "other_in_maintenance": "INCLUDED",
+    "other_10k_krw": null,
+    "other_cost_label": "청소·공용",
+    "maintenance_note": null
+  },
+  "conditions": {
+    "target_month": 10,
+    "household_size": 1,
+    "housing_type": "다세대·연립",
+    "area_m2": 20
+  },
+  "user": {
+    "confirmed": true,
+    "metering": "INDIVIDUAL"
+  }
+}

@@ -1,46 +1,19 @@
-# 데이터(공공데이터 원본·정제본·국토부 다운로드)는 저장소에 올리지 않는다. collect_rent.py 로 직접 수집.
+# 데이터 원본 · 정제본 · 다운로드 (collect_rent.py 등으로 직접 수집)
 data/
-output/clean_rent_data.csv
-output/area_check_*.csv
-output/ledger_sample.csv
-output/run_validation_log.txt
-# 로컬 설치 라이브러리·캐시
-_libs/
-__pycache__/
-*.pyc
-# 인증키·로컬 경로가 들어갈 수 있는 파일, 개인 대화 기록
+output/
+# 가구에너지패널 마이크로데이터와 그 파생 분포 (이용 범위 확인 전 비공개)
+micro_dist_seoul.csv
+microdata_raw/
+# 인증키 · 개인 대화 기록
 *.key
 *key*.txt
-run_collect_more.sh
 gpt_*.txt
-# 개별 계약 단위 결과(재배포 조건 미확인 데이터에서 파생) — 요약 표만 올린다
-output/backtest_all.csv
-output/similar_search_backtest.csv
-output/dup_sensitivity_cases.csv
-# 건축물대장 조회 결과(건물 단위 원본)
-output/ledger_*.csv
-run_collect_holdout.sh
-output/holdout_backtest_cases.csv
-output/exp_headroom_same_building.csv
-run_collect_holdout2.sh
-# 개별 계약·건물 단위 파생 결과(재배포 조건 미확인) — 요약표·report.json·manifest.json 만 올린다
-analysis_internal/results/*/records.csv
-analysis_internal/results/time_trend_records.csv
-output/exp_calibrate_scored.csv
-output/exp_stage0_cases.csv
-output/exp_stage0_gate_scored.csv
-output/exp_lag_errors.csv
-output/exp_lot_buildings_raw.csv
-output/holdout2_clean.csv
-# 팀 공유용으로 묶은 원본 데이터 압축본(저장소에 올리지 않음)
-share/
-# 실제 광고 캡처(저작권·개인정보 때문에 로컬에서만 사용)
+# 실제 광고 캡처 (저작권 · 개인정보)
 analysis_internal/extraction/real/
-# OCR 엔진 격리 설치 폴더·실행 로그(용량 큼, 재설치 가능)
+# 로컬 설치 라이브러리 · 캐시 · 모델
+_libs/
 _ocr_libs/
 _paddle_libs/
+__pycache__/
+*.pyc
 *_run.log
-# 합성 광고 캡처용 임시 크롬 프로필(방문 기록 등 개인 정보 가능)
-analysis_internal/extraction/synthetic/chrome_profile/
-# 계약 단위 파생 결과(재배포 조건 미확인)
-analysis_internal/results/exp1_weighted_cases.csv

@@ -38,3 +38,30 @@ def cards_from(text):
             continue
         out.append(('월세' if h.group(1) == '원세' else h.group(1), rent, mon, b.group(1), area, maint))
     return out
+
+
+# ---- 직방 웹 목록 카드: "월세 200/110 / 관리비 15만원 / 단기 ・ 오픈형 원룸 · 46.8m² · 반지하 / 지역 / 설명" ----
+ZB_AREA = re.compile(r'([\d\.]+)\s*m[²2]')
+ZB_FLOOR = re.compile(r'(?:·|・|\s)(\d+층|반지하|옥탑|저층|고층|중층|지하)')
+ZB_MAINT = re.compile(r'관리비\s*([\d\.]+)\s*만\s*원')
+
+
+def cards_from_zigbang(text):
+    """직방 목록 카드(월세/전세 줄로 시작)를 카드 단위로 읽는다. 관리비 '없음'·숫자 아닌 값·비정상 범위는 보류. 값 보정 없음."""
+    out = []
+    for blk in re.split(r'(?=(?:월세|전세)\s*[\d억])', text.replace(chr(10), ' ')):
+        h = HEAD.match(blk.strip())
+        mt, ar, fl = ZB_MAINT.search(blk), ZB_AREA.search(blk), ZB_FLOOR.search(blk)
+        if not (h and mt and ar and fl):
+            continue
+        try:
+            area, maint = float(ar.group(1)), float(mt.group(1))
+        except ValueError:
+            continue
+        rent, mon = won(h.group(2)), won(h.group(3) or '')
+        if rent is BAD or mon is BAD:
+            continue
+        if not (3 <= area <= 300 and rent <= 100000 and (mon is None or mon <= 2000) and maint <= 100):
+            continue
+        out.append((h.group(1), rent, mon, fl.group(1), area, maint))
+    return out

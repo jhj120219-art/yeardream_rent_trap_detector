@@ -10,6 +10,7 @@ import normalize_listing as nl
 import compare_rent as cr
 
 HERE = Path(__file__).parent
+(HERE / 'output').mkdir(exist_ok=True)      # 결과 저장 폴더가 없으면 만든다
 results = []
 
 

@@ -1,0 +1,16 @@
+{
+  "request_id": "example-01",
+  "ad_text": "관리비 합계 80,000 원 정액관리비 공용 관리비 68,000 원 사용료 12,000 원 전기 실비 수도 12,000 원 가스 실비 난방 실비 인터넷 실비 TV 실비 포함 항목 : 수도 미포함 항목 : 전기, 가스, 난방, 인터넷, TV",
+  "user": {
+    "confirmed": true,
+    "metering": "INDIVIDUAL"
+  },
+  "conditions": {
+    "target_month": 10,
+    "household_size": 1,
+    "housing_type": "다세대·연립",
+    "area_m2": 20,
+    "heating_type": "모름",
+    "gas_user": "모름"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "advertised_total": 70000,
+  "decomposition": {
+    "enabled": false,
+    "status": "DISABLED"
+  },
+  "errors": [],
+  "input_warnings": [],
+  "internet_availability": null,
+  "missing_fields": [],
+  "other": {
+    "amount": null,
+    "descriptions": [
+      "청소·주차"
+    ],
+    "source": "NOT_PROVIDED"
+  },
+  "reason_codes": [],
+  "reference_comparison": [],
+  "schema_version": "maintenance.v1",
+  "separate_items": [],
+  "source_contract_version": "FIVE_ITEMS_V1",
+  "status": "INSUFFICIENT_DATA",
+  "status_reason": [
+    "NO_USABLE_AD_INFO"
+  ],
+  "utility_estimates": []
+}

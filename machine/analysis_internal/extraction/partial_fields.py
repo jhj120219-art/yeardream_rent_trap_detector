@@ -43,11 +43,30 @@ def _card(kind, dep, rent, blk):
     return (kind, dep, rent, area, maint)
 
 
+def drop_cut_duplicates(items):
+    """items: [(조각 번호, 그 조각의 마지막 카드인지, 카드)].
+    조각(타일) 경계에서 잘려 항목이 덜 읽힌 카드는 겹친 **다른 조각**의 같은 머리줄 카드(항목을 더 많이 알고 값이 모순되지 않는 것)와 같은 매물의 부분 복사본이므로 버린다.
+    버리는 조건: ① 그 조각의 **마지막 카드**(경계에서 잘렸을 가능성이 있는 위치), ② 다른 조각에 같은 머리줄 카드가 있음, ③ 그쪽이 면적·관리비를 더 많이 알고 값이 모순되지 않음.
+    같은 조각 안의 같은 머리줄 카드, 조각 중간의 카드는 서로 다른 매물일 수 있으므로 절대 합치거나 버리지 않는다. 조건을 확인할 수 없으면 그대로 둔다."""
+    def known(c):
+        return (c[3] is not None) + (c[4] is not None)
+
+    def covered(c, d):
+        return d[:3] == c[:3] and known(d) > known(c) and all(c[i] is None or c[i] == d[i] for i in (3, 4))
+    keep = []
+    for part, is_last, c in items:
+        if is_last and any(p2 != part and covered(c, d) for p2, _, d in items):
+            continue
+        keep.append(c)
+    return keep
+
+
 def partial_cards(text):
     """다방·직방 목록 카드(월세/전세 머리줄로 시작)를 항목별로 읽는다."""
-    out = []
+    items = []
     # 조각(타일) 경계(TILE_MARK)에서 글이 이어 붙지 않게 먼저 나눈다: 잘린 카드 뒤에 다음 조각의 다른 카드 글이 붙어 항목이 섞이는 것을 막는다.
-    for part in text.split(TILE_MARK):
+    for pi, part in enumerate(text.split(TILE_MARK)):
+        part_cards = []
         for blk in SPLIT.split(part.replace(chr(10), ' ')):
             h = HEAD.match(blk.strip())
             if not h:
@@ -58,8 +77,9 @@ def partial_cards(text):
             kind = '월세' if h.group(1) == '원세' else h.group(1)
             if kind == '월세' and rent is None:          # 월세 카드는 월세 금액이 있어야 한다(금액 표기가 깨진 머리줄은 읽지 않는다)
                 continue
-            out.append(_card(kind, dep, rent, blk))
-    return out
+            part_cards.append(_card(kind, dep, rent, blk))
+        items += [(pi, i == len(part_cards) - 1, c) for i, c in enumerate(part_cards)]
+    return drop_cut_duplicates(items)
 
 
 def normalize_address(m):

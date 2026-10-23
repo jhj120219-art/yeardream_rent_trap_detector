@@ -5,6 +5,8 @@
 !backend/app/**
 !backend/scripts/
 !backend/scripts/*.py
+!backend/web/
+!backend/web/**
 !backend/requirements.txt
 !backend/Dockerfile
 !backend/__init__.py

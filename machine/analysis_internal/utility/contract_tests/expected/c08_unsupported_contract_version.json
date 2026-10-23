@@ -1,0 +1,30 @@
+{
+  "advertised_total": null,
+  "decomposition": {
+    "enabled": false,
+    "status": "DISABLED"
+  },
+  "errors": [
+    "UNSUPPORTED_CONTRACT_VERSION"
+  ],
+  "input_warnings": [],
+  "internet_availability": null,
+  "missing_fields": [],
+  "other": {
+    "amount": null,
+    "descriptions": null,
+    "source": null
+  },
+  "reason_codes": [
+    "UNSUPPORTED_CONTRACT_VERSION"
+  ],
+  "reference_comparison": [],
+  "schema_version": "maintenance.v1",
+  "separate_items": [],
+  "source_contract_version": "FIVE_ITEMS_V9",
+  "status": "INSUFFICIENT_DATA",
+  "status_reason": [
+    "UNSUPPORTED_CONTRACT_VERSION"
+  ],
+  "utility_estimates": []
+}

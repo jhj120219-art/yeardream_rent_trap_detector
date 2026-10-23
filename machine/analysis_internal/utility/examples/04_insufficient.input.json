@@ -1,0 +1,12 @@
+{
+  "request_id": "example-04",
+  "ad": {},
+  "conditions": {
+    "target_month": 10,
+    "household_size": 1,
+    "housing_type": "다세대·연립",
+    "area_m2": 20,
+    "heating_type": "모름",
+    "gas_user": "모름"
+  }
+}

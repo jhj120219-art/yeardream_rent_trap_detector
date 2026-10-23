@@ -142,6 +142,7 @@ table.perf{border-collapse:collapse;width:100%;font-size:.85rem}table.perf th,ta
     <div class="card"><h2>월별 참고 금액 (포함 항목 합계, 집단 평균 환산값의 폭)</h2><svg id="chart" viewBox="0 0 700 250" role="img" aria-label="월별 참고 비용 합계"></svg>
       <p class="foot">겨울에는 가스(난방)가 커서 합계가 가장 높고, 여름에는 전기가 높습니다. 점검하는 달에 맞춰 보세요.</p></div>
     <div class="card"><h2>광고주에게 확인할 질문</h2><ul id="qs"></ul></div>
+    <div class="card" id="microcard" hidden><h2>조사 가구 사용량 분포 (참고, 2023 가구에너지패널 마이크로데이터)</h2><div id="micro"></div></div>
     <div class="card"><h2>이 계산의 가정과 한계</h2><ul id="lim"></ul></div>
   </section>
 </main>
@@ -184,6 +185,34 @@ async function run(){
   const r=await (await fetch('/estimate',{method:'POST',body:JSON.stringify(body)})).json();
   if(r.error){alert(r.error);return;} show(r,body);
 }
+
+function microshow(r){
+  const m=r.micro, box=$('micro'), card=$('microcard');
+  if(!m||(!m.electric&&!m.gas)){card.hidden=true;return;}
+  card.hidden=false;
+  const blk=(label,unit,x)=>{
+    if(!x||!x.main)return `<p class="note warn">${label}: 이 조건에서는 표본이 충분한 집단을 찾지 못해 분포를 보여주지 않습니다.</p>`;
+    const g=x.main, q=g.kwh_or_m3, b=g.bill, c=g.bill_ci;
+    let h=`<p><b>${label}</b> — 참고한 집단: <b>${g.segment}</b> (조사 가구 ${g.n}개, 유효표본 ${Math.round(g.n_eff)}개)</p>
+      <table class="perf"><tr><th></th><th>하위 25%</th><th>중앙값</th><th>상위 25%</th></tr>
+      <tr><td>사용량(${unit})</td><td>${Math.round(q.q25)}</td><td>${Math.round(q.q50)}</td><td>${Math.round(q.q75)}</td></tr>
+      <tr><td>2026 요금 가정 참고 비용(원)</td><td>${won(b.q25)}</td><td>${won(b.q50)}</td><td>${won(b.q75)}</td></tr>
+      <tr><td class="foot">표본 불확실성(근사 95% 구간)</td><td class="foot">${won(c.q25[0])}~${won(c.q25[1])}</td><td class="foot">${won(c.q50[0])}~${won(c.q50[1])}</td><td class="foot">${won(c.q75[0])}~${won(c.q75[1])}</td></tr></table>`;
+    if(x.pooled){const pq=x.pooled.kwh_or_m3, pb=x.pooled.bill;
+      h+=`<p><b>부분 풀링 추정</b> — 가장 가까운 조건 &quot;${x.pooled.most_specific}&quot;(가구 ${x.pooled.n}개)의 표본이 작아 더 넓은 집단 쪽으로 보정한 값입니다.</p>
+      <table class="perf"><tr><th></th><th>하위 25%</th><th>중앙값</th><th>상위 25%</th></tr>
+      <tr><td>사용량(${unit})</td><td>${Math.round(pq.q25)}</td><td>${Math.round(pq.q50)}</td><td>${Math.round(pq.q75)}</td></tr>
+      <tr><td>2026 요금 가정 참고 비용(원)</td><td>${won(pb.q25)}</td><td>${won(pb.q50)}</td><td>${won(pb.q75)}</td></tr></table>
+      <p class="foot">조사 가구를 나누어 검증했을 때 위의 &quot;참고한 집단&quot; 방식보다 소형 가구의 사용량 분포를 더 잘 맞췄습니다. 2023년 조사 가구 기준이며 실제 청구액 예측이 아닙니다.</p>`;}
+    (x.exploratory||[]).forEach(e=>{h+=`<p class="foot">더 가까운 조건 &quot;${e.segment}&quot;은 표본이 작아(가구 ${e.n}개, 유효 ${Math.round(e.n_eff)}개) <b>탐색적 참고</b>만 가능합니다: 중앙값 약 ${won(e.bill.q50)}원(근사 구간 ${won(e.bill_ci.q50[0])}~${won(e.bill_ci.q50[1])}원).</p>`;});
+    (x.hidden||[]).forEach(e=>{h+=`<p class="foot">&quot;${e.segment}&quot;은 표본이 너무 작아(가구 ${e.n}개) 분포를 보여주지 않습니다.</p>`;});
+    return h;
+  };
+  let h=blk('전기','kWh',m.electric);
+  if(r.items&&r.items.gas&&m.gas)h+=blk('도시가스(난방 가구)','N㎥',m.gas);
+  h+=`<p class="foot">이 분포는 2023년 조사 가구별 월 사용량을 2026년 요금 가정으로 가구별로 다시 계산한 <b>참고 비용 분포</b>입니다. 이 값은 이 집의 적정 비용이나 관리비의 정상 범위가 아니며, 2026년 실제 청구액의 예측구간도 아닙니다. 계약 종류·사용 습관에 따라 달라질 수 있습니다. 해당 월 사용 기록이 있는 가구만 포함했습니다. 위 구간은 가구를 다시 뽑아 본 근사 불확실성이며 공식 신뢰구간이 아닙니다. 출처: 에너지경제연구원 가구에너지패널조사 14차(2023년 기준) 마이크로데이터.</p>`;
+  box.innerHTML=h;
+}
 function show(r,b){
   $('out').hidden=false;
   const st={REFERENCE_ONLY:['참고만','ref'],REVIEW_REQUIRED:['추가 확인 필요','rev'],INSUFFICIENT_DATA:['근거 부족','ins']}[r.status]||['참고만','ref'];
@@ -209,6 +238,7 @@ function show(r,b){
   $('sep').innerHTML=sep.length?`<h2>관리비 밖에서 별도로 부담할 수 있는 항목 (광고에 별도·불포함으로 적힘)</h2><ul>${sep.map(x=>`<li>${x.name}: ${x.hold?'가스 사용 여부·난방 방식 확인 전이라 참고 금액을 내지 않습니다.':`참고 금액 약 ${won(x.low)}${x.low!==x.high?'~'+won(x.high):''}원/월 (집단 평균 환산)`}</li>`).join('')}</ul><p class="foot">관리비에 이미 포함된 항목과 겹쳐 더하지 않도록 따로 표시합니다.</p>`:'';
   chart(r);
   decshow(r);
+  microshow(r);
   $('qs').innerHTML=r.questions.length?r.questions.map(q=>`<li>${q}</li>`).join(''):'<li>포함 항목을 체크하면 항목별 확인 질문이 나옵니다.</li>';
   const lim=[r.basis,'2023년 서울 조사 집단의 평균 사용량을 2026년 요율로 환산한 참고 금액이며 실제 2026년 평균 청구액이나 고지서 금액과 다를 수 있습니다.','사용량 ±20%(전기)·±30%(가스) 민감도는 통계적 분포가 아니라 가정입니다.',
     '공동 계량(수도·전기), 정액제 관리비, 중앙·지역난방, 전기난방은 오차가 커서 이 범위가 맞지 않을 수 있습니다.',

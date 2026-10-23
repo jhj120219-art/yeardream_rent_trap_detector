@@ -1,0 +1,25 @@
+{
+  "request_id": "example-03",
+  "ad": {
+    "total": 90000,
+    "mode": "정액",
+    "utility_included": [
+      "전기",
+      "수도"
+    ],
+    "included": [
+      "전기",
+      "수도"
+    ],
+    "amounts": {},
+    "actual_items": [],
+    "utility_separate": [],
+    "excluded_items": [],
+    "incomplete": [],
+    "undisclosed": false,
+    "notes": []
+  },
+  "conditions": {
+    "target_month": 10
+  }
+}

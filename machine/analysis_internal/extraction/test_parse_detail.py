@@ -17,9 +17,16 @@ EXP = {
 }
 
 
+ZB_CASE = ('관리비 : 70,000원 일반(공용) 관리비 70,000원 사용료 전기 실비 수도 실비 가스 실비 난방 실비 인터넷 실비 TV 실비 기타 관리비 해당 없음 최근 3개월 관리비 평균',
+           70000, [], ['수도', '전기', '가스', '인터넷'], ['공용'])
+
+
 def main():
     bad = 0
-    for l in (HERE / 'real' / 'detail_modals_dev.jsonl').read_text(encoding='utf-8').splitlines():
+    dev = HERE / 'real' / 'detail_modals_dev.jsonl'   # 실제 광고 캡처에서 읽은 개발용 14건: 저장소에 없고 로컬에만 있음
+    if not dev.exists():
+        print('개발용 캡처 14건 없음 — 직방 1건만 확인')
+    for l in (dev.read_text(encoding='utf-8').splitlines() if dev.exists() else []):
         d = json.loads(l)
         if d['idx'] not in EXP or not d.get('modal'):
             continue
@@ -28,6 +35,11 @@ def main():
         ok = r['total'] == tot and r['utility_included'] == inc and r['utility_separate'] == sep and sorted(r['amounts']) == sorted(amt)
         bad += not ok
         print(('OK ' if ok else 'BAD'), d['idx'], r['total'], r['mode'], '포함', r['utility_included'], '별도', r['utility_separate'], '금액', r['amounts'], '' if ok else f'기대 {EXP[d["idx"]]}')
+    t, tot, inc, sep, amt = ZB_CASE                      # 직방 상세 표기 1건(개발용, 개인정보 제외한 관리비 부분만)
+    r = parse_detail(t)
+    ok = r['total'] == tot and r['utility_included'] == inc and r['utility_separate'] == sep and sorted(r['amounts']) == sorted(amt)
+    bad += not ok
+    print(('OK ' if ok else 'BAD'), '직방', r['total'], r['mode'], '포함', r['utility_included'], '별도', r['utility_separate'], '금액', r['amounts'])
     print('불일치', bad, '/ 14 (개발 데이터)')
     sys.exit(1 if bad else 0)
 

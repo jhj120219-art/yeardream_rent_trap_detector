@@ -1,0 +1,35 @@
+{
+  "advertised_total": 80000,
+  "decomposition": {
+    "enabled": false,
+    "status": "DISABLED"
+  },
+  "errors": [],
+  "input_warnings": [],
+  "internet_availability": "AVAILABLE",
+  "missing_fields": [],
+  "other": {
+    "amount": null,
+    "descriptions": [
+      "청소·공용"
+    ],
+    "source": "NOT_PROVIDED"
+  },
+  "reason_codes": [],
+  "reference_comparison": [],
+  "schema_version": "maintenance.v1",
+  "separate_items": [],
+  "source_contract_version": "FIVE_ITEMS_V1",
+  "status": "REFERENCE_ONLY",
+  "status_reason": [],
+  "utility_estimates": [
+    {
+      "ad": null,
+      "hi": 10950,
+      "inc": "INCLUDED",
+      "lo": 10950,
+      "st": "AVAILABLE",
+      "t": "WATER"
+    }
+  ]
+}

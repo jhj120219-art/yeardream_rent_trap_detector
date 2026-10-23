@@ -11,12 +11,20 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-sys.path.insert(0, str(HERE.parents[1]))                     # analysis_internal
 sys.path.insert(0, str(HERE.parents[1] / 'extraction'))
-from utility import reference as R
-from utility.calc import electricity_bill, gas_bill, water_bill
-from utility.check import assess, INTERNET_RANGE
-from utility.tariffs import ELECTRIC, GAS, WATER
+try:      # 패키지로 불러온 경우(integration.run_maintenance, 백엔드): 같은 모듈을 공유한다(두 벌 로드되어 캐시·설정이 갈라지는 것을 막음)
+    from .. import reference as R
+    from .. import micro_ref
+    from ..calc import electricity_bill, gas_bill, water_bill
+    from ..check import assess, INTERNET_RANGE
+    from ..tariffs import ELECTRIC, GAS, WATER
+except ImportError:      # 직접 실행(python app.py)이나 시험에서 `from app import ...` 로 불러온 경우
+    sys.path.insert(0, str(HERE.parents[1]))                 # analysis_internal
+    from utility import reference as R
+    from utility import micro_ref
+    from utility.calc import electricity_bill, gas_bill, water_bill
+    from utility.check import assess, INTERNET_RANGE
+    from utility.tariffs import ELECTRIC, GAS, WATER
 from parse_ad_text import parse_ad
 
 PORT = 8766
@@ -28,8 +36,10 @@ def views_for(housing, household, area_band, gas_ok):
     v = []
     if HOUSING.get(housing):
         v.append(('housing', HOUSING[housing]))
-    v.append(('size', f'{household}명' if household < 4 else '4명이상'))
-    v.append(('area', AREA_BANDS.get(area_band, '33㎡미만')))
+    if household:                                     # 모르면(None) 그 관점을 건너뛴다. 임의로 1인 가구·소형으로 가정하지 않는다
+        v.append(('size', f'{household}명' if household < 4 else '4명이상'))
+    if area_band in AREA_BANDS:
+        v.append(('area', AREA_BANDS[area_band]))
     return v, gas_ok
 
 
@@ -45,9 +55,12 @@ def month_ref(month, housing, household, area_band, gas_ok):
             out[name] = None
             continue
         views = list(vs) + ([('heating', '도시가스')] if key == 'gas' else [])
+        if not views:                                   # 주택유형·가구원 수·면적을 모두 몰라 집단을 고를 수 없음
+            out[name] = None
+            continue
         by_view, vals, uses = [], [], []
         for view, cat in views:
-            e = R.estimate(view, cat, month, household)[key]
+            e = R.estimate(view, cat, month, household or 1)[key]
             by_view.append(dict(view=VIEW_LABEL[view], category=cat, bill=e['bill'], usage=e['usage']))
             vals.append(e['bill'])
             uses.append(e['usage'])
@@ -55,8 +68,8 @@ def month_ref(month, housing, household, area_band, gas_ok):
         fn = (lambda u: electricity_bill(u, month)['total']) if key == 'electricity' else (lambda u: gas_bill(u)['total'])
         out[name] = dict(low=min(vals), high=max(vals), usage_low=min(uses), usage_high=max(uses), by_view=by_view,
                          sens=dict(pct=int(sens * 100), low=fn(mid * (1 - sens)), high=fn(mid * (1 + sens))))
-    w = R.estimate(vs[0][0], vs[0][1], month, household)['water']
-    out['water'] = dict(low=w['bill'], high=w['bill'], usage_low=w['usage'], usage_high=w['usage'], by_view=[dict(view='서울 세대원 수별 평균 사용량', category=f'{household}명', bill=w['bill'], usage=w['usage'])])
+    w = R.estimate('size', '1명', month, household)['water'] if household else None   # 수도는 가구원 수가 있어야 계산(관점과 무관)
+    out['water'] = None if w is None else dict(low=w['bill'], high=w['bill'], usage_low=w['usage'], usage_high=w['usage'], by_view=[dict(view='서울 세대원 수별 평균 사용량', category=f'{household}명', bill=w['bill'], usage=w['usage'])])
     out['internet'] = dict(low=INTERNET_RANGE[0], high=INTERNET_RANGE[1], usage_low=None, usage_high=None,
                            by_view=[dict(view='KT 공개 요금제 예시(약정·결합에 따라 다름)', category='월 요금', bill=INTERNET_RANGE[0], usage=None), dict(view='KT 공개 요금제 예시', category='상위 속도', bill=INTERNET_RANGE[1], usage=None)])
     return out
@@ -138,7 +151,8 @@ def bill_compare(month, usage):
 
 def estimate(p):
     month = max(1, min(int(p.get('month', 1)), 12))
-    household = max(1, min(int(p.get('household', 1)), 6))
+    hh = p.get('household', 1)
+    household = None if hh in (None, '') else max(1, min(int(hh), 6))
     housing, area_band = p.get('housing', '다세대·연립'), p.get('area_band', '~33㎡')
     heating, gas_user = p.get('heating', '모름'), p.get('gas_user', '모름')
     metering = p.get('metering', '모름')
@@ -157,11 +171,15 @@ def estimate(p):
         if it == 'gas' and cur['gas'] is None:
             items[it] = dict(name='가스', state='HOLD', reason='가스 사용 여부·난방 방식(개별 도시가스)이 확인되지 않아 참고 비용을 내지 않습니다.')
             continue
+        if cur.get(it) is None:
+            items[it] = dict(name=NAMES[it], state='HOLD', reason='가구원 수·주택유형·면적 중 필요한 조건이 없어 참고 비용을 내지 않습니다.')
+            continue
         c = cur[it]
         items[it] = dict(name=NAMES[it], low=c['low'], high=c['high'], usage_low=c['usage_low'], usage_high=c['usage_high'], by_view=c['by_view'], sens=c.get('sens'))
     sum_low = sum(v['low'] for v in items.values() if 'low' in v)
     sum_high = sum(v['high'] for v in items.values() if 'high' in v)
     a = assess(month=month, household=household, included=included, itemized=itemized, mgmt_total=mgmt_won, gas_user=(gas_user == '예') or None,
+               housing_cat=HOUSING.get(housing), area_cat=AREA_BANDS.get(area_band),
                heating='개별가스' if heating == '개별 도시가스' else (heating if heating != '모름' else None))
     questions = [QUESTIONS[x] for x in included if x in QUESTIONS] + [QUESTIONS[x] for x in other_included if x in QUESTIONS]
     if mgmt_won and mgmt_won >= 100000:
@@ -188,9 +206,17 @@ def estimate(p):
         dec = dict(type='NONE', M=mgmt_won, reason='입력한 관리비가 범위를 벗어났습니다(음수이거나 월 500만원 초과). 단위(만원)를 확인해 주세요.')
     else:
         dec = decompose(mgmt_won, items, included, itemized, metering)
+    micro = None
+    if micro_ref.available():                               # 분포표(로컬 전용 파생 통계)가 있을 때만
+        el = micro_ref.pick('electric_kwh', month, household, p.get('area_band', '~33㎡'))
+        if el is not None:                                  # 전기만: 사전 등록 평가를 통과한 부분 풀링 분위수를 함께 준다(가구원 수가 있을 때)
+            el['pooled'] = micro_ref.pooled('electric_kwh', month, household, p.get('area_band', '~33㎡')) if household else None
+        micro = dict(electric=el,
+                     gas=micro_ref.pick('gas_nm3', month, household, p.get('area_band', '~33㎡')) if gas_ok else None)
     return dict(month=month, items=items, sum_low=sum_low, sum_high=sum_high, mgmt_won=mgmt_won, status=a['status'], assess_items=a['items'],
                 questions=questions, monthly=monthly, unverified=unver, other_included=other_included, separate=separate, decomposition=dec,
                 bill_check=bill_compare(month, p.get('bill_usage')), common_items=COMMON_ITEMS,
+                micro=micro,
                 meta=dict(tariff_date='2026-10-20 확인(한전 주택용 저압, 서울가스 2026.10.01, 아리수 가정용)', usage_basis='가구에너지패널조사 14차(2023년 기준) 서울 결과표',
                           note='2023년 사용량을 2026년 요율로 환산한 참고 금액이며 실제 2026년 평균 청구액이 아님', kinds='서로 다른 집단 평균을 각각 환산한 값(조합하지 않음)',
                           month_used=f'{month}월 기준 한 달치(월·난방 방식이 다르면 비교하지 마세요)'),

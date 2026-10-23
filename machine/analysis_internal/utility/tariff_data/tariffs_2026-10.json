@@ -1,0 +1,63 @@
+{
+  "schema_version": "tariff-v1",
+  "tariff_set_id": "KR-SEOUL-2026-10",
+  "retrieved": "2026-10-20",
+  "scope": "서울 주택용 가정 기준 공과금 참고 계산. 개별 계약·할인·특례는 반영하지 않음",
+  "status_legend": {
+    "VERIFIED": "공식 출처에서 해당 시점 값을 직접 확인",
+    "PARTIAL": "공식 출처에서 값은 확인했으나 적용 시점(2026-10) 또는 세부 조건 확인 미완",
+    "ASSUMPTION": "공식 값을 확인하지 못해 가정으로 사용(결과에 가정 표시)"
+  },
+  "electricity": {
+    "provider": "한국전력공사", "contract": "주택용 저압(누진제)",
+    "summer_months": [7, 8],
+    "tiers": {
+      "summer": [
+        {"up_to_kwh": 300, "base_won": 910, "won_per_kwh": 120.0},
+        {"up_to_kwh": 450, "base_won": 1600, "won_per_kwh": 214.6},
+        {"up_to_kwh": null, "base_won": 7300, "won_per_kwh": 307.3}
+      ],
+      "other": [
+        {"up_to_kwh": 200, "base_won": 910, "won_per_kwh": 120.0},
+        {"up_to_kwh": 400, "base_won": 1600, "won_per_kwh": 214.6},
+        {"up_to_kwh": null, "base_won": 7300, "won_per_kwh": 307.3}
+      ],
+      "status": "VERIFIED",
+      "source": "https://cyber.kepco.co.kr/ckepco/front/jsp/CY/E/E/CYEEHP00101.jsp",
+      "note": "한전 요금표 페이지(적용일자 2023-05-16 표기)와 2025-01-01 적용 월간 요금표에서 구간·단가 동일 확인"
+    },
+    "components": {
+      "fuel_adjust_won_per_kwh": {"value": 5.0, "status": "VERIFIED", "effective": "2026-Q4", "source": "https://www.kepco.co.kr/home/media/newsroom/notice/boardView.do?boardMngNo=14&boardNo=2759", "note": "2026년 4분기 연료비조정단가 한전 공지 2026-09-21"},
+      "climate_won_per_kwh": {"value": 9.0, "status": "PARTIAL", "effective": "2023-01-01~", "source": "https://cyber.kepco.co.kr/ckepco/front/jsp/CY/D/C/CYDCHP00408.jsp", "note": "전기공급약관 부칙에 2023-01-01부터 9.0원/kWh. 2026-10 현재 적용 단가는 미확인"},
+      "fund_rate": {"value": 0.027, "status": "ASSUMPTION", "effective": "2025-07-01~", "source": "전기사업법 시행령 제36조(ChatGPT 안내, 원문 직접 확인 전)", "note": "블로그에 3.7% 표기도 있어 원문 확인 필요"},
+      "vat_rate": {"value": 0.10, "status": "VERIFIED", "source": "부가가치세법", "note": "전기요금 부가세 10%"}
+    },
+    "rounding": "기금은 10원 미만 절사, 합계는 10원 단위 반올림(계산기 구현 기준, 공식 청구서 절차와 대조 전)"
+  },
+  "gas": {
+    "provider": "서울도시가스(서울지역 단일요금)", "contract": "주택용 취사·난방",
+    "won_per_mj": {"value": 22.5268, "status": "VERIFIED", "effective": "2026-10-01", "source": "https://www.seoulgas.co.kr/mobile/payment/gasPayTable", "note": "취사·난방 동일 단가"},
+    "base_won_per_month": {"value": 1250, "status": "VERIFIED", "source": "https://www.seoulgas.co.kr/mobile/payment/gasPayTable", "note": "해당 페이지에 2019-05-01 적용 문구가 함께 있어 시행 시점 재확인 권장"},
+    "mj_per_nm3": {"value": 42.6, "status": "VERIFIED", "source": "한국가스공사 열량실적 조회(https://www.kogas.or.kr/site/koGas/userSplCalRslt.do?Key=1040502020000) 서울도시가스(주) 고위발열량, 2025-10~2026-09 12개월 평균 42.598", "note": "월별 값은 42.42~42.76(2023-01~2026-09 전체 42.42~43.19, 평균 42.75)이라 월마다 최대 약 ±0.4% 달라질 수 있음. 고지서의 해당 월 열량으로 바꾸면 더 정확. 이전 가정 43.0 은 약 +0.9% 높았음"},
+    "correction": {"value": 1.0, "status": "ASSUMPTION", "note": "온압보정계수. 조사 사용량 단위가 표준상태(N㎥)이면 1.0"},
+    "vat_rate": {"value": 0.10, "status": "VERIFIED", "source": "서울도시가스 요금 계산 안내"},
+    "formula": "((사용량 x 보정계수) x 평균열량 x 단가 + 기본요금) x (1 + 부가세), 합계 10원 단위 반올림"
+  },
+  "water": {
+    "provider": "서울아리수본부", "contract": "가정용 1세대(15mm)",
+    "base_won_per_month": {"value": 1080, "status": "VERIFIED", "source": "https://i121.seoul.go.kr/cs/cyber/front/cgcalc/NR_cgCalcGeneralPurpose.do"},
+    "waterworks_won_per_m3": {"value": 580, "status": "VERIFIED", "source": "https://i121.seoul.go.kr/cs/cyber/front/cgcalc/NR_cgCalcGeneralPurpose.do"},
+    "sewerage_won_per_m3": {"value": 480, "status": "VERIFIED", "source": "https://i121.seoul.go.kr/cs/cyber/front/cgcalc/NR_cgCalcGeneralPurpose.do"},
+    "water_use_charge_won_per_m3": {"value": 170, "status": "VERIFIED", "source": "https://i121.seoul.go.kr/cs/cyber/front/cgcalc/NR_cgCalcGeneralPurpose.do"},
+    "anchor": {"input_m3": 10, "expected_total_won": 13380, "note": "아리수 요금 시뮬레이션 결과(가정용 1세대 15mm 10㎥)"},
+    "seoul_l_per_day_by_household_size": {"1": 264, "2": 435, "3": 576, "4": 679, "5": 777, "6": 813},
+    "seoul_l_per_day_source": "서울아리수본부 2023-09-14 보도자료(2021년 기준)"
+  },
+  "internet": {
+    "provider": "공개 요금제(KT 등) 범위", "vat_included": true,
+    "range_won_per_month": [17600, 30000],
+    "status": "PARTIAL",
+    "source": "https://product.kt.com/wDic/index.do?CateCode=6005&FilterCode=118",
+    "note": "공개 요금제 범위이며 실제 계약·결합할인에 따라 다름. 통계 근거 없음"
+  }
+}

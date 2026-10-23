@@ -1,0 +1,30 @@
+{
+  "advertised_total": 80000,
+  "decomposition": {
+    "enabled": false,
+    "status": "DISABLED"
+  },
+  "errors": [
+    "MISSING_DATA_FILE"
+  ],
+  "input_warnings": [],
+  "internet_availability": null,
+  "missing_fields": [],
+  "other": {
+    "amount": null,
+    "descriptions": [
+      "청소·공용"
+    ],
+    "source": "NOT_PROVIDED"
+  },
+  "reason_codes": [],
+  "reference_comparison": [],
+  "schema_version": "maintenance.v1",
+  "separate_items": [],
+  "source_contract_version": "FIVE_ITEMS_V1",
+  "status": "INSUFFICIENT_DATA",
+  "status_reason": [
+    "MISSING_DATA_FILE"
+  ],
+  "utility_estimates": []
+}
