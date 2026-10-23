@@ -12,8 +12,8 @@ class CardRead(BaseModel):
     contract_type: Literal['월세', '전세']
     deposit_10k_krw: Number = Field(ge=0, le=1_000_000)
     rent_10k_krw: Number | None = Field(default=None, ge=0, le=100_000)
-    area_m2: Number = Field(gt=0, le=1000)
-    maintenance_10k_krw: Number = Field(ge=0, le=1000)
+    area_m2: Number | None = Field(default=None, gt=0, le=1000)                  # 읽지 못한 항목은 null (부분 입력)
+    maintenance_10k_krw: Number | None = Field(default=None, ge=0, le=1000)
 
 
 class CardConsensusRequest(BaseModel):
@@ -21,7 +21,7 @@ class CardConsensusRequest(BaseModel):
     engine_reads: dict[Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=80)], Annotated[list[CardRead], Field(max_length=300)]] = Field(min_length=2, max_length=5)
 
     def reads(self):
-        return {e: [(r.contract_type, float(r.deposit_10k_krw), None if r.rent_10k_krw is None else float(r.rent_10k_krw), float(r.area_m2), float(r.maintenance_10k_krw))
+        return {e: [(r.contract_type, float(r.deposit_10k_krw), None if r.rent_10k_krw is None else float(r.rent_10k_krw), None if r.area_m2 is None else float(r.area_m2), None if r.maintenance_10k_krw is None else float(r.maintenance_10k_krw))
                     for r in rs] for e, rs in self.engine_reads.items()}
 
 
@@ -37,7 +37,7 @@ def run(body: CardConsensusRequest):
     cards = consensus(body.reads())
     count = lambda s: sum(c['status'] == s for c in cards)
     return {'version': 'card-consensus-1', 'cards': cards,
-            'summary': {'extracted': count('extracted'), 'needs_review': count('needs_review'), 'on_hold': count('on_hold')},
+            'summary': {'extracted': count('extracted'), 'partial': count('partial'), 'needs_review': count('needs_review'), 'on_hold': count('on_hold')},
             'notice': '사용자 확인 전의 초안입니다. 둘 이상의 엔진이 같게 읽은 값만 채웠고, 나머지는 비워 두었습니다. 월세 비교·관리비 추정은 확인 후에만 실행하세요.'}
 
 
@@ -50,7 +50,7 @@ def extraction_result(card):
     fields = {}
     for name in ('deposit_10k_krw', 'rent_10k_krw', 'area_m2', 'maintenance_10k_krw'):
         field = card.get('fields', {}).get(name, {})
-        value = field.get('value') if field.get('status') == 'extracted' else None
+        value = field.get('value') if field.get('status') in ('extracted', 'agreed') else None     # agreed: 부분 카드에서 두 엔진이 일치한 항목
         fields[name] = {'value': value, 'raw_text': 'ENGINE_CONSENSUS_CANDIDATE' if value is not None else None,
                         'review_required': True}
     return {'schema_version': '1.1', 'extraction_status': 'EXTRACTED_NEEDS_REVIEW',

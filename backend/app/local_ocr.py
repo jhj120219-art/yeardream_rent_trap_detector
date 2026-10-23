@@ -20,7 +20,38 @@ ROOT = Path(__file__).resolve().parents[2]
 _lock = threading.BoundedSemaphore(1)
 
 def selectable(card):
-    return card.get('status') == 'extracted' and card.get('fields', {}).get('contract_type', {}).get('value') == '월세'
+    # extracted(모든 항목 일치) 또는 partial(일치한 항목만 채워진 카드). 비어 있는 항목은 사용자가 직접 입력한다.
+    return card.get('status') in ('extracted', 'partial') and card.get('fields', {}).get('contract_type', {}).get('value') == '월세'
+
+
+IMAGE_FIELD_KEYS = ('address_text', 'deposit_10k_krw', 'rent_10k_krw', 'area_m2', 'maintenance_10k_krw')
+
+
+def merge_image_fields(by_engine):
+    """엔진별 image_fields(분석 코드 출력) → 항목별 합의. 분석 코드에 해당 기능이 없거나 엔진이 둘이 아니면 빈 값."""
+    if len(by_engine) < 2:
+        return {}
+    try:
+        from machine.analysis_internal.extraction.partial_fields import merge_image_fields as merge
+    except ImportError:
+        return {}
+    return merge(by_engine)
+
+
+def image_fields_result(image_fields):
+    """카드가 아닌 화면(상세·사진)에서 두 엔진이 같게 읽은 항목만 확인용 초안으로 만든다. 읽은 항목이 없으면 None."""
+    fields = {}
+    for key in IMAGE_FIELD_KEYS:
+        f = (image_fields or {}).get(key) or {}
+        if f.get('autofill') and f.get('value') is not None:
+            fields[key] = {'value': f['value'], 'raw_text': 'ENGINE_CONSENSUS_CANDIDATE', 'review_required': True}
+    if not fields:
+        return None
+    messages = ['두 OCR 엔진이 같은 값으로 읽은 항목만 채운 확인용 초안입니다. 읽지 못한 항목은 직접 입력해 주세요.']
+    if 'address_text' in fields:
+        messages.append('주소는 읽은 글자(후보)입니다. 주소 검색으로 확인하기 전에는 확정이 아닙니다.')
+    return {'schema_version': '1.1', 'source_type': 'LOCAL_OCR_IMAGE_FIELDS', 'fields': fields,
+            'review_messages': messages, 'extraction_status': 'EXTRACTED_NEEDS_REVIEW'}
 
 def choose_card(result, index):
     cards = result.get('ocr_cards', [])
@@ -31,16 +62,22 @@ def choose_card(result, index):
     draft['review_messages'] = ['두 OCR 엔진이 같은 값으로 읽은 확인용 초안입니다. 원본 이미지와 금액·면적을 확인해 주세요.', '주소·주택 유형·면적 기준·관리비 포함 항목은 직접 확인해 주세요.']
     return draft
 
-def adapt_cards(cards):
+def adapt_cards(cards, image_fields=None):
     if not isinstance(cards, list) or len(cards) > 300 or any(not isinstance(card, dict) or not isinstance(card.get('fields'), dict) for card in cards):
         raise ValueError('Invalid OCR card collection')
     if any(not isinstance(field, dict) for card in cards for field in card['fields'].values()):
         raise ValueError('Invalid OCR fields')
     result = {'schema_version': '1.1', 'source_type': 'LOCAL_OCR_CONSENSUS', 'fields': {},
               'ocr_cards': cards, 'review_messages': [],
-              'extraction_status': 'MULTIPLE_LISTINGS' if cards else 'NO_LISTING_FOUND'}
+              'extraction_status': 'MULTIPLE_LISTINGS' if cards else 'NO_LISTING_FOUND',
+              'image_fields': image_fields if isinstance(image_fields, dict) else {}}
     if len(cards) == 1 and selectable(cards[0]):
         result.update(choose_card(result, 0))
+    elif not any(selectable(c) for c in cards):
+        # 읽은 카드가 없거나 모두 보류인 화면(상세·사진): 두 엔진이 일치한 image_fields 항목(주소 등)만 입력 후보로 둔다
+        partial = image_fields_result(image_fields)
+        if partial:
+            result.update(partial)
     return result
 
 def runtime_status(settings):
@@ -93,6 +130,7 @@ def _run_locked(data, site, settings):
             python = getattr(settings, 'local_ocr_python', '') or sys.executable
             machine_root = getattr(settings, 'local_ocr_machine_root', str(ROOT / 'machine'))
             reads = {}
+            fields_by_engine = {}
             for engine in ('easyocr','paddle'):
                 output=Path(folder)/(engine+'.json')
                 p = subprocess.run([python, '-X', 'utf8', '-m', 'backend.app.local_ocr', '--engine', engine,
@@ -103,14 +141,17 @@ def _run_locked(data, site, settings):
                     raise HTTPException(422, '설치된 분석 코드가 이 사이트를 지원하지 않습니다. 지원 사이트를 확인해 주세요.')
                 if p.returncode:
                     raise ValueError('worker failed')
-                rows=json.loads(output.read_text(encoding='utf-8'))['engine_reads'][engine]
+                data=json.loads(output.read_text(encoding='utf-8'))
+                rows=data['engine_reads'][engine]
+                if isinstance(data.get('image_fields_by_engine',{}).get(engine),dict):
+                    fields_by_engine[engine]=data['image_fields_by_engine'][engine]
                 reads[engine]=[]
                 for row in rows:
                     if not isinstance(row,list) or len(row)!=5:
                         raise ValueError('Invalid analyst card tuple')
                     reads[engine].append(dict(zip(('contract_type','deposit_10k_krw','rent_10k_krw','area_m2','maintenance_10k_krw'),row)))
             result=combine_cards(CardConsensusRequest(engine_reads=reads))
-            return adapt_cards(result['cards'])
+            return adapt_cards(result['cards'], merge_image_fields(fields_by_engine))
         except subprocess.TimeoutExpired:
             raise HTTPException(504, '이미지 읽기 시간이 초과됐어요. 목록 영역을 작게 잘라 다시 시도해 주세요.') from None
         except (OSError, ValueError, KeyError, TypeError):

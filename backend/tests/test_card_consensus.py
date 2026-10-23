@@ -21,7 +21,7 @@ def test_only_values_read_identically_by_two_engines_are_filled(client):
     r = client.post('/extraction/card-consensus', json=body)
     assert r.status_code == 200, r.text
     out = r.json()
-    assert out['summary'] == {'extracted': 1, 'needs_review': 0, 'on_hold': 2}
+    assert out['summary'] == {'extracted': 1, 'partial': 0, 'needs_review': 0, 'on_hold': 2}
     filled = [c for c in out['cards'] if c['status'] == 'extracted']
     assert filled[0]['fields']['deposit_10k_krw']['value'] == 1000 and filled[0]['user_confirmed'] is False
     assert all(v['value'] is None for c in out['cards'] if c['status'] == 'on_hold' for v in c['fields'].values())
@@ -29,7 +29,7 @@ def test_only_values_read_identically_by_two_engines_are_filled(client):
 
 def test_conflicting_amounts_need_review_and_never_fill(client):
     out = client.post('/extraction/card-consensus', json={'engine_reads': {'a': [read(1000, 40, 23.14, 8)], 'b': [read(500, 40, 23.14, 8)]}}).json()
-    assert out['summary'] == {'extracted': 0, 'needs_review': 1, 'on_hold': 0}
+    assert out['summary'] == {'extracted': 0, 'partial': 0, 'needs_review': 1, 'on_hold': 0}
     assert out['cards'][0]['fields']['deposit_10k_krw']['value'] is None and len(out['cards'][0]['candidates']) == 2
 
 

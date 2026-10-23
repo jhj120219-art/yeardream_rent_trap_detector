@@ -350,7 +350,7 @@ def create_app(settings=None, pool=None, extractor=None):
     @app.get('/extractions/{extraction_id}/listing-draft')
     def get_listing_draft(extraction_id: str,sid=Depends(owner)):
         source=find(extraction_id,sid,'extraction')
-        return {**listing_draft(source), 'ocr_cards': source['result'].get('ocr_cards', []), 'extraction_id': extraction_id}
+        return {**listing_draft(source), 'ocr_cards': source['result'].get('ocr_cards', []), 'image_fields': source['result'].get('image_fields', {}), 'extraction_id': extraction_id}
 
     @app.post('/extractions/{extraction_id}/cards/{card_index}', status_code=201)
     def select_ocr_card(extraction_id: str, card_index: int, sid=Depends(owner), key=Depends(retry_key)):
